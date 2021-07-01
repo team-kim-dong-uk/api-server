@@ -1,7 +1,7 @@
 plugins {
     id 'org.springframework.boot' version '2.5.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.asciidoctor.convert' version '1.5.8'
+    id 'org.asciidoctor.jvm.convert' version '3.2.0'
     id 'java'
 }
 
@@ -13,6 +13,8 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    asciidoctorExt
+    jsondoclet
 }
 
 repositories {
@@ -21,6 +23,7 @@ repositories {
 
 ext {
     set('snippetsDir', file("build/generated-snippets"))
+    javadocJsonDir = file("build/generated-javadoc-json")
 }
 
 dependencies {
@@ -33,15 +36,38 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.springframework.security:spring-security-test'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'com.auth0:java-jwt:3.17.0'
+    asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
+    implementation 'capital.scalable:spring-auto-restdocs-core:2.0.11'
+    jsondoclet "capital.scalable:spring-auto-restdocs-json-doclet-jdk9:2.0.11"
+}
+
+task jsonDoclet(type: Javadoc, dependsOn: compileJava) {
+    source = sourceSets.main.allJava
+    classpath = sourceSets.main.compileClasspath
+    destinationDir = javadocJsonDir
+    options.docletpath = configurations.jsondoclet.files.asType(List)
+    options.doclet = 'capital.scalable.restdocs.jsondoclet.ExtractDocumentationAsJsonDoclet'
+    options.memberLevel = JavadocMemberLevel.PACKAGE
 }
 
 test {
     outputs.dir snippetsDir
+    systemProperty 'org.springframework.restdocs.javadocJsonDir', javadocJsonDir
     useJUnitPlatform()
+    dependsOn jsonDoclet
 }
 
 asciidoctor {
+    configurations 'asciidoctorExt'
     inputs.dir snippetsDir
     dependsOn test
+}
+
+bootJar {
+    dependsOn asciidoctor
+    from("${asciidoctor.outputDir}") {
+        into 'BOOT-INF/classes/static/docs'
+    }
 }

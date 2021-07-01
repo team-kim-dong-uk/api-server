@@ -1,0 +1,34 @@
+ifndef::snippets[]
+:snippets: ../../../build/generated-snippets
+endif::[]
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+[[Documentation]]
+= 어덕행덕 API Documentation
+
+[[auth-controller-test]]
+= 인증
+'''
+== 1. 소셜 로그인
+=== 구글
+`+/oauth2/authorization/google+` 로 접속하여 인증
+
+=== 애플
+=== 카카오
+
+=== Redirect
+`+/api/v1/auth/redirect-page?accessToken=<access-token>&refreshToken=<refresh-token>+` 로 리다이렉트
+
+추후 프론트 페이지로 변경예정
+
+== 2. 토큰 재발급
+include::{snippets}/auth-controller-test/reissue-refresh-token/auto-section.adoc[]
+==== Example response (expired refresh token)
+include::{snippets}/auth-controller-test/reissue-refresh-token-expired/http-response.adoc[]
+==== Example response (invalid refresh token)
+include::{snippets}/auth-controller-test/reissue-refresh-token-invalid/http-response.adoc[]

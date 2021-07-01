@@ -1,12 +1,11 @@
 package com.udhd.apiserver.config.auth;
 
+import com.udhd.apiserver.config.auth.dto.Tokens;
 import com.udhd.apiserver.domain.user.User;
+import com.udhd.apiserver.service.AuthService;
 import com.udhd.apiserver.service.UserService;
-import com.udhd.apiserver.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -21,8 +20,8 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+    private final AuthService authService;
     private final UserService userService;
-    private final JwtUtils jwtUtils;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -44,16 +43,12 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                                                     .build();
                                 return userService.insert(newUser);
                             });
-
-        String token = jwtUtils.generateAccessToken(user.getId());
-        String refreshToken = jwtUtils.generateRefreshToken(user.getId());
-        user.setRefreshToken(refreshToken);
-        userService.save(user);
+        Tokens tokens = authService.issueRefreshToken(user.getId());
 
         return UriComponentsBuilder
                 .fromUriString("/api/v1/auth/redirect-page")
-                .queryParam("token", token)
-                .queryParam("refreshToken", refreshToken)
+                .queryParam("accessToken", tokens.getAccessToken())
+                .queryParam("refreshToken", tokens.getRefreshToken())
                 .build().toUriString();
     }
 }

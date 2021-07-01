@@ -1,63 +1,40 @@
 package com.udhd.apiserver.web;
 
 import com.udhd.apiserver.config.auth.dto.TokenInfo;
-import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.exception.auth.InvalidRefreshTokenException;
-import com.udhd.apiserver.service.UserService;
+import com.udhd.apiserver.service.AuthService;
 import com.udhd.apiserver.util.JwtUtils;
 import com.udhd.apiserver.web.dto.ErrorResponse;
 import com.udhd.apiserver.web.dto.auth.RefreshTokenRequest;
-import com.udhd.apiserver.web.dto.auth.RefreshTokenResponse;
+import com.udhd.apiserver.web.dto.auth.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.Optional;
+import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 @RestController
 public class AuthController {
-    private final JwtUtils jwtUtils;
-    private final UserService userService;
+    private final AuthService authService;
 
+    /**
+     * refresh token을 받아서 새로운 access token과 refresh token을 발급해준다.
+     *
+     * @title 토큰 재발급
+     * @param refreshTokenRequest the refresh token request
+     * @return the token response
+     * @throws InvalidRefreshTokenException the invalid refresh token exception
+     */
     @PostMapping("/refresh-token")
-    public RefreshTokenResponse refreshToken(
-            @RequestBody RefreshTokenRequest refreshTokenRequest) throws InvalidRefreshTokenException {
+    public TokenResponse reissueRefreshToken(
+            @RequestBody @Valid RefreshTokenRequest refreshTokenRequest) throws InvalidRefreshTokenException {
         String refreshToken = refreshTokenRequest.getRefreshToken();
-        TokenInfo tokenInfo;
-        try {
-            tokenInfo = jwtUtils.parseToken(refreshToken);
-        } catch (Exception e) {
-            // reject if token data is invalid
-            throw new InvalidRefreshTokenException("Invalid refresh token");
-        }
-
-        // reject if refresh token is expired
-        if (tokenInfo.getExpiresAt().before(new Date(System.currentTimeMillis()))) {
-            throw new InvalidRefreshTokenException("Expired refresh token");
-        }
-
+        TokenInfo tokenInfo = authService.validateRefreshToken(refreshToken);
         ObjectId userId = new ObjectId(tokenInfo.getUserId());
-        Optional<User> user = userService.findById(userId);
-        // reject if refresh token is different with DB
-        if (user.isEmpty() || !user.get().getRefreshToken().equals(refreshToken)) {
-            throw new InvalidRefreshTokenException("Invalid refresh token");
-        }
-
-        // since refresh token is valid, return new tokens to user
-        String newAccessToken = jwtUtils.generateAccessToken(userId);
-        String newRefreshToken = jwtUtils.generateRefreshToken(userId);
-        User user1 = user.get();
-        user1.setRefreshToken(newRefreshToken);
-        userService.save(user1);
-
-        return RefreshTokenResponse.builder()
-                .accessToken(newAccessToken)
-                .refreshToken(newRefreshToken)
-                .build();
+        return new TokenResponse(authService.issueRefreshToken(userId));
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)

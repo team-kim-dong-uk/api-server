@@ -25,6 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                                 "/api/v1/auth/"
                                 ,"/oauth2/"
                                 ,"/login/oauth2/"
+                                ,"/docs/"
                         })
                         , LogoutFilter.class)
                 .csrf().disable()
