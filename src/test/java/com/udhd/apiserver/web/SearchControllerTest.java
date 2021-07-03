@@ -5,22 +5,12 @@ import capital.scalable.restdocs.SnippetRegistry;
 import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.udhd.apiserver.config.auth.dto.TokenInfo;
-import com.udhd.apiserver.config.auth.dto.Tokens;
-import com.udhd.apiserver.exception.auth.InvalidRefreshTokenException;
-import com.udhd.apiserver.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
@@ -30,24 +20,24 @@ import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
 import org.springframework.restdocs.operation.preprocess.Preprocessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static capital.scalable.restdocs.misc.AuthorizationSnippet.documentAuthorization;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(RestDocumentationExtension.class)
 @AutoConfigureRestDocs
 @SpringBootTest
-public class AuthControllerTest {
+public class SearchControllerTest {
     @Autowired
     private WebApplicationContext context;
 
     @Autowired
     protected ObjectMapper objectMapper;
-
-    @MockBean
-    private AuthService authService;
 
     protected MockMvc mockMvc;
 
@@ -77,8 +67,10 @@ public class AuthControllerTest {
                                 AutoDocumentation.requestParameters(),
                                 AutoDocumentation.description(),
                                 AutoDocumentation.methodAndPath(),
+                                AutoDocumentation.authorization("User access token required."),
                                 AutoDocumentation.sectionBuilder()
                                         .snippetNames(
+                                                SnippetRegistry.AUTO_AUTHORIZATION,
                                                 SnippetRegistry.AUTO_PATH_PARAMETERS,
                                                 SnippetRegistry.AUTO_REQUEST_PARAMETERS,
                                                 SnippetRegistry.AUTO_REQUEST_FIELDS,
@@ -90,69 +82,43 @@ public class AuthControllerTest {
                 .build();
     }
 
-    @Test
-    void reissueRefreshToken() throws Exception {
-        // given
-        String refreshToken = "<valid-refresh-token>";
-        String refreshTokenRequest = "{\"refreshToken\" : \""+refreshToken+"\"}";
-        Tokens generatedTokens = Tokens.builder().accessToken("<access-token>").refreshToken("<refresh-token>").build();
-        TokenInfo validTokenInfo = TokenInfo.builder()
-                                                .userId("012345678901234567890123")
-                                                .build();
+    protected RequestPostProcessor userToken() {
+        return (request) -> {
+            request.addHeader("Authorization", "Bearer <access-token>");
+            return documentAuthorization(request, "User access token required.");
+        };
+    }
 
-        given(authService.validateRefreshToken(refreshToken)).willReturn(validTokenInfo);
-        given(authService.issueRefreshToken(any())).willReturn(generatedTokens);
+
+
+    @Test
+    void searchTags() throws Exception {
+        // given
+        String userId = "123";
 
         // when
+        String requestUri = "/api/v1/users/" + userId + "/search?tags=더보이즈,1집&sortBy=random&page=0&pageSize=15";
         ResultActions actions = mockMvc
-                .perform(post("/api/v1/auth/refresh-token")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(refreshTokenRequest));
+                .perform(get(requestUri));
 
         // then
         actions
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken", is("<access-token>")))
-                .andExpect(jsonPath("$.refreshToken", is("<refresh-token>")));
+                .andExpect(status().isOk());
     }
 
     @Test
-    void reissueRefreshTokenExpired() throws Exception {
+    void searchSimilar() throws Exception {
         // given
-        String expiredToken = "<expired_refresh_token>";
-        String refreshTokenRequest = "{\"refreshToken\":\""+expiredToken+"\"}";
-
-        given(authService.validateRefreshToken(expiredToken))
-                .willThrow(new InvalidRefreshTokenException("Expired refresh token"));
+        String userId = "123";
+        String photoId = "456";
 
         // when
+        String requestUri = "/api/v1/users/" + userId + "/search/similar/" + photoId;
         ResultActions actions = mockMvc
-                .perform(post("/api/v1/auth/refresh-token")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(refreshTokenRequest));
+                .perform(get(requestUri));
 
         // then
         actions
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void reissueRefreshTokenInvalid() throws Exception {
-        // given
-        String invalidToken = "<invalid_refresh_token>";
-        String refreshTokenRequest = "{\"refreshToken\":\""+invalidToken+"\"}";
-
-        given(authService.validateRefreshToken(invalidToken))
-                .willThrow(new InvalidRefreshTokenException("Invalid refresh token"));
-
-        // when
-        ResultActions actions = mockMvc
-                .perform(post("/api/v1/auth/refresh-token")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(refreshTokenRequest));
-
-        // then
-        actions
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isOk());
     }
 }

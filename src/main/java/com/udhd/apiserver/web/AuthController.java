@@ -23,7 +23,6 @@ public class AuthController {
     /**
      * refresh token을 받아서 새로운 access token과 refresh token을 발급해준다.
      *
-     * @title 토큰 재발급
      * @param refreshTokenRequest the refresh token request
      * @return the token response
      * @throws InvalidRefreshTokenException the invalid refresh token exception

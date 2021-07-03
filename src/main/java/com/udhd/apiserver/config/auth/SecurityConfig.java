@@ -22,7 +22,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(jwtExceptionHandlerFilter, LogoutFilter.class)
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtUtils, new String[]{
-                                "/api/v1/auth/"
+                                "/api/v1/auth"
+                                ,"/api/v1/photos/"
                                 ,"/oauth2/"
                                 ,"/login/oauth2/"
                                 ,"/docs/"

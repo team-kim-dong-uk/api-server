@@ -5,13 +5,62 @@ endif::[]
 :icons: font
 :source-highlighter: highlightjs
 :toc: left
-:toclevels: 2
+:toclevels: 1
 :sectlinks:
 
 [[Documentation]]
 = 어덕행덕 API Documentation
 
-[[auth-controller-test]]
+= 공통
+'''
+== 1. 에러 객체
+|===
+|Path|Type|Description
+
+|code
+|String
+|에러코드. 일단은 response status와 같이 제공
+
+|message
+|String
+|에러에 대한 상세 메시지
+
+|error
+|Array[String]
+|에러가 발생한 필드별 상세 메시지
+
+|===
+
+== 2. 공통 에러 응답 코드
+|===
+|Status|Description|When
+
+|400
+|Bad Request
+|형식에 맞지 않는 요청인 경우.
+
+ex) Request field 의 필수/길이 조건 등을 지키지 않은 경우. Error 객체의 .error에 세부정보 포함되어 있다.
+
+|401
+|Unauthorized
+|access token 이 없거나 / 해석할 수 없거나 / 만료된 경우.
+
+인증 - 토큰 재발급 요청을 보내 다시 발급받을 수 있다.
+
+|403
+|Forbidden
+|요청한 리소스에 권한이 없는 경우.
+
+ex) 다른 유저의 앨범에 접근
+
+|404
+|Not Found
+|존재하지 않는 리소스에 접근하는 경우.
+
+ex) 잘못된 uri, 존재하지 않는 photoId 등
+
+|===
+
 = 인증
 '''
 == 1. 소셜 로그인
@@ -32,3 +81,48 @@ include::{snippets}/auth-controller-test/reissue-refresh-token/auto-section.adoc
 include::{snippets}/auth-controller-test/reissue-refresh-token-expired/http-response.adoc[]
 ==== Example response (invalid refresh token)
 include::{snippets}/auth-controller-test/reissue-refresh-token-invalid/http-response.adoc[]
+
+= 유저
+'''
+== 1. 유저 정보 가져오기
+include::{snippets}/user-controller-test/detail-user/auto-section.adoc[]
+
+== 2. 유저 정보 수정
+include::{snippets}/user-controller-test/update-user/auto-section.adoc[]
+
+= 검색
+'''
+== 1. 태그로 검색
+include::{snippets}/search-controller-test/search-tags/auto-section.adoc[]
+
+== 2. 유사 이미지 검색
+include::{snippets}/search-controller-test/search-similar/auto-section.adoc[]
+
+= 사진
+'''
+== 1. 사진 업로드
+include::{snippets}/photo-controller-test/upload-photos/auto-section.adoc[]
+
+== 2. 사진 태그 추천
+include::{snippets}/photo-controller-test/recommend-tags/auto-section.adoc[]
+
+== 3. 사진 정보 가져오기
+include::{snippets}/photo-controller-test/detail-photo/auto-section.adoc[]
+
+= 앨범
+'''
+== 1. 앨범에 사진 저장
+include::{snippets}/album-controller-test/new-album/auto-section.adoc[]
+
+== 2. 앨범 사진 정보
+include::{snippets}/album-controller-test/detail-album/auto-section.adoc[]
+
+== 3. 앨범 사진 리스트
+include::{snippets}/album-controller-test/list-album/auto-section.adoc[]
+
+== 4. 앨범 사진 수정
+include::{snippets}/album-controller-test/update-album/auto-section.adoc[]
+
+== 5. 앨범 사진 삭제
+include::{snippets}/album-controller-test/delete-album/auto-section.adoc[]
+
