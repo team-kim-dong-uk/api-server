@@ -55,7 +55,7 @@ public class SearchControllerTest {
                 .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation)
                         .uris()
                         .withScheme("http")
-                        .withHost("45.62.217.43")
+                        .withHost("udhd.djbaek.com")
                         .withPort(8080)
                         .and().snippets()
                         .withDefaults(CliDocumentation.curlRequest(),
