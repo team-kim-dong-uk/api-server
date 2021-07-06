@@ -69,6 +69,7 @@ ex) 잘못된 uri, 존재하지 않는 photoId 등
 
 === 애플
 === 카카오
+`+/oauth2/authorization/kakao+` 로 접속하여 인증
 
 === Redirect
 `+/api/v1/auth/redirect-page?accessToken=<access-token>&refreshToken=<refresh-token>+` 로 리다이렉트

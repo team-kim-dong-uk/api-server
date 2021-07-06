@@ -6,7 +6,6 @@ import com.udhd.apiserver.service.AuthService;
 import com.udhd.apiserver.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -26,15 +25,15 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws ServletException, IOException {
-        DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
+        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String targetUrl = generateTargetUrlWithTokens(oAuth2User);
 
         clearAuthenticationAttributes(request);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
-    private String generateTargetUrlWithTokens(DefaultOAuth2User oAuth2User) {
-        String email = oAuth2User.getAttribute("email");
+    private String generateTargetUrlWithTokens(CustomOAuth2User oAuth2User) {
+        String email = oAuth2User.getEmail();
         Optional<User> foundUser = userService.findByEmail(email);
         User user = foundUser.orElseGet(()->{
                                 User newUser = User.builder()

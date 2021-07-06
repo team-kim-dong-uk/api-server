@@ -1,9 +1,23 @@
-spring.data.mongodb.host=
-spring.data.mongodb.port=
+spring.data.mongodb.uri=
 spring.data.mongodb.database=
 
+#goolgle
 spring.security.oauth2.client.registration.google.client-id=
 spring.security.oauth2.client.registration.google.client-secret=
 spring.security.oauth2.client.registration.google.scope=
+
+# kakao
+spring.security.oauth2.client.registration.kakao.client-id=
+spring.security.oauth2.client.registration.kakao.client-secret=
+spring.security.oauth2.client.registration.kakao.redirect-uri={baseUrl}/{action}/oauth2/code/{registrationId}
+spring.security.oauth2.client.registration.kakao.authorization-grant-type=authorization_code
+spring.security.oauth2.client.registration.kakao.scope=
+spring.security.oauth2.client.registration.kakao.client-name=kakao
+spring.security.oauth2.client.registration.kakao.client-authentication-method=POST
+## kakao Provider
+spring.security.oauth2.client.provider.kakao.authorization-uri= https://kauth.kakao.com/oauth/authorize
+spring.security.oauth2.client.provider.kakao.token-uri=https://kauth.kakao.com/oauth/token
+spring.security.oauth2.client.provider.kakao.user-info-uri=https://kapi.kakao.com/v2/user/me
+spring.security.oauth2.client.provider.kakao.user-name-attribute=id
 
 jwt.secret=
