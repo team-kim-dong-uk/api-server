@@ -45,7 +45,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         Tokens tokens = authService.issueRefreshToken(user.getId());
 
         return UriComponentsBuilder
-                .fromUriString("/api/v1/auth/redirect-page")
+                .fromHttpUrl("http://localhost:3000/login-redirect")
                 .queryParam("accessToken", tokens.getAccessToken())
                 .queryParam("refreshToken", tokens.getRefreshToken())
                 .build().toUriString();
