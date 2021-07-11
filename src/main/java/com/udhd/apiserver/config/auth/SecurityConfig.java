@@ -19,6 +19,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .cors().and()
                 .addFilterBefore(jwtExceptionHandlerFilter, LogoutFilter.class)
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtUtils, new String[]{
