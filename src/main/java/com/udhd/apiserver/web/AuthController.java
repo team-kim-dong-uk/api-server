@@ -29,7 +29,7 @@ public class AuthController {
      */
     @PostMapping("/refresh-token")
     public TokenResponse reissueRefreshToken(
-            @RequestBody @Valid RefreshTokenRequest refreshTokenRequest) throws InvalidRefreshTokenException {
+            @RequestBody RefreshTokenRequest refreshTokenRequest) throws InvalidRefreshTokenException {
         String refreshToken = refreshTokenRequest.getRefreshToken();
         TokenInfo tokenInfo = authService.validateRefreshToken(refreshToken);
         ObjectId userId = new ObjectId(tokenInfo.getUserId());

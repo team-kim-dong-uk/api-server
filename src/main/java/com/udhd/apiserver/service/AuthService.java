@@ -36,6 +36,11 @@ public class AuthService {
      * @throws InvalidRefreshTokenException the invalid refresh token exception
      */
     public TokenInfo validateRefreshToken(String refreshToken) throws InvalidRefreshTokenException {
+        // reject if no refresh token
+        if (refreshToken == null) {
+            throw new InvalidRefreshTokenException("No refresh token");
+        }
+        // validate token if refresh token is given
         TokenInfo tokenInfo;
         try {
             tokenInfo = jwtUtils.parseToken(refreshToken);

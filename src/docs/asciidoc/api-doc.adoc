@@ -80,6 +80,8 @@ include::{snippets}/auth-controller-test/reissue-refresh-token/auto-section.adoc
 include::{snippets}/auth-controller-test/reissue-refresh-token-expired/http-response.adoc[]
 ==== Example response (invalid refresh token)
 include::{snippets}/auth-controller-test/reissue-refresh-token-invalid/http-response.adoc[]
+==== Example response (no refresh token)
+include::{snippets}/auth-controller-test/reissue-refresh-token-no-token/http-response.adoc[]
 
 = 유저
 '''

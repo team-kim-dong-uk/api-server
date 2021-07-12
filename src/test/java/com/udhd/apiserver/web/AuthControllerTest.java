@@ -155,4 +155,23 @@ public class AuthControllerTest {
         actions
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void reissueRefreshTokenNoToken() throws Exception {
+        // given
+        String refreshTokenRequest = "{\"refreshToken\" : null}";
+
+        given(authService.validateRefreshToken(null))
+                .willThrow(new InvalidRefreshTokenException("No refresh token"));
+
+        // when
+        ResultActions actions = mockMvc
+                .perform(post("/api/v1/auth/refresh-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshTokenRequest));
+
+        // then
+        actions
+                .andExpect(status().isUnauthorized());
+    }
 }
