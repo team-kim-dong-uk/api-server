@@ -30,14 +30,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        // jwt 인증이 필요없는 경로라면, 통과시켜준다.
+        // allowedPaths는 SecurityConfig에서 해당 filter를 생성할 때 인자로 넣어준다.
+        for (String allowedPath : allowedPaths) {
+            if (request.getRequestURI().startsWith(allowedPath)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+        // Authorization 헤더를 읽어와 jwt 인증 진행
         String authorizationHeader = request.getHeader("Authorization");
         if (!isAuthorizationHeaderValid(authorizationHeader)) {
-            for (String allowedPath : allowedPaths) {
-                if (request.getRequestURI().startsWith(allowedPath)) {
-                    filterChain.doFilter(request, response);
-                    return;
-                }
-            }
             throw new InvalidAccessTokenException("No Access Token");
         }
         try {
