@@ -1,28 +1,21 @@
 package com.udhd.apiserver.web;
 
-import com.udhd.apiserver.web.dto.photo.PhotoDetailResponse;
-import com.udhd.apiserver.web.dto.photo.TagListResponse;
+import com.udhd.apiserver.service.PhotoService;
+import com.udhd.apiserver.web.dto.photo.PhotoDetailDto;
+import com.udhd.apiserver.web.dto.photo.TagListDto;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/photos")
 @RestController
 public class PhotoController {
-    private final PhotoDetailResponse mockPhotoDetailResponse
-            = PhotoDetailResponse.builder()
-            .photoId("456")
-            .uploaderNickname("업로더")
-            .originalLink("http://link.com/456")
-            .favouriteCount(532)
-            .uploadedAt(new Date())
-            .tags(Arrays.asList("더보이즈", "멤버1", "1집", "210701"))
-            .build();
+    private final PhotoService photoService;
 
     /**
      * 대량 업로드?????? TODO
@@ -42,20 +35,20 @@ public class PhotoController {
      */
     @PostMapping("/recommend/tags")
     @ResponseStatus(HttpStatus.OK)
-    public TagListResponse recommendTags() {
-        return TagListResponse.builder().tags(Arrays.asList("더보이즈", "멤버1", "1집")).build();
+    public TagListDto recommendTags() {
+        return TagListDto.builder().tags(Arrays.asList("오마이걸", "멤버1", "1집")).build();
     }
 
     /**
-     *  사진의 상세정보를 반환한다. TODO
+     *  사진의 상세정보를 반환한다.
      *
      * @param photoId the photo id
      * @return the uploaded photo detail response
      */
     @GetMapping("/{photoId}")
     @ResponseStatus(HttpStatus.OK)
-    public PhotoDetailResponse detailPhoto(
+    public PhotoDetailDto detailPhoto(
             @PathVariable String photoId) {
-        return mockPhotoDetailResponse;
+        return photoService.getPhotoDetail(photoId);
     }
 }

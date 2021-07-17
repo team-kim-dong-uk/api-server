@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class TagListResponse {
+public class TagListDto {
     /**
      * 추천된 태그 목록
      */

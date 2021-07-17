@@ -21,6 +21,9 @@ public class User {
     private String nickname;
     private String refreshToken;
 
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }

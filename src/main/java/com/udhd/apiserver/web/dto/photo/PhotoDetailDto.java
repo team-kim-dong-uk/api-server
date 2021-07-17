@@ -1,22 +1,22 @@
-package com.udhd.apiserver.web.dto.album;
+package com.udhd.apiserver.web.dto.photo;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
 
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class AlbumDetailResponse {
+public class PhotoDetailDto {
     /**
-     * 저장한 사진의 id
+     * 사진의 id
      */
-    private String albumId;
+    private String photoId;
+    /**
+     * 사진 업로더 아이디
+     */
+    private String uploaderId;
     /**
      * 사진 업로더 닉네임
      */
@@ -30,13 +30,9 @@ public class AlbumDetailResponse {
      */
     private String originalLink;
     /**
-     * 즐겨찾기 지정 여부
+     * 업로드 날짜
      */
-    private Boolean favourite;
-    /**
-     * 저장 날짜
-     */
-    private Date savedAt;
+    private Date uploadedAt;
     /**
      * 태그
      */

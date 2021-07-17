@@ -3,16 +3,13 @@ package com.udhd.apiserver.web;
 import com.udhd.apiserver.config.auth.dto.TokenInfo;
 import com.udhd.apiserver.exception.auth.InvalidRefreshTokenException;
 import com.udhd.apiserver.service.AuthService;
-import com.udhd.apiserver.util.JwtUtils;
 import com.udhd.apiserver.web.dto.ErrorResponse;
 import com.udhd.apiserver.web.dto.auth.RefreshTokenRequest;
-import com.udhd.apiserver.web.dto.auth.TokenResponse;
+import com.udhd.apiserver.web.dto.auth.TokenDto;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
@@ -28,12 +25,12 @@ public class AuthController {
      * @throws InvalidRefreshTokenException the invalid refresh token exception
      */
     @PostMapping("/refresh-token")
-    public TokenResponse reissueRefreshToken(
+    public TokenDto reissueRefreshToken(
             @RequestBody RefreshTokenRequest refreshTokenRequest) throws InvalidRefreshTokenException {
         String refreshToken = refreshTokenRequest.getRefreshToken();
         TokenInfo tokenInfo = authService.validateRefreshToken(refreshToken);
         ObjectId userId = new ObjectId(tokenInfo.getUserId());
-        return new TokenResponse(authService.issueRefreshToken(userId));
+        return new TokenDto(authService.issueRefreshToken(userId));
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)

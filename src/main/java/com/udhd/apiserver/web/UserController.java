@@ -1,7 +1,9 @@
 package com.udhd.apiserver.web;
 
+import com.udhd.apiserver.service.UserService;
+import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
-import com.udhd.apiserver.web.dto.user.UserResponse;
+import com.udhd.apiserver.web.dto.user.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -10,24 +12,23 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/users")
 @RestController
 public class UserController {
-    private final UserResponse mockUserResponse
-            = UserResponse.builder().userId("123").nickname("닉네임").numUploadedPhotos(100).numAlbumPhotos(4000).build();
+    private final UserService userService;
 
     /**
-     * 유저 상세정보 조회. TODO
+     * 유저 상세정보 조회.
      *
      * @param userId the user id
      * @return the user response
      */
     @GetMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public UserResponse detailUser(
+    public UserDto detailUser(
             @PathVariable String userId) {
-        return mockUserResponse;
+        return userService.getUserDetail(userId);
     }
 
     /**
-     * 유저 정보 업데이트. TODO
+     * 유저 정보 업데이트.
      *
      * @param userId            the user id
      * @param updateUserRequest the update user request
@@ -35,9 +36,11 @@ public class UserController {
      */
     @PatchMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public UserResponse updateUser(
+    public UserDto updateUser(
             @PathVariable String userId,
             UpdateUserRequest updateUserRequest) {
-        return mockUserResponse;
+        SecurityUtils.checkUser(userId);
+
+        return userService.updateUser(userId, updateUserRequest);
     }
 }

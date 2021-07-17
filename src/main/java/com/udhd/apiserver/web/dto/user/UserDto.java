@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class UserResponse {
+public class UserDto {
     /**
      * user id
      */

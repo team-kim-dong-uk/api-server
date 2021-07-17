@@ -121,9 +121,12 @@ include::{snippets}/album-controller-test/detail-album/auto-section.adoc[]
 == 3. 앨범 사진 리스트
 include::{snippets}/album-controller-test/list-album/auto-section.adoc[]
 
-== 4. 앨범 사진 수정
-include::{snippets}/album-controller-test/update-album/auto-section.adoc[]
+== 4. 앨범 사진 즐겨찾기여부 수정
+include::{snippets}/album-controller-test/update-album-favourite/auto-section.adoc[]
 
-== 5. 앨범 사진 삭제
+== 5. 앨범 사진 태그 수정
+include::{snippets}/album-controller-test/update-album-tags/auto-section.adoc[]
+
+== 6. 앨범 사진 삭제
 include::{snippets}/album-controller-test/delete-album/auto-section.adoc[]
 

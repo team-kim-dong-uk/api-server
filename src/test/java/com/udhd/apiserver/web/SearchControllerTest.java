@@ -5,12 +5,16 @@ import capital.scalable.restdocs.SnippetRegistry;
 import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.udhd.apiserver.service.PhotoService;
+import com.udhd.apiserver.util.SecurityUtils;
+import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
@@ -24,13 +28,19 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static capital.scalable.restdocs.misc.AuthorizationSnippet.documentAuthorization;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mockStatic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(RestDocumentationExtension.class)
 @AutoConfigureRestDocs
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 public class SearchControllerTest {
     @Autowired
@@ -39,7 +49,26 @@ public class SearchControllerTest {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @MockBean
+    private PhotoService photoService;
+
     protected MockMvc mockMvc;
+
+    private final PhotoOutlineDto mockPhotoOutlineDto = PhotoOutlineDto.builder()
+            .photoId("456").thumbnailLink("http://link.com").build();
+
+    private MockedStatic<SecurityUtils> mockedSecurityUtils;
+
+    @BeforeAll
+    public void mockStaticSetup() {
+        mockedSecurityUtils = mockStatic(SecurityUtils.class);
+        given(SecurityUtils.getLoginUserId()).willReturn("123");
+    }
+
+    @AfterAll
+    public void demockStaticSetup() {
+        mockedSecurityUtils.close();
+    }
 
     @BeforeEach
     public void setUp(RestDocumentationContextProvider restDocumentation) throws Exception {
@@ -95,11 +124,14 @@ public class SearchControllerTest {
     void searchTags() throws Exception {
         // given
         String userId = "123";
+        List<String> tags = Arrays.asList("오마이걸", "1집");
+
+        given(photoService.findPhotos(tags, null, 21)).willReturn(Arrays.asList(mockPhotoOutlineDto));
 
         // when
-        String requestUri = "/api/v1/users/" + userId + "/search?tags=더보이즈,1집&sortBy=random&page=0&pageSize=15";
+        String requestUri = "/api/v1/users/" + userId + "/search?tags=오마이걸,1집&sortBy=random&fetchSize=21";
         ResultActions actions = mockMvc
-                .perform(get(requestUri));
+                .perform(get(requestUri).with(userToken()));
 
         // then
         actions
@@ -115,7 +147,7 @@ public class SearchControllerTest {
         // when
         String requestUri = "/api/v1/users/" + userId + "/search/similar/" + photoId;
         ResultActions actions = mockMvc
-                .perform(get(requestUri));
+                .perform(get(requestUri).with(userToken()));
 
         // then
         actions

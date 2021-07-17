@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class AlbumOutlineResponse {
+public class AlbumOutlineDto {
     /**
      * 저장된 사진의 id
      */
@@ -13,5 +13,5 @@ public class AlbumOutlineResponse {
     /**
      * 미리보기용 저화질/용량 이미지 링크
      */
-    private String smallLink;
+    private String thumbnailLink;
 }

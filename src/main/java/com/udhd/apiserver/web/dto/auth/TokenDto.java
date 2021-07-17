@@ -4,7 +4,7 @@ import com.udhd.apiserver.config.auth.dto.Tokens;
 import lombok.Getter;
 
 @Getter
-public class TokenResponse {
+public class TokenDto {
     /**
      * 새로 발급받은 access token
      */
@@ -14,7 +14,7 @@ public class TokenResponse {
      */
     private String refreshToken;
 
-    public TokenResponse(Tokens tokens) {
+    public TokenDto(Tokens tokens) {
         this.accessToken = tokens.getAccessToken();
         this.refreshToken = tokens.getRefreshToken();
     }
