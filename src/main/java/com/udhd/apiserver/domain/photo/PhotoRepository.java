@@ -11,4 +11,5 @@ public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
     Optional<Photo> findById(ObjectId id);
     List<Photo> findAllByTagsIn(List<String> tags);
     List<Photo> findAllByTagsInAndIdAfter(List<String> tags, ObjectId findAfter);
+    Boolean existsPhotoByChecksum(String checksum);
 }

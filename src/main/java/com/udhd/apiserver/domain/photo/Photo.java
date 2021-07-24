@@ -22,6 +22,7 @@ public class Photo {
     private ObjectId uploaderId;
     private String thumbnailLink;
     private String originalLink;
+    private String checksum;
     private List<String> tags;
 
     public void setTags(List<String> tags) {

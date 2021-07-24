@@ -130,3 +130,8 @@ include::{snippets}/album-controller-test/update-album-tags/auto-section.adoc[]
 == 6. 앨범 사진 삭제
 include::{snippets}/album-controller-test/delete-album/auto-section.adoc[]
 
+= 업로드
+'''
+== 1. pre-signed url 가져오기
+include::{snippets}/upload-controller-test/presigned-urls/auto-section.adoc[]
+
