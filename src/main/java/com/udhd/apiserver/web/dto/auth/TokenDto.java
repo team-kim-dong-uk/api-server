@@ -14,8 +14,14 @@ public class TokenDto {
      */
     private String refreshToken;
 
-    public TokenDto(Tokens tokens) {
+    /**
+     * userId
+     */
+    private String userId;
+
+    public TokenDto(Tokens tokens, String userId) {
         this.accessToken = tokens.getAccessToken();
         this.refreshToken = tokens.getRefreshToken();
+        this.userId = userId;
     }
 }

@@ -30,7 +30,7 @@ public class AuthController {
         String refreshToken = refreshTokenRequest.getRefreshToken();
         TokenInfo tokenInfo = authService.validateRefreshToken(refreshToken);
         ObjectId userId = new ObjectId(tokenInfo.getUserId());
-        return new TokenDto(authService.issueRefreshToken(userId));
+        return new TokenDto(authService.issueRefreshToken(userId), tokenInfo.getUserId());
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
