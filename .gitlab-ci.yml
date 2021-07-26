@@ -9,10 +9,15 @@ stages:
 build:
   image: gradle:7.1.1-jdk11
   stage: build jar
+  cache:
+    key: build-cache
+    paths:
+      - ./gradle/wrapper
+      - ./gradle/caches
+
   before_script:
     - mv $PROPERTIES src/main/resources/application.properties
   script:
-    - rm -rf .gradle
     - ./gradlew bootJar --scan
   artifacts:
     paths:
