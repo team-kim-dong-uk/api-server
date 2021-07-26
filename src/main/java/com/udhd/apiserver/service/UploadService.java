@@ -57,6 +57,7 @@ public class UploadService {
                         new GeneratePresignedUrlRequest(bucket, checksums.get(i))
                                 .withMethod(HttpMethod.PUT)
                                 .withExpiration(expiration);
+                generatePresignedUrlRequest.addRequestParameter("x-amz-acl", "public-read");
                 URL url = amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
                 urls.set(i, url.toString());
             } catch (Exception e) {
