@@ -1,15 +1,19 @@
 package com.udhd.apiserver.service;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.udhd.apiserver.config.auth.CustomOAuth2User;
 import com.udhd.apiserver.config.auth.dto.TokenInfo;
 import com.udhd.apiserver.config.auth.dto.Tokens;
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.domain.user.UserRepository;
 import com.udhd.apiserver.exception.auth.InvalidRefreshTokenException;
 import com.udhd.apiserver.util.JwtUtils;
+import com.udhd.apiserver.web.dto.auth.LoginInfoDto;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Date;
 import java.util.Optional;
@@ -23,6 +27,28 @@ public class AuthService {
     private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
 
+    /**
+     * authentication 정보를 가지고 loginInfoDto 객체를 만든다.
+     * authentication.principle의 email을 기준으로, DB에 없는 유저면 새로 추가한 후 진행한다
+     *
+     * @param authentication
+     * @return login info
+     */
+    public LoginInfoDto generateLoginInfo(Authentication authentication) {
+        CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+        String email = oAuth2User.getEmail();
+        Optional<User> foundUser = userRepository.findByEmail(email);
+        boolean isNewUser = foundUser.isEmpty();
+        User user = foundUser.orElseGet(()->{
+            User newUser = User.builder()
+                    .email(email)
+                    .nickname("어덕행덕")
+                    .build();
+            return userRepository.insert(newUser);
+        });
+
+        return toLoginInfoDto(user.getId(), isNewUser);
+    }
 
     /**
      * Validate refresh token token info.
@@ -84,6 +110,17 @@ public class AuthService {
         return Tokens.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
+                .build();
+    }
+
+    private LoginInfoDto toLoginInfoDto(ObjectId userId, boolean isNewUser) {
+        Tokens tokens = issueRefreshToken(userId);
+
+        return LoginInfoDto.builder()
+                .userId(userId.toString())
+                .accessToken(tokens.getAccessToken())
+                .refreshToken(tokens.getRefreshToken())
+                .isNewUser(isNewUser)
                 .build();
     }
 }

@@ -1,14 +1,14 @@
 package com.udhd.apiserver.web.dto.auth;
 
-import com.udhd.apiserver.config.auth.dto.Tokens;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @AllArgsConstructor
 @Builder
 @Getter
-public class TokenDto {
+public class LoginInfoDto {
     /**
      * 새로 발급받은 access token
      */
@@ -23,9 +23,8 @@ public class TokenDto {
      */
     private String userId;
 
-    public TokenDto(Tokens tokens, String userId) {
-        this.accessToken = tokens.getAccessToken();
-        this.refreshToken = tokens.getRefreshToken();
-        this.userId = userId;
-    }
+    /**
+     * 처음 가입하는 유저인지 여부
+     */
+    private boolean isNewUser;
 }
