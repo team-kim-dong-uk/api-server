@@ -48,6 +48,23 @@ public class UserService {
         return toUserDto(user);
     }
 
+    /**
+     * 최애 group을 변경한다.
+     * @param userId
+     * @param group
+     * @return
+     * @throws InvalidAccessTokenException
+     */
+    public UserDto setGroup(String userId, String group) throws InvalidAccessTokenException {
+        ObjectId userObjectId = new ObjectId(userId);
+
+        User user = userRepository.findById(userObjectId)
+                .orElseThrow(() -> new InvalidAccessTokenException("Invalid access token"));
+        user.setGroup(group);
+        userRepository.save(user);
+        return toUserDto(user);
+    }
+
     public UserDto updateUser(String userId, UpdateUserRequest updateUserRequest)
             throws UserNotFoundException {
         ObjectId userObjectId = new ObjectId(userId);
@@ -76,6 +93,7 @@ public class UserService {
                 .userId(user.getId().toString())
                 .nickname(user.getNickname())
                 .email(user.getEmail())
+                .group(user.getGroup())
                 .numAlbumPhotos(2)      // TODO
                 .numUploadedPhotos(2)
                 .build();

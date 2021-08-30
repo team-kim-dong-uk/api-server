@@ -19,11 +19,13 @@ public class User {
     private ObjectId id;
     private String email;
     private String nickname;
+    private String group;
     private String refreshToken;
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
+    public void setGroup(String group) { this.group = group; }
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }

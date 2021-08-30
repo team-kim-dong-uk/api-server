@@ -37,6 +37,15 @@ public class UserController {
         return userService.setNickname(userId, updateUserRequest.getNickname());
     }
 
+    @PutMapping("/{userId}/group")
+    public UserDto setGroup(
+            @PathVariable String userId,
+            @RequestBody UpdateUserRequest updateUserRequest) throws DuplicateNicknameException {
+        SecurityUtils.checkUser(userId);
+
+        return userService.setGroup(userId, updateUserRequest.getGroup());
+    }
+
     /**
      * 유저 정보 업데이트.
      *
