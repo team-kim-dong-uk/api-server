@@ -1,5 +1,6 @@
 package com.udhd.apiserver.web;
 
+import com.udhd.apiserver.exception.auth.DuplicateNicknameException;
 import com.udhd.apiserver.service.UserService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
@@ -25,6 +26,15 @@ public class UserController {
     public UserDto detailUser(
             @PathVariable String userId) {
         return userService.getUserDetail(userId);
+    }
+
+    @PutMapping("/{userId}/nickname")
+    public UserDto setNickname(
+            @PathVariable String userId,
+            @RequestBody UpdateUserRequest updateUserRequest) throws DuplicateNicknameException {
+        SecurityUtils.checkUser(userId);
+
+        return userService.setNickname(userId, updateUserRequest.getNickname());
     }
 
     /**

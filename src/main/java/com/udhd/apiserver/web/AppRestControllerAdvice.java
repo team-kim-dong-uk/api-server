@@ -1,6 +1,7 @@
 package com.udhd.apiserver.web;
 
 import com.udhd.apiserver.exception.EntityNotFoundException;
+import com.udhd.apiserver.exception.auth.DuplicateNicknameException;
 import com.udhd.apiserver.exception.auth.NoAuthorityException;
 import com.udhd.apiserver.web.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -38,4 +39,12 @@ public class AppRestControllerAdvice {
     public ErrorResponse entityNotFound(EntityNotFoundException e) {
         return new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Resource not found", Arrays.asList(e.getMessage()));
     }
+
+    @ExceptionHandler(DuplicateNicknameException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse duplicateNickname(DuplicateNicknameException e) {
+        return new ErrorResponse(HttpStatus.CONFLICT.value(), "Duplicate nickname", Arrays.asList(e.getMessage()));
+    }
+
+
 }

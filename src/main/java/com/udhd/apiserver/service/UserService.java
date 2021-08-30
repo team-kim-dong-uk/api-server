@@ -2,6 +2,8 @@ package com.udhd.apiserver.service;
 
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.domain.user.UserRepository;
+import com.udhd.apiserver.exception.auth.InvalidAccessTokenException;
+import com.udhd.apiserver.exception.auth.DuplicateNicknameException;
 import com.udhd.apiserver.exception.user.UserNotFoundException;
 import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
 import com.udhd.apiserver.web.dto.user.UserDto;
@@ -22,6 +24,27 @@ public class UserService {
         User user = userRepository.findById(userObjectId)
                 .orElseThrow(() -> new UserNotFoundException(userObjectId));
 
+        return toUserDto(user);
+    }
+
+    /**
+     * 닉네임을 변경한다.
+     * 현재는 중복된 닉네임이 있는지만 체크
+     * @param nickname
+     * @throws DuplicateNicknameException
+     */
+    public UserDto setNickname(String userId, String nickname)
+            throws DuplicateNicknameException, InvalidAccessTokenException {
+        ObjectId userObjectId = new ObjectId(userId);
+
+        // 이미 중복 닉이 있으면 에러
+        if (userRepository.existsUserByNickname(nickname)) {
+            throw new DuplicateNicknameException("Duplicate nickname " + nickname + " exists");
+        }
+        User user = userRepository.findById(userObjectId)
+                .orElseThrow(() -> new InvalidAccessTokenException("Invalid access token"));
+        user.setNickname(nickname);
+        userRepository.save(user);
         return toUserDto(user);
     }
 

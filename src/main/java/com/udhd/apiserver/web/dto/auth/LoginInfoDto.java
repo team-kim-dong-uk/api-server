@@ -24,6 +24,16 @@ public class LoginInfoDto {
     private String userId;
 
     /**
+     * email
+     */
+    private String email;
+
+    /**
+     * nickname
+     */
+    private String nickname;
+
+    /**
      * 처음 가입하는 유저인지 여부
      */
     private boolean isNewUser;

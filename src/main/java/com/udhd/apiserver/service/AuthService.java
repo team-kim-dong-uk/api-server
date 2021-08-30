@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Date;
 import java.util.Optional;
@@ -38,16 +37,16 @@ public class AuthService {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getEmail();
         Optional<User> foundUser = userRepository.findByEmail(email);
+
         boolean isNewUser = foundUser.isEmpty();
         User user = foundUser.orElseGet(()->{
             User newUser = User.builder()
                     .email(email)
-                    .nickname("어덕행덕")
                     .build();
             return userRepository.insert(newUser);
         });
 
-        return toLoginInfoDto(user.getId(), isNewUser);
+        return toLoginInfoDto(user, isNewUser);
     }
 
     /**
@@ -113,13 +112,16 @@ public class AuthService {
                 .build();
     }
 
-    private LoginInfoDto toLoginInfoDto(ObjectId userId, boolean isNewUser) {
+    private LoginInfoDto toLoginInfoDto(User user, boolean isNewUser) {
+        ObjectId userId = user.getId();
         Tokens tokens = issueRefreshToken(userId);
 
         return LoginInfoDto.builder()
                 .userId(userId.toString())
                 .accessToken(tokens.getAccessToken())
                 .refreshToken(tokens.getRefreshToken())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
                 .isNewUser(isNewUser)
                 .build();
     }
