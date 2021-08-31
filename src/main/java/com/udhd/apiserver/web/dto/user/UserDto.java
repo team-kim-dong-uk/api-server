@@ -19,6 +19,10 @@ public class UserDto {
      */
     String email;
     /**
+     * 최애 그룹
+     */
+    String group;
+    /**
      * 업로드한 사진 수
      */
     Integer numUploadedPhotos;
