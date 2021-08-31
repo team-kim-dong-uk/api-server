@@ -88,8 +88,11 @@ include::{snippets}/auth-controller-test/reissue-refresh-token-no-token/http-res
 == 1. 유저 정보 가져오기
 include::{snippets}/user-controller-test/detail-user/auto-section.adoc[]
 
-== 2. 유저 정보 수정
-include::{snippets}/user-controller-test/update-user/auto-section.adoc[]
+== 2. 유저 닉네임 설정
+include::{snippets}/user-controller-test/set-nickname/auto-section.adoc[]
+
+== 3. 유저 최애 그룹 설정
+include::{snippets}/user-controller-test/set-group/auto-section.adoc[]
 
 = 검색
 '''
