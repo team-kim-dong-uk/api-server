@@ -1,6 +1,9 @@
 package com.udhd.apiserver.web;
 
+import com.udhd.apiserver.domain.tag.Tag;
+import com.udhd.apiserver.domain.tag.TagRepository;
 import com.udhd.apiserver.service.PhotoService;
+import com.udhd.apiserver.service.TagService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +18,25 @@ import java.util.List;
 @RestController
 public class SearchController {
     private final PhotoService photoService;
+    private final TagService tagService;
     private final List<PhotoOutlineDto> mockSearchResults
             = Arrays.asList(PhotoOutlineDto.builder()
                                     .photoId("456")
                                     .thumbnailLink("http://link.com/456")
                                     .build());
+
+    @GetMapping("/tags/recommended")
+    public List<Tag> recommendedTags(@RequestParam String keyword) {
+        return tagService.getRecommendedTags(keyword);
+    }
+
+    private final TagRepository tagRepository;
+
+    @GetMapping("/insert")
+    public void ins (){
+        tagRepository.insert(new Tag("오마이걸"));
+        tagRepository.insert(new Tag("1집"));
+    }
 
     /**
      * userId에게 없는 사진들 중 해당 tags 들을 가진 사진들을 찾는다.
