@@ -109,9 +109,8 @@ public class AlbumControllerTest {
                                 Preprocessors.prettyPrint())))
                 .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation)
                         .uris()
-                        .withScheme("http")
+                        .withScheme("https")
                         .withHost("udhd.djbaek.com")
-                        .withPort(8080)
                         .and().snippets()
                         .withDefaults(CliDocumentation.curlRequest(),
                                 HttpDocumentation.httpRequest(),
