@@ -6,6 +6,7 @@ import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udhd.apiserver.service.PhotoService;
+import com.udhd.apiserver.service.TagService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import org.junit.jupiter.api.*;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.cli.CliDocumentation;
@@ -51,6 +51,8 @@ public class SearchControllerTest {
 
     @MockBean
     private PhotoService photoService;
+    @MockBean
+    private TagService tagService;
 
     protected MockMvc mockMvc;
 
@@ -83,9 +85,8 @@ public class SearchControllerTest {
                                 Preprocessors.prettyPrint())))
                 .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation)
                         .uris()
-                        .withScheme("http")
+                        .withScheme("https")
                         .withHost("udhd.djbaek.com")
-                        .withPort(8080)
                         .and().snippets()
                         .withDefaults(CliDocumentation.curlRequest(),
                                 HttpDocumentation.httpRequest(),
@@ -118,6 +119,27 @@ public class SearchControllerTest {
         };
     }
 
+    @Test
+    void tagsRecommended() throws Exception {
+        // given
+        String userId = "123";
+        String keyword = "오마이걸";
+
+        given(tagService.getRecommendedTags("오마이걸")).willReturn(Arrays.asList(
+                new com.udhd.apiserver.domain.tag.Tag("오마이걸"),
+                new com.udhd.apiserver.domain.tag.Tag("오마이걸포"),
+                new com.udhd.apiserver.domain.tag.Tag("오마이걸포함"),
+                new com.udhd.apiserver.domain.tag.Tag("오마이걸포함태그")));
+
+        // when
+        String requestUri = "/api/v1/users/" + userId + "/search/tags/recommended?keyword=오마이걸";
+        ResultActions actions = mockMvc
+                .perform(get(requestUri).with(userToken()));
+
+        // then
+        actions
+                .andExpect(status().isOk());
+    }
 
 
     @Test
