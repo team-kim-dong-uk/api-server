@@ -122,6 +122,7 @@ public class AuthService {
                 .refreshToken(tokens.getRefreshToken())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .group(user.getGroup())
                 .isNewUser(isNewUser)
                 .build();
     }

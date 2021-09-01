@@ -34,6 +34,11 @@ public class LoginInfoDto {
     private String nickname;
 
     /**
+     * 최애 그룹
+     */
+    private String group;
+
+    /**
      * 처음 가입하는 유저인지 여부
      */
     private boolean isNewUser;
