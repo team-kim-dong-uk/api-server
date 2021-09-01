@@ -32,12 +32,6 @@ public class SearchController {
 
     private final TagRepository tagRepository;
 
-    @GetMapping("/insert")
-    public void ins (){
-        tagRepository.insert(new Tag("오마이걸"));
-        tagRepository.insert(new Tag("1집"));
-    }
-
     /**
      * userId에게 없는 사진들 중 해당 tags 들을 가진 사진들을 찾는다.
      *
