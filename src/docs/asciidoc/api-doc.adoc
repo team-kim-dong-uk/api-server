@@ -96,10 +96,13 @@ include::{snippets}/user-controller-test/set-group/auto-section.adoc[]
 
 = 검색
 '''
-== 1. 태그로 검색
+== 1. 검색태그 추천
+include::{snippets}/search-controller-test/tags-recommended/auto-section.adoc[]
+
+== 2. 태그로 검색
 include::{snippets}/search-controller-test/search-tags/auto-section.adoc[]
 
-== 2. 유사 이미지 검색
+== 3. 유사 이미지 검색
 include::{snippets}/search-controller-test/search-similar/auto-section.adoc[]
 
 = 사진
