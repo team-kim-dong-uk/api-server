@@ -1,15 +1,13 @@
 package com.udhd.apiserver.domain.user;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode
 @Builder
 @AllArgsConstructor
 @Document(collection = "user")
@@ -21,6 +19,7 @@ public class User {
     private String nickname;
     private String group;
     private String refreshToken;
+    private int uploadCount;
 
     public void setNickname(String nickname) {
         this.nickname = nickname;

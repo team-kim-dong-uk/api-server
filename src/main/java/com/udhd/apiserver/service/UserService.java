@@ -95,7 +95,7 @@ public class UserService {
                 .email(user.getEmail())
                 .group(user.getGroup())
                 .numAlbumPhotos(2)      // TODO
-                .numUploadedPhotos(2)
+                .numUploadedPhotos(user.getUploadCount())
                 .build();
     }
 }
