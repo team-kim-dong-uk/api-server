@@ -5,10 +5,14 @@ import capital.scalable.restdocs.SnippetRegistry;
 import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.udhd.apiserver.domain.tag.Tag;
+import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.service.SearchService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
+import com.udhd.apiserver.web.dto.search.SearchCandidateDto;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
@@ -121,24 +125,26 @@ public class SearchControllerTest {
 
     @Test
     void tagsRecommended() throws Exception {
-//        // given
-//        String userId = "123";
-//        String keyword = "오마이걸";
-//
-//        given(searchService.getRecommendedKeywords("오마이걸")).willReturn(Arrays.asList(
-//                new com.udhd.apiserver.domain.tag.Tag("오마이걸"),
-//                new com.udhd.apiserver.domain.tag.Tag("오마이걸포"),
-//                new com.udhd.apiserver.domain.tag.Tag("오마이걸포함"),
-//                new com.udhd.apiserver.domain.tag.Tag("오마이걸포함태그")));
-//
-//        // when
-//        String requestUri = "/api/v1/users/" + userId + "/search/tags/recommended?keyword=오마이걸";
-//        ResultActions actions = mockMvc
-//                .perform(get(requestUri).with(userToken()));
-//
-//        // then
-//        actions
-//                .andExpect(status().isOk());
+        // given
+        String userId = "123";
+        String keyword = "오마이걸";
+
+        given(searchService.getRecommendedKeywords("오마이걸")).willReturn(Arrays.asList(
+                SearchCandidateDto.fromTag(new Tag("오마이걸", 400)),
+                SearchCandidateDto.fromTag(new Tag("오마이걸시작태그", 100)),
+                SearchCandidateDto.fromTag(new Tag("포함오마이걸", 230)),
+                SearchCandidateDto.fromUser(User.builder().nickname("오마이걸시작닉네임").uploadCount(3).build())
+        ));
+
+        System.out.println(searchService.getRecommendedKeywords("오마이걸"));
+        // when
+        String requestUri = "/api/v1/users/" + userId + "/search/tags/recommended?keyword=" + keyword;
+        ResultActions actions = mockMvc
+                .perform(get(requestUri).with(userToken()));
+
+        // then
+        actions
+                .andExpect(status().isOk());
     }
 
 
