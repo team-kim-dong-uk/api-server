@@ -12,4 +12,5 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Tag {
     @Id
     private String tag;
+    private int count;
 }
