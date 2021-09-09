@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -53,6 +54,7 @@ import pics.udhd.kafka.dto.internal.ResultDto;
  * @see QueryExecutor
  */
 @Service
+@Slf4j
 public class QueryCommander {
   @Value("${spring.kafka.template.req-topic}")
   private String TOPIC_REQ;
@@ -84,19 +86,24 @@ public class QueryCommander {
      * callback 에서 값을 받기 위해서 만듬
      */
     final QueryResultDto[] result = new QueryResultDto[1];
-    search(query, new QueryCallback() {
-      @Override
-      public void execute(QueryResultDto _result) {
-        result[0] = _result;
-        syncObject.notify();
-      }
+    try {
+      search(query, new QueryCallback() {
+        @Override
+        public void execute(QueryResultDto _result) {
+          result[0] = _result;
+          syncObject.notify();
+        }
 
-      @Override
-      public void fail(QueryResultDto _result) {
-        result[0] = _result;
-        syncObject.notify();
-      }
-    });
+        @Override
+        public void fail(QueryResultDto _result) {
+          result[0] = _result;
+          syncObject.notify();
+        }
+      });
+    } catch (Exception e) {
+      log.info("kafka error", e);
+      return null;
+    }
     try {
       syncObject.wait(2 * timeoutDelay);
     } catch (InterruptedException e) {

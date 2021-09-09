@@ -61,14 +61,14 @@ public class SearchControllerTest {
     protected MockMvc mockMvc;
 
     private final PhotoOutlineDto mockPhotoOutlineDto = PhotoOutlineDto.builder()
-            .photoId("456").thumbnailLink("http://link.com").build();
+            .photoId("60e2fea74c17cf5152fb5b78").thumbnailLink("http://link.com").build();
 
     private MockedStatic<SecurityUtils> mockedSecurityUtils;
 
     @BeforeAll
     public void mockStaticSetup() {
         mockedSecurityUtils = mockStatic(SecurityUtils.class);
-        given(SecurityUtils.getLoginUserId()).willReturn("123");
+        given(SecurityUtils.getLoginUserId()).willReturn("60e2fea74c17cf5152fb5b78");
     }
 
     @AfterAll
@@ -126,7 +126,7 @@ public class SearchControllerTest {
     @Test
     void tagsRecommended() throws Exception {
         // given
-        String userId = "123";
+        String userId = "60e2fea74c17cf5152fb5b78";
         String keyword = "오마이걸";
 
         given(searchService.getRecommendedKeywords("오마이걸")).willReturn(Arrays.asList(
@@ -152,7 +152,7 @@ public class SearchControllerTest {
     @Test
     void searchTags() throws Exception {
         // given
-        String userId = "123";
+        String userId = "60e2fea74c17cf5152fb5b78";
         List<String> tags = Arrays.asList("오마이걸", "1집");
 
         given(photoService.findPhotos(tags, null, null, 21)).willReturn(Arrays.asList(mockPhotoOutlineDto));
@@ -170,8 +170,8 @@ public class SearchControllerTest {
     @Test
     void searchSimilar() throws Exception {
         // given
-        String userId = "123";
-        String photoId = "456";
+        String userId = "60e2fea74c17cf5152fb5b78";
+        String photoId = "6110066323a94f7c27f9cf4c";
 
         // when
         String requestUri = "/api/v1/users/" + userId + "/search/similar/" + photoId;

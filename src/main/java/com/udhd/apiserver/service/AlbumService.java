@@ -243,6 +243,13 @@ public class AlbumService {
             .map(AlbumService::toPhotoDto)
             .collect(Collectors.toList()));
 
+        if (searched == null) {
+            Map<String, List<String>> retval = new HashMap<>();
+            photos.forEach(photoId -> {
+                retval.put(photoId, Collections.singletonList(photoId));
+            });
+            return retval;
+        }
         Map<String, List<String>> retval = new HashMap<>();
         searched.getValue().forEach((key, value) -> {
             // TODO : Photo 객체를 키로 재활용

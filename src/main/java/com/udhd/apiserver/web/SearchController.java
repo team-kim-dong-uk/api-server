@@ -37,8 +37,6 @@ public class SearchController {
         return searchService.getRecommendedKeywords(keyword);
     }
 
-    private final TagRepository tagRepository;
-
     /**
      * userId에게 없는 사진들 중 해당 tags 들을 가진 사진들을 찾는다.
      *
