@@ -46,7 +46,7 @@ public class AuthService {
             return userRepository.insert(newUser);
         });
 
-        return toLoginInfoDto(user, isNewUser);
+        return toLoginInfoDto(user, isNewUser, oAuth2User.getGoogleToken());
     }
 
     /**
@@ -112,7 +112,7 @@ public class AuthService {
                 .build();
     }
 
-    private LoginInfoDto toLoginInfoDto(User user, boolean isNewUser) {
+    private LoginInfoDto toLoginInfoDto(User user, boolean isNewUser, String googleToken) {
         ObjectId userId = user.getId();
         Tokens tokens = issueRefreshToken(userId);
 
@@ -123,6 +123,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .group(user.getGroup())
+                .googleToken(googleToken)
                 .isNewUser(isNewUser)
                 .build();
     }

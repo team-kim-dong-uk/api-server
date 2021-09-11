@@ -39,6 +39,11 @@ public class LoginInfoDto {
     private String group;
 
     /**
+     * googleDrive용 액세스 토큰
+     */
+    private String googleToken;
+
+    /**
      * 처음 가입하는 유저인지 여부
      */
     private boolean isNewUser;
