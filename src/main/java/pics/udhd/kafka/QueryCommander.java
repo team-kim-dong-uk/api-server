@@ -182,6 +182,11 @@ public class QueryCommander {
   )
   public void consume(ResultDto resultDto) {
     QueryState queryState = progress.get(resultDto.getQueryKey());
+    if (queryState == null) {
+      log.info("cannot find querykey : " + resultDto.getQueryKey() +
+          ", photoId : " + resultDto.getPhotoId());
+      return;
+    }
     queryState.accumulateResult(resultDto);
 
     if (queryState.isDone()) {
