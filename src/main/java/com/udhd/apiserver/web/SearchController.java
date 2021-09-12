@@ -1,8 +1,11 @@
 package com.udhd.apiserver.web;
 
+import com.udhd.apiserver.domain.tag.TagRepository;
 import com.udhd.apiserver.service.PhotoService;
+import com.udhd.apiserver.service.SearchService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
+import com.udhd.apiserver.web.dto.search.SearchCandidateDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +18,19 @@ import java.util.List;
 @RestController
 public class SearchController {
     private final PhotoService photoService;
+    private final SearchService searchService;
     private final List<PhotoOutlineDto> mockSearchResults
             = Arrays.asList(PhotoOutlineDto.builder()
                                     .photoId("456")
                                     .thumbnailLink("http://link.com/456")
                                     .build());
+
+    @GetMapping("/tags/recommended")
+    public List<SearchCandidateDto> recommendedTags(@RequestParam String keyword) {
+        return searchService.getRecommendedKeywords(keyword);
+    }
+
+    private final TagRepository tagRepository;
 
     /**
      * userId에게 없는 사진들 중 해당 tags 들을 가진 사진들을 찾는다.

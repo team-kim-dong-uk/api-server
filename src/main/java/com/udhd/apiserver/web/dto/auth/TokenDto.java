@@ -1,8 +1,12 @@
 package com.udhd.apiserver.web.dto.auth;
 
 import com.udhd.apiserver.config.auth.dto.Tokens;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
+@AllArgsConstructor
+@Builder
 @Getter
 public class TokenDto {
     /**

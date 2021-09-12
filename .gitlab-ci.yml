@@ -12,20 +12,23 @@ build:
   cache:
     key: build-cache
     paths:
-      - ./gradle/wrapper
-      - ./gradle/caches
+      - .gradle/wrapper
+      - .gradle/caches
 
   before_script:
     - mv $PROPERTIES src/main/resources/application.properties
+    - echo '########## - Define my variables'
+    - export GRADLE_USER_HOME=`pwd`/.gradle
+    - echo $GRADLE_USER_HOME
+
   script:
-    - ./gradlew bootJar --scan
+    - ./gradlew bootJar -g $GRADLE_USER_HOME
+
   artifacts:
     paths:
       - build/libs/*.jar
   tags:
     - api
-  only:
-    - develop
 
 docker build:
   image: rimeilo324/aws-docker:0.0.1
@@ -42,41 +45,29 @@ docker build:
     - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ECR_REPO
 
   script:
-    - docker build --platform linux/amd64 -t $AWS_ECR_REPO:latest .
-    - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD docker.io
+    - docker build
+      --platform linux/amd64
+      -t $AWS_ECR_REPO:latest
+      -t $AWS_ECR_REPO:${CI_COMMIT_SHORT_SHA} .
+
+    #- docker login -u $DOCKER_USER -p $DOCKER_PASSWORD docker.io
     - docker push $AWS_ECR_REPO:latest
+    - docker push $AWS_ECR_REPO:${CI_COMMIT_SHORT_SHA}
   tags:
     - api
   only:
     - develop
 
+
+
 deploy:
-  #image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
-  image: ubuntu:latest
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  #image: ubuntu:latest
   stage: deploy
-  before_script:
-    #- aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-    #- aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-    #- aws configure set region $AWS_DEFAULT_REGION
-    #- aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ECR_REPO
-
-    - 'which ssh-agent || (apt-get update -y && apt-get install openssh-client -y)'
-    - eval $(ssh-agent -s)
-    - echo "$ENV_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
-
   script:
-    - ssh ec2-user@$DEPLOY_SERVER "sudo systemctl start docker;
-      aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID;
-      aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY;
-      aws configure set region $AWS_DEFAULT_REGION;
-      aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ECR_REPO;
-      docker stop $APP_NAME;
-      docker system prune -a -f;
-      docker pull $AWS_ECR_REPO:latest;
-      docker container run -d --name $APP_NAME -p 80:8080  $AWS_ECR_REPO"
+    #- aws ecs register-task-definition --cli-input-json file://./t-d-1.json
+    - aws ecs update-service --region "$AWS_DEFAULT_REGION" --cluster "$CI_AWS_ECS_CLUSTER" --service "$CI_AWS_SERVICE_NAME"  --task-definition "$CI_AWS_ECS_TASK_DEFINITION"
+
   tags:
     - api
   only:

@@ -77,9 +77,8 @@ public class UserControllerTest {
                                 Preprocessors.prettyPrint())))
                 .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation)
                         .uris()
-                        .withScheme("http")
+                        .withScheme("https")
                         .withHost("udhd.djbaek.com")
-                        .withPort(8080)
                         .and().snippets()
                         .withDefaults(CliDocumentation.curlRequest(),
                                 HttpDocumentation.httpRequest(),
@@ -135,22 +134,49 @@ public class UserControllerTest {
     }
 
     @Test
-    void updateUser() throws Exception {
+    void setNickname() throws Exception {
         // given
         String userId = "123";
         String updateAlbumRequest = "{\"nickname\" : \"새 닉네임\"}";
 
-        given(userService.updateUser(any(), any()))
+        given(userService.setNickname(any(), any()))
                 .willReturn(UserDto.builder()
                         .userId("123").nickname("새 닉네임")
                         .email("testuser@gmail.com")
+                        .group("오마이걸")
                         .numUploadedPhotos(100).numAlbumPhotos(4000)
                         .build());
 
         // when
-        String requestUri = "/api/v1/users/" + userId;
+        String requestUri = "/api/v1/users/" + userId + "/nickname";
         ResultActions actions = mockMvc
-                .perform(patch(requestUri).with(userToken())
+                .perform(put(requestUri).with(userToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateAlbumRequest));
+
+        // then
+        actions
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void setGroup() throws Exception {
+        // given
+        String userId = "123";
+        String updateAlbumRequest = "{\"group\" : \"오마이걸\"}";
+
+        given(userService.setGroup(any(), any()))
+                .willReturn(UserDto.builder()
+                        .userId("123").nickname("닉네임")
+                        .email("testuser@gmail.com")
+                        .group("오마이걸")
+                        .numUploadedPhotos(100).numAlbumPhotos(4000)
+                        .build());
+
+        // when
+        String requestUri = "/api/v1/users/" + userId + "/group";
+        ResultActions actions = mockMvc
+                .perform(put(requestUri).with(userToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateAlbumRequest));
 

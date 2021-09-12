@@ -5,9 +5,14 @@ import capital.scalable.restdocs.SnippetRegistry;
 import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.udhd.apiserver.domain.tag.Tag;
+import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.service.PhotoService;
+import com.udhd.apiserver.service.SearchService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
+import com.udhd.apiserver.web.dto.search.SearchCandidateDto;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
@@ -15,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.cli.CliDocumentation;
@@ -51,6 +55,8 @@ public class SearchControllerTest {
 
     @MockBean
     private PhotoService photoService;
+    @MockBean
+    private SearchService searchService;
 
     protected MockMvc mockMvc;
 
@@ -83,9 +89,8 @@ public class SearchControllerTest {
                                 Preprocessors.prettyPrint())))
                 .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation)
                         .uris()
-                        .withScheme("http")
+                        .withScheme("https")
                         .withHost("udhd.djbaek.com")
-                        .withPort(8080)
                         .and().snippets()
                         .withDefaults(CliDocumentation.curlRequest(),
                                 HttpDocumentation.httpRequest(),
@@ -118,6 +123,29 @@ public class SearchControllerTest {
         };
     }
 
+    @Test
+    void tagsRecommended() throws Exception {
+        // given
+        String userId = "123";
+        String keyword = "오마이걸";
+
+        given(searchService.getRecommendedKeywords("오마이걸")).willReturn(Arrays.asList(
+                SearchCandidateDto.fromTag(new Tag("오마이걸", 400)),
+                SearchCandidateDto.fromTag(new Tag("오마이걸시작태그", 100)),
+                SearchCandidateDto.fromTag(new Tag("포함오마이걸", 230)),
+                SearchCandidateDto.fromUser(User.builder().nickname("오마이걸시작닉네임").uploadCount(3).build())
+        ));
+
+        System.out.println(searchService.getRecommendedKeywords("오마이걸"));
+        // when
+        String requestUri = "/api/v1/users/" + userId + "/search/tags/recommended?keyword=" + keyword;
+        ResultActions actions = mockMvc
+                .perform(get(requestUri).with(userToken()));
+
+        // then
+        actions
+                .andExpect(status().isOk());
+    }
 
 
     @Test

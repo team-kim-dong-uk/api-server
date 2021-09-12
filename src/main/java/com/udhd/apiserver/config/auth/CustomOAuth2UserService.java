@@ -30,7 +30,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName,
                 oAuth2User.getAttributes());
 
-        return new CustomOAuth2User(null, attributes);
+        String accessToken = userRequest.getAccessToken().getTokenValue();
+
+        String googleToken = registrationId.equals("google") ? accessToken : null;
+        return new CustomOAuth2User(null, attributes, googleToken);
     }
 
 }

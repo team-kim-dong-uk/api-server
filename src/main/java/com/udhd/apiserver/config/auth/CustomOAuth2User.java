@@ -21,17 +21,25 @@ public class CustomOAuth2User implements OAuth2User, Serializable {
 
     private final String email;
 
-    public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities, OAuthAttributes oAuthAttributes) {
+    private final String googleToken;
+
+    public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities, OAuthAttributes oAuthAttributes,
+                            String googleToken) {
         this.authorities = (authorities != null)
                 ? Collections.unmodifiableSet(new LinkedHashSet<>(this.sortAuthorities(authorities)))
                 : Collections.unmodifiableSet(new LinkedHashSet<>(AuthorityUtils.NO_AUTHORITIES));
         this.attributes = Collections.unmodifiableMap(new LinkedHashMap<>(oAuthAttributes.getAttributes()));
         this.nameAttributeKey = oAuthAttributes.getNameAttributeKey();
         this.email = oAuthAttributes.getEmail();
+        this.googleToken = googleToken;
     }
 
     public String getEmail() {
         return email;
+    }
+
+    public String getGoogleToken() {
+        return googleToken;
     }
 
     @Override

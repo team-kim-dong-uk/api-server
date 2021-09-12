@@ -14,4 +14,9 @@ public class UpdateUserRequest {
      * update 할 닉네임
      */
     private String nickname;
+
+    /**
+     * update 할 그룹
+     */
+    private String group;
 }

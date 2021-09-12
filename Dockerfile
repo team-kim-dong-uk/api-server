@@ -1,4 +1,4 @@
-FROM openjdk:11 AS builder
+FROM openjdk:11-jdk AS builder
 # build
 
 WORKDIR application
