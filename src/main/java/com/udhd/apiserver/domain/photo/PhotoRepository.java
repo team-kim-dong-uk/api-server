@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
     Photo insert(Photo photo);
     Optional<Photo> findById(ObjectId id);
+    Optional<Photo> findByChecksum(String checksum);
     List<Photo> findAllByTagsIn(List<String> tags);
     List<Photo> findAllByTagsInAndIdAfter(List<String> tags, ObjectId findAfter);
     Boolean existsPhotoByChecksum(String checksum);

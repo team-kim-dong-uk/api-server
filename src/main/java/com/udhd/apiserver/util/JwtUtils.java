@@ -17,7 +17,7 @@ public class JwtUtils {
 
     @Value("${jwt.secret}")
     private String secret;
-    public final static long ACCESS_TOKEN_EXPIRE_SECOND = 1000L * 10 * 60;
+    public final static long ACCESS_TOKEN_EXPIRE_SECOND = 1000L * 180 * 60;
     public final static long REFRESH_TOKEN_EXPIRE_SECOND = 1000L * 60 * 24 * 30;
 
     public TokenInfo parseToken(String token)
