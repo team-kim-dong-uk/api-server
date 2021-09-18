@@ -8,10 +8,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udhd.apiserver.config.auth.JwtAuthenticationFilter;
 import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.UploadService;
+import com.udhd.apiserver.util.JsonUtils;
 import com.udhd.apiserver.util.JwtUtils;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.album.AlbumDetailDto;
 import com.udhd.apiserver.web.dto.album.AlbumOutlineDto;
+import com.udhd.apiserver.web.dto.upload.PresignedURLResponse;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
@@ -125,15 +129,25 @@ public class UploadControllerTest {
         };
     }
 
-    /*
     @Test
     void presignedUrls() throws Exception {
         // given
         String userId = "123";
-        String presignedUrlRequest = "{\"checksums\" : [\"absbsb\", \"absbsb\"]}";
+        List<String> checksums = Arrays.asList(
+            "912ec803b2ce49e4a541068d495ab570",
+            "6a204bd89f3c8348afd5c77c717a097a");
+        List<String> resultUrls = Arrays.asList("http://example-url", null);
+        Map<String, Object> data = new HashMap<>();
+        data.put("checksums", checksums);
+        String presignedUrlRequest = JsonUtils.getInstance().stringify(data);
 
-        given(uploadService.getPreSignedURLs(any()))
-                .willReturn(Arrays.asList("http://example-url", null));
+        PresignedURLResponse dummyRes = PresignedURLResponse.builder()
+            .pollingKey(userId + System.currentTimeMillis())
+            .checksums(checksums) /* Dummy md5 value */
+            .urls(resultUrls)
+            .build();
+
+        given(uploadService.getPreSignedURLs(any())).willReturn(resultUrls);
 
         // when
         String requestUri = "/api/v1/upload/presigned-url";
@@ -146,7 +160,5 @@ public class UploadControllerTest {
         actions
                 .andExpect(status().isOk());
     }
-     */
-
 
 }

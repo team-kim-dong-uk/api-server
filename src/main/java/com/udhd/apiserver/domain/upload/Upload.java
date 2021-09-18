@@ -24,4 +24,10 @@ public class Upload {
     private String status;  // TODO: enum 으로 변경하기
     private List<String> tags;
     private String fileId;  // for google drive
+
+    public static String STATUS_UPLOADING = "uploading";
+    public static String STATUS_TAGGING = "tagging";
+    public static String STATUS_REGISTERING = "registering";
+    public static String STATUS_COMPLETED = "completed";
+    public static String STATUS_ERROR = "error";
 }

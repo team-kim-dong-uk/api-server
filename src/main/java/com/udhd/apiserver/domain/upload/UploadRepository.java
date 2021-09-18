@@ -13,4 +13,5 @@ public interface UploadRepository extends MongoRepository<Upload, ObjectId> {
 
     Long countByPollingKey(String pollingKey);
     Long countByPollingKeyAndStatus(String pollingKey, String status);
+    Upload findByPollingKeyAndChecksum(String pollingKey, String checksum);
 }
