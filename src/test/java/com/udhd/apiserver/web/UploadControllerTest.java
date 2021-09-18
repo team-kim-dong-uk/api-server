@@ -125,6 +125,7 @@ public class UploadControllerTest {
         };
     }
 
+    /*
     @Test
     void presignedUrls() throws Exception {
         // given
@@ -145,6 +146,7 @@ public class UploadControllerTest {
         actions
                 .andExpect(status().isOk());
     }
+     */
 
 
 }
