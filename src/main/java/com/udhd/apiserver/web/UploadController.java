@@ -54,7 +54,7 @@ public class UploadController {
         PresignedURLResponse res = PresignedURLResponse.builder()
             .pollingKey(pollingKey)
             .checksums(presignedURLRequest.getChecksums())
-            .urls(uploads.stream().map(Upload::getChecksum).collect(Collectors.toList()))
+            .urls(uploads.stream().map(Upload::getS3Url).collect(Collectors.toList()))
             .build();
         return res;
     }

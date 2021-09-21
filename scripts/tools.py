@@ -67,7 +67,7 @@ def publish_auth(meta, jwt_secret):
         return
 
     with open(meta['__filename__'], 'w') as f:
-        meta['auth'] = 'Bearer: ' + token
+        meta['auth'] = 'Bearer ' + token
         del meta['__filename__'] # It is only used internally. So delete it when to save.
         f.write(json.dumps(meta, indent=2))
 
@@ -97,6 +97,8 @@ def upload(meta, data):
 
         preprocessed_data.append(preprocessed_info)
 
+    print(preprocessed_info)
+
     polling_key, urls = get_presigned_url(meta['url'], meta['auth'],
                                           preprocessed_data)
     print(polling_key, urls)
@@ -120,15 +122,23 @@ def put_image(presigned_url, binary):
 
 
 # TODO
-def get_presigned_url(url, auth, cnt):
-    target_url = url + '/api/v1/upload?cnt=' + cnt
-    headers = {'Authorization': auth}
-    req = request.Request(target_url, headers=headers)
+def get_presigned_url(url, auth, info):
+    target_url = url + '/api/v1/upload/presigned-url'
+    headers = {
+        'Authorization': auth,
+        'Content-Type': 'application/json'
+    }
+    hashes = list(map(lambda x: x['hash'], info))
+    req = request.Request(target_url,
+                          data=bytes(json.dumps({'checksums': hashes}), encoding='utf-8'),
+                          headers=headers,
+                          method='POST')
 
     with request.urlopen(req) as res:
-        data = json.load(res.read())
-        urls = data.urls
-        polling_key = data.pollingKey
+        print(t)
+        #data = json.load(str(res.read()))
+        #urls = data.urls
+        #polling_key = data.pollingKey
 
     return polling_key, urls
 
@@ -148,7 +158,7 @@ def load_binary(info):
 
 # TODO
 def check_upload_progress(polling_key, info, url, auth):
-    target_url = url + '/presigned-url/' + polling_key + '/' + info['hash']
+    target_url = url + '/api/v1/presigned-url/' + polling_key + '/' + info['hash']
     headers = {'Authorization': auth}
     req = request.Request(target_url, headers=headers)
     with request.urlopen(req) as res:
