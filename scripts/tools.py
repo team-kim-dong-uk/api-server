@@ -135,10 +135,11 @@ def get_presigned_url(url, auth, info):
                           method='POST')
 
     with request.urlopen(req) as res:
-        print(t)
-        #data = json.load(str(res.read()))
-        #urls = data.urls
-        #polling_key = data.pollingKey
+        raw_data = res.read()
+        print(raw_data.decode('utf-8'))
+        data = json.loads(raw_data.decode('utf-8'))
+        urls = data["urls"]
+        polling_key = data["pollingKey"]
 
     return polling_key, urls
 

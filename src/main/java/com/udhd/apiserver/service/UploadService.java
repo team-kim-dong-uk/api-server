@@ -225,7 +225,6 @@ public class UploadService {
             isNewPhoto.set(i, !photoRepository.existsPhotoByChecksum(uploads.get(i).getChecksum()));
         }
 
-        List<String> urls = new ArrayList<>(Collections.nCopies(N, null));
         for (int i = 0; i < N; i++) {
             if (!isNewPhoto.get(i)) {
                 continue;
@@ -237,7 +236,7 @@ public class UploadService {
                         .withExpiration(expiration);
                 generatePresignedUrlRequest.addRequestParameter("x-amz-acl", "public-read");
                 URL url = amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
-                urls.set(i, url.toString());
+                uploads.get(i).setS3Url(url.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
