@@ -42,10 +42,34 @@ public class PhotoService {
     public List<PhotoOutlineDto> findPhotos(List<String> tags, String findAfterId, int fetchSize) {
         List<Photo> photos;
         if (findAfterId == null) {
-            photos = photoRepository.findAllByTagsIn(tags);
+            if (tags.size() == 0) {
+                photos = photoRepository.findAll();
+            } else {
+                photos = photoRepository.findAllByTagsIn(tags);
+            }
         } else {
             ObjectId findAfterObjectId = new ObjectId(findAfterId);
-            photos = photoRepository.findAllByTagsInAndIdAfter(tags, findAfterObjectId);
+            if (tags.size() == 0) {
+                photos = photoRepository.findAllByIdAfter(findAfterObjectId);
+            } else {
+                photos = photoRepository.findAllByTagsInAndIdAfter(tags, findAfterObjectId);
+            }
+        }
+
+        return photos.stream().limit(fetchSize)
+                .map(photo -> toPhotoOutlineDto(photo))
+                .collect(Collectors.toList());
+    }
+
+    public List<PhotoOutlineDto> findPhotosUploadedBy(String userId, String findAfterId, int fetchSize) {
+        ObjectId userObjectId = new ObjectId(userId);
+
+        List<Photo> photos;
+        if (findAfterId == null) {
+            photos = photoRepository.findAllByUploaderId(userObjectId);
+        } else {
+            ObjectId findAfterObjectId = new ObjectId(findAfterId);
+            photos = photoRepository.findAllByUploaderIdAndIdAfter(userObjectId, findAfterObjectId);
         }
 
         return photos.stream().limit(fetchSize)

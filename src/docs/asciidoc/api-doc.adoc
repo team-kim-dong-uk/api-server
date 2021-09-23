@@ -94,6 +94,9 @@ include::{snippets}/user-controller-test/set-nickname/auto-section.adoc[]
 == 3. 유저 최애 그룹 설정
 include::{snippets}/user-controller-test/set-group/auto-section.adoc[]
 
+== 4. 유저 업로드 사진 목록
+include::{snippets}/user-controller-test/list-uploaded/auto-section.adoc[]
+
 = 검색
 '''
 == 1. 검색태그 추천

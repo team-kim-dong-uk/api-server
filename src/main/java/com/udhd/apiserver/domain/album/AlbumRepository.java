@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface AlbumRepository extends MongoRepository<Album, ObjectId> {
     Album insert(Album album);
     Optional<Album> findById(ObjectId albumId);
+    List<Album> findAllByUserId(ObjectId userId);
+    List<Album> findAllByUserIdAndIdAfter(Object userId, ObjectId findAfter);
     List<Album> findAllByUserIdAndTagsIn(ObjectId userId, List<String> tags);
     List<Album> findAllByUserIdAndTagsInAndIdAfter(ObjectId userId, List<String> tags, ObjectId findAfter);
 }

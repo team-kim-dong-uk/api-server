@@ -8,9 +8,11 @@ import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.domain.upload.Upload;
 import com.udhd.apiserver.domain.upload.UploadRepository;
+import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.upload.UploadWithGoogleDriveRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.binary.Hex;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -50,11 +52,13 @@ public class UploadService {
 
     public List<Upload> uploadWithGoogleDrive(UploadWithGoogleDriveRequest uploadWithGoogleDriveRequest,
                                           String pollingKey) {
+        ObjectId uploaderId = new ObjectId(SecurityUtils.getLoginUserId());
         List<Upload> uploads = uploadWithGoogleDriveRequest.getFileIds()
                 .stream()
                 .map(fileId ->
                         Upload.builder()
                                 .pollingKey(pollingKey)
+                                .uploaderId(uploaderId)
                                 .fileId(fileId)
                                 .status("uploading")
                                 .build())

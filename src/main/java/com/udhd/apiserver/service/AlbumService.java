@@ -82,10 +82,18 @@ public class AlbumService {
 
         List<Album> albums;
         if (findAfterId == null) {
-            albums = albumRepository.findAllByUserIdAndTagsIn(userObjectId, tags);
+            if (tags.size() == 0) {
+                albums = albumRepository.findAllByUserId(userObjectId);
+            } else {
+                albums = albumRepository.findAllByUserIdAndTagsIn(userObjectId, tags);
+            }
         } else {
             ObjectId findAfterObjectId = new ObjectId(findAfterId);
-            albums = albumRepository.findAllByUserIdAndTagsInAndIdAfter(userObjectId, tags, findAfterObjectId);
+            if (tags.size() == 0) {
+                albums = albumRepository.findAllByUserIdAndIdAfter(userObjectId, findAfterObjectId);
+            } else {
+                albums = albumRepository.findAllByUserIdAndTagsInAndIdAfter(userObjectId, tags, findAfterObjectId);
+            }
         }
 
         return albums.stream().limit(fetchSize)

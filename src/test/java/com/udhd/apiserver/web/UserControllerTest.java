@@ -5,8 +5,10 @@ import capital.scalable.restdocs.SnippetRegistry;
 import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.service.UserService;
 import com.udhd.apiserver.util.SecurityUtils;
+import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
 import com.udhd.apiserver.web.dto.user.UserDto;
 import org.junit.jupiter.api.*;
@@ -29,6 +31,9 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static capital.scalable.restdocs.misc.AuthorizationSnippet.documentAuthorization;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -49,9 +54,14 @@ public class UserControllerTest {
 
     @MockBean
     private UserService userService;
+    @MockBean
+    private PhotoService photoService;
     protected MockMvc mockMvc;
 
     private MockedStatic<SecurityUtils> mockedSecurityUtils;
+
+    private final PhotoOutlineDto mockPhotoOutlineDto = PhotoOutlineDto.builder()
+            .photoId("456").thumbnailLink("http://link.com").build();
 
     @BeforeAll
     public void mockStaticSetup() {
@@ -179,6 +189,24 @@ public class UserControllerTest {
                 .perform(put(requestUri).with(userToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateAlbumRequest));
+
+        // then
+        actions
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void listUploaded() throws Exception {
+        // given
+        String userId = "123";
+
+        given(photoService.findPhotosUploadedBy(userId, null, 21))
+                .willReturn(Arrays.asList(mockPhotoOutlineDto, mockPhotoOutlineDto));
+
+        // when
+        String requestUri = "/api/v1/users/" + userId + "/uploaded?sortBy=id&fetchSize=21";
+        ResultActions actions = mockMvc
+                .perform(get(requestUri).with(userToken()));
 
         // then
         actions
