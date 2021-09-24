@@ -42,6 +42,7 @@ public class UploadService {
     private final AlbumRepository albumRepository;
     private final RestTemplate restTemplate;
     private final TagService tagService;
+    private final SearchService searchService;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -138,6 +139,7 @@ public class UploadService {
         else
             saveIntoAlbum(upload.getUploaderId(), photo, upload.getTags());
 
+        searchService.registerPhoto(photo);
         // Upload collection 에 저장 완료로 표시
         markCompleted(upload);
     }

@@ -161,7 +161,7 @@ public class SearchControllerTest {
 
         given(photoService.findPhotos(tags, null, 21))
             .willReturn(Arrays.asList(mockPhotoOutlineDto));
-        given(albumService.remainNotOwned(userId, photoIds))
+        given(searchService.remainNotOwned(userId, photoIds))
             .willReturn(photoIds);
 
         // when

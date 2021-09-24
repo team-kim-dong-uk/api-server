@@ -34,7 +34,6 @@ import pics.udhd.kafka.dto.QueryResultDto;
 public class AlbumService {
     private final AlbumRepository albumRepository;
     private final PhotoRepository photoRepository;
-    private final QueryCommander queryCommander;
 
 
     /**
@@ -184,91 +183,7 @@ public class AlbumService {
                 .build();
     }
 
-    public List<String> remainNotOwned(String userIdStr, List<String> photoIds) {
-      /* 모든 값이 일단 가지고 있지 않다고 가정한다. */
-      Set<String> retval = new HashSet<>();
-      retval.addAll(photoIds);
-
-      /* 비슷한 이미지 photoId를 모두 가져온다. */
-      Map<String, List<String>> searched = searchSimilarPhotos(photoIds);
-
-      /* 역으로 참조해야하기 때문에 이를 위한 Mapping Table을 만든다. */
-      Map<ObjectId, String> reverseMap = new HashMap<>();
-      List<ObjectId> searchQuery = new ArrayList<>();
-
-      searched.forEach((key, value) -> {
-        value.forEach((elem) -> {
-            ObjectId e = new ObjectId(elem);
-            reverseMap.put(e, key);
-            searchQuery.add(e);
-        });
-      });
-
-      ObjectId userId = new ObjectId(userIdStr);
-      List<Album> alreadyHas = albumRepository.findAllByUserIdAndPhotoIdIn(userId, searchQuery);
-      for (Album album: alreadyHas) {
-          String containedPhotoId = reverseMap.get(album.getPhotoId());
-          /* Don't have to check that it contains photoId. remove() is ignore it. */
-          retval.remove(containedPhotoId);
-      }
-
-      return new ArrayList<>(retval);
-    }
-
-    public List<String> searchSimilarPhotoNoOwned(String userIdStr, String photoId) {
-        /* 비슷한 이미지 photoId를 모두 가져온다. */
-        List<String> similarPhotoIds = searchSimilarPhoto(photoId);
-        ObjectId userId = new ObjectId(userIdStr);
-        List<ObjectId> searchQuery = new ArrayList<>();
-
-        List<Album> alreadyHas = albumRepository.findAllByUserIdAndPhotoIdIn(userId, searchQuery);
-        Set<String> retval = new HashSet<>(similarPhotoIds);
-        for (Album album : alreadyHas) {
-            retval.remove(album.getPhotoId().toHexString());
-        }
-        return new ArrayList<>(retval);
-    }
-
-    public List<String> searchSimilarPhoto(String photoId) {
-        Map<String, List<String>> searched = searchSimilarPhotos(Collections.singletonList(photoId));
-        return searched.get(photoId);
-    }
-
-    public List<String> searchSimilarPhoto(Photo photo) {
-        return searchSimilarPhoto(photo.getId().toHexString());
-    }
-
-    public Map<String, List<String>> searchSimilarPhotos(List<String> photos) {
-        QueryResultDto searched = queryCommander.search(photos.stream()
-            .map(AlbumService::toPhotoDto)
-            .collect(Collectors.toList()));
-
-        if (searched == null) {
-            Map<String, List<String>> retval = new HashMap<>();
-            photos.forEach(photoId -> {
-                retval.put(photoId, Collections.singletonList(photoId));
-            });
-            return retval;
-        }
-        Map<String, List<String>> retval = new HashMap<>();
-        searched.getValue().forEach((key, value) -> {
-            // TODO : Photo 객체를 키로 재활용
-            // TODO : 지금은 그냥 객체 탐색해서 일일이 비교 연산하지만, 이럴게 아니라 다른 방식으로 조회해야함.
-            List<String> matched = photos.stream().filter(photo-> photo.equals(key)).collect(Collectors.toList());
-            if (matched.isEmpty())
-                return;
-            // Photo
-            // PhotoId만 가지고 있는 객체에서 변경
-            retval.put(matched.get(0), value);
-        });
-
-        return retval;
-    }
-
-    private static PhotoDto toPhotoDto(String photoId) {
-        PhotoDto photoDto = new PhotoDto();
-        photoDto.setPhotoId(photoId);
-        photoDto.setUrl(photoDto.getUrl());
-        return photoDto;
+    public List<Album> findAllByUserIdAndPhotoIdIn(String userId, List<ObjectId> searchQuery) {
+        return albumRepository.findAllByUserIdAndPhotoIdIn(new ObjectId(userId), searchQuery);
     }
 }

@@ -24,7 +24,6 @@ import java.util.List;
 @RequestMapping("/api/v1/users/{userId}/search")
 @RestController
 public class SearchController {
-    private final AlbumService albumService;
     private final PhotoService photoService;
     private final SearchService searchService;
 
@@ -62,7 +61,7 @@ public class SearchController {
 
         List<PhotoOutlineDto> fetchedData = photoService.findPhotos(tags, findAfter, fetchSize);
 
-        List<String> notDuplicatedPhotoIds = albumService.remainNotOwned(userId,
+        List<String> notDuplicatedPhotoIds = searchService.remainNotOwned(userId,
             fetchedData.stream().map(PhotoOutlineDto::getPhotoId).collect(Collectors.toList())
         );
 
@@ -93,7 +92,7 @@ public class SearchController {
         SecurityUtils.checkUser(userId);
 
         try {
-            albumService.remainNotOwned(userId, Arrays.asList(photoId));
+            searchService.remainNotOwned(userId, Arrays.asList(photoId));
         } catch (Exception e) {
             log.info("error", e);
         }
