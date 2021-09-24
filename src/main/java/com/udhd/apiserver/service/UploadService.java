@@ -244,6 +244,7 @@ public class UploadService {
                 e.printStackTrace();
             }
         }
+        uploadRepository.saveAll(uploads);
     }
 
     public boolean markCompleted(Upload upload) {
