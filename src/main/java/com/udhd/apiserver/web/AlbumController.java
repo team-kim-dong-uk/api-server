@@ -27,7 +27,7 @@ public class AlbumController {
     @ResponseStatus(HttpStatus.CREATED)
     public AlbumDetailDto newAlbum(
             @PathVariable String userId,
-            NewAlbumRequest newAlbumRequest) {
+            @RequestBody @Valid NewAlbumRequest newAlbumRequest) {
         SecurityUtils.checkUser(userId);
 
         return albumService.saveAlbum(userId, newAlbumRequest.getPhotoId());
