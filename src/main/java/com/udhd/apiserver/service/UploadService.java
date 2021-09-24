@@ -10,6 +10,8 @@ import com.udhd.apiserver.domain.upload.Upload;
 import com.udhd.apiserver.domain.upload.UploadRepository;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.upload.UploadWithGoogleDriveRequest;
+import java.net.URI;
+import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
@@ -158,15 +160,30 @@ public class UploadService {
         albumRepository.insert(album);
     }
 
+    private String getUrlWithoutParameters(String url) throws URISyntaxException {
+        URI uri = new URI(url);
+        return new URI(uri.getScheme(),
+            uri.getAuthority(),
+            uri.getPath(),
+            null, // Ignore the query part of the input url
+            uri.getFragment()).toString();
+    }
+
     Photo fetchOrCreatePhotoByUpload(Upload upload) {
         Photo photo = photoRepository.findByChecksum(upload.getChecksum())
             .orElseGet(() -> {
+                String url = upload.getS3Url();
+                try {
+                    url = getUrlWithoutParameters(upload.getS3Url());
+                } catch (URISyntaxException e) {
+                    log.error("upload parse url error ", e);
+                }
                 List<String> tags =  tagService.fetchTag(upload);
                 Photo newPhoto = Photo.builder()
                     .id(upload.getId())
                     .checksum(upload.getChecksum())
-                    .originalLink(upload.getS3Url())
-                    .thumbnailLink(upload.getS3Url())
+                    .originalLink(url)
+                    .thumbnailLink(url)
                     .uploaderId(upload.getUploaderId())
                     .tags(tags)
                     .build();
