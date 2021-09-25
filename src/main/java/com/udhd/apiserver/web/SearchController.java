@@ -47,12 +47,13 @@ public class SearchController {
     public List<PhotoOutlineDto> searchTag(
             @PathVariable String userId,
             @RequestParam(defaultValue = "") List<String> tags,
+            @RequestParam(defaultValue = "") String uploaderId,
             @RequestParam(defaultValue = "photoId") String sortBy,
             @RequestParam(required = false) String findAfter,
             @RequestParam(defaultValue = "21") Integer fetchSize) {
         SecurityUtils.checkUser(userId);
 
-        return photoService.findPhotos(tags, findAfter, fetchSize);
+        return photoService.findPhotos(tags, uploaderId, findAfter, fetchSize);
     }
 
     /**

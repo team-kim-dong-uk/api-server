@@ -39,20 +39,23 @@ public class PhotoService {
         return toPhotoDetailDto(photo);
     }
 
-    public List<PhotoOutlineDto> findPhotos(List<String> tags, String findAfterId, int fetchSize) {
+    public List<PhotoOutlineDto> findPhotos(List<String> tags, String uploaderId, String findAfterId, int fetchSize) {
         List<Photo> photos;
-        if (findAfterId == null) {
-            if (tags.size() == 0) {
-                photos = photoRepository.findAll();
-            } else {
-                photos = photoRepository.findAllByTagsIn(tags);
-            }
-        } else {
-            ObjectId findAfterObjectId = new ObjectId(findAfterId);
+        ObjectId findAfterObjectId = findAfterId == null
+                ? new ObjectId("000000000000000000000000") : new ObjectId(findAfterId);
+        if (uploaderId == null || uploaderId.equals("")) {
             if (tags.size() == 0) {
                 photos = photoRepository.findAllByIdAfter(findAfterObjectId);
             } else {
                 photos = photoRepository.findAllByTagsInAndIdAfter(tags, findAfterObjectId);
+            }
+        } else {
+            ObjectId uploaderObjectId = new ObjectId(uploaderId);
+            if (tags.size() == 0) {
+                photos = photoRepository.findAllByUploaderIdAndIdAfter(uploaderObjectId, findAfterObjectId);
+            } else {
+                photos = photoRepository.findAllByUploaderIdAndTagsInAndIdAfter(uploaderObjectId, tags,
+                        findAfterObjectId);
             }
         }
 

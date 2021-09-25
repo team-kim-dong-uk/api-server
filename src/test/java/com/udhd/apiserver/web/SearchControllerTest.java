@@ -133,7 +133,8 @@ public class SearchControllerTest {
                 SearchCandidateDto.fromTag(new Tag("오마이걸", 400)),
                 SearchCandidateDto.fromTag(new Tag("오마이걸시작태그", 100)),
                 SearchCandidateDto.fromTag(new Tag("포함오마이걸", 230)),
-                SearchCandidateDto.fromUser(User.builder().nickname("오마이걸시작닉네임").uploadCount(3).build())
+                SearchCandidateDto.fromUser(User.builder().nickname("오마이걸시작닉네임").id(new ObjectId(
+                        "60e2fea74c17cf5152fb5b78")).uploadCount(3).build())
         ));
 
         System.out.println(searchService.getRecommendedKeywords("오마이걸"));
@@ -154,7 +155,7 @@ public class SearchControllerTest {
         String userId = "123";
         List<String> tags = Arrays.asList("오마이걸", "1집");
 
-        given(photoService.findPhotos(tags, null, 21)).willReturn(Arrays.asList(mockPhotoOutlineDto));
+        given(photoService.findPhotos(tags, null, null, 21)).willReturn(Arrays.asList(mockPhotoOutlineDto));
 
         // when
         String requestUri = "/api/v1/users/" + userId + "/search?tags=오마이걸,1집&sortBy=random&fetchSize=21";
