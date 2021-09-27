@@ -86,13 +86,17 @@ public class QueryCommander {
         @Override
         public void execute(QueryResultDto _result) {
           result[0] = _result;
-          syncObject.notify();
+          synchronized (syncObject) {
+            syncObject.notify();
+          }
         }
 
         @Override
         public void fail(QueryResultDto _result) {
           result[0] = _result;
-          syncObject.notify();
+          synchronized (syncObject) {
+            syncObject.notify();
+          }
         }
       });
     } catch (Exception e) {
@@ -100,7 +104,9 @@ public class QueryCommander {
       return null;
     }
     try {
-      syncObject.wait(2 * timeoutDelay);
+      synchronized (syncObject) {
+        syncObject.wait(2 * timeoutDelay);
+      }
     } catch (InterruptedException e) {
       return null;
     }
