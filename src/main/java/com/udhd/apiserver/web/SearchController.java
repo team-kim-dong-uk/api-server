@@ -6,14 +6,11 @@ import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.service.SearchService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
-<<<<<<< HEAD
 import com.udhd.apiserver.web.dto.search.SearchCandidateDto;
-=======
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
->>>>>>> 3d830d6 (Implement searchPhoto related to kafka)
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
