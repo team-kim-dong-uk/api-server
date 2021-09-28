@@ -7,6 +7,7 @@ import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udhd.apiserver.domain.tag.Tag;
 import com.udhd.apiserver.domain.user.User;
+import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.service.SearchService;
 import com.udhd.apiserver.util.SecurityUtils;
@@ -57,11 +58,13 @@ public class SearchControllerTest {
     private PhotoService photoService;
     @MockBean
     private SearchService searchService;
+    @MockBean
+    private AlbumService albumService;
 
     protected MockMvc mockMvc;
 
     private final PhotoOutlineDto mockPhotoOutlineDto = PhotoOutlineDto.builder()
-            .photoId("60e2fea74c17cf5152fb5b78").thumbnailLink("http://link.com").build();
+            .photoId("6110066323a94f7c27f9cf4c").thumbnailLink("http://link.com").build();
 
     private MockedStatic<SecurityUtils> mockedSecurityUtils;
 
@@ -154,8 +157,12 @@ public class SearchControllerTest {
         // given
         String userId = "60e2fea74c17cf5152fb5b78";
         List<String> tags = Arrays.asList("오마이걸", "1집");
+        List<String> photoIds = Arrays.asList("6110066323a94f7c27f9cf4c");
 
-        given(photoService.findPhotos(tags, null, null, 21)).willReturn(Arrays.asList(mockPhotoOutlineDto));
+        given(photoService.findPhotos(tags, null, 21))
+            .willReturn(Arrays.asList(mockPhotoOutlineDto));
+        given(albumService.remainNotOwned(userId, photoIds))
+            .willReturn(photoIds);
 
         // when
         String requestUri = "/api/v1/users/" + userId + "/search?tags=오마이걸,1집&sortBy=random&fetchSize=21";

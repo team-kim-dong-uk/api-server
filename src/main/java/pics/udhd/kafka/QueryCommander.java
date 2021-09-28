@@ -101,7 +101,7 @@ public class QueryCommander {
         }
       });
     } catch (Exception e) {
-      log.info("kafka error", e);
+      log.info("kafka fail");
       return null;
     }
     try {

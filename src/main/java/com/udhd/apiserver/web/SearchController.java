@@ -12,12 +12,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users/{userId}/search")
 @RestController
@@ -59,13 +61,14 @@ public class SearchController {
         SecurityUtils.checkUser(userId);
 
         List<PhotoOutlineDto> fetchedData = photoService.findPhotos(tags, findAfter, fetchSize);
+
         List<String> notDuplicatedPhotoIds = albumService.remainNotOwned(userId,
             fetchedData.stream().map(PhotoOutlineDto::getPhotoId).collect(Collectors.toList())
         );
 
         Set<String> notDuplicatedPhotoIdsSet = new HashSet<>(notDuplicatedPhotoIds);
 
-        List<PhotoOutlineDto> retval = new ArrayList<PhotoOutlineDto>();
+        List<PhotoOutlineDto> retval = new ArrayList<>();
         for (PhotoOutlineDto photoOutlineDto : fetchedData) {
             if (notDuplicatedPhotoIdsSet.contains(photoOutlineDto.getPhotoId())) {
                 retval.add(photoOutlineDto);
@@ -89,7 +92,11 @@ public class SearchController {
             @PathVariable String photoId) {
         SecurityUtils.checkUser(userId);
 
-        albumService.remainNotOwned(userId, Arrays.asList(photoId));
+        try {
+            albumService.remainNotOwned(userId, Arrays.asList(photoId));
+        } catch (Exception e) {
+            log.info("error", e);
+        }
         return mockSearchResults;
     }
 }
