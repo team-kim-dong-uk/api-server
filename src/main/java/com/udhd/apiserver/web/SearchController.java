@@ -1,11 +1,19 @@
 package com.udhd.apiserver.web;
 
 import com.udhd.apiserver.domain.tag.TagRepository;
+import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.service.SearchService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
+<<<<<<< HEAD
 import com.udhd.apiserver.web.dto.search.SearchCandidateDto;
+=======
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+>>>>>>> 3d830d6 (Implement searchPhoto related to kafka)
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +25,10 @@ import java.util.List;
 @RequestMapping("/api/v1/users/{userId}/search")
 @RestController
 public class SearchController {
+    private final AlbumService albumService;
     private final PhotoService photoService;
     private final SearchService searchService;
+
     private final List<PhotoOutlineDto> mockSearchResults
             = Arrays.asList(PhotoOutlineDto.builder()
                                     .photoId("456")
@@ -53,7 +63,21 @@ public class SearchController {
             @RequestParam(defaultValue = "21") Integer fetchSize) {
         SecurityUtils.checkUser(userId);
 
-        return photoService.findPhotos(tags, uploaderId, findAfter, fetchSize);
+        List<PhotoOutlineDto> fetchedData = photoService.findPhotos(tags, findAfter, fetchSize);
+        List<String> notDuplicatedPhotoIds = albumService.remainNotOwned(userId,
+            fetchedData.stream().map(PhotoOutlineDto::getPhotoId).collect(Collectors.toList())
+        );
+
+        Set<String> notDuplicatedPhotoIdsSet = new HashSet<>(notDuplicatedPhotoIds);
+
+        List<PhotoOutlineDto> retval = new ArrayList<PhotoOutlineDto>();
+        for (PhotoOutlineDto photoOutlineDto : fetchedData) {
+            if (notDuplicatedPhotoIdsSet.contains(photoOutlineDto.getPhotoId())) {
+                retval.add(photoOutlineDto);
+            }
+        }
+
+        return retval;
     }
 
     /**
@@ -70,6 +94,7 @@ public class SearchController {
             @PathVariable String photoId) {
         SecurityUtils.checkUser(userId);
 
+        albumService.remainNotOwned(userId, Arrays.asList(photoId));
         return mockSearchResults;
     }
 }

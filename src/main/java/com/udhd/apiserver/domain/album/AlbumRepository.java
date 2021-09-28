@@ -14,4 +14,5 @@ public interface AlbumRepository extends MongoRepository<Album, ObjectId> {
     List<Album> findAllByUserIdAndIdAfter(Object userId, ObjectId findAfter);
     List<Album> findAllByUserIdAndTagsIn(ObjectId userId, List<String> tags);
     List<Album> findAllByUserIdAndTagsInAndIdAfter(ObjectId userId, List<String> tags, ObjectId findAfter);
+    List<Album> findAllByUserIdAndPhotoIdIn(ObjectId userId, List<ObjectId> photoIds);
 }
