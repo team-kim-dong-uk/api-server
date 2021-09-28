@@ -32,7 +32,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
-import pics.udhd.kafka.TagCommander;
 
 @RequiredArgsConstructor
 @Service
@@ -69,6 +68,7 @@ public class UploadService {
                                 .pollingKey(pollingKey)
                                 .uploaderId(uploaderId)
                                 .fileId(fileId)
+                                .uploaderId(uploaderId)
                                 .status(Upload.STATUS_UPLOADING)
                                 .build())
                 .collect(Collectors.toList());

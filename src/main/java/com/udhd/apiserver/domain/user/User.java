@@ -1,12 +1,15 @@
 package com.udhd.apiserver.domain.user;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
@@ -24,6 +27,10 @@ public class User {
   private String group;
   private String refreshToken;
   private int uploadCount;
+  @CreatedDate
+  private LocalDateTime createdDate;
+  @LastModifiedDate
+  private LocalDateTime modifiedDate;
 
   public void setNickname(String nickname) {
     this.nickname = nickname;
