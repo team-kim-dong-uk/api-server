@@ -53,7 +53,7 @@ public class SearchController {
             @RequestParam(defaultValue = "21") Integer fetchSize) {
         SecurityUtils.checkUser(userId);
 
-        List<PhotoOutlineDto> fetchedData = photoService.findPhotos(tags, findAfter, fetchSize);
+        List<PhotoOutlineDto> fetchedData = photoService.findPhotos(tags, uploaderId, findAfter, fetchSize);
 
         List<String> notDuplicatedPhotoIds = searchService.remainNotOwned(userId,
             fetchedData.stream().map(PhotoOutlineDto::getPhotoId).collect(Collectors.toList())
