@@ -85,7 +85,6 @@ public class PhotoService {
                 .photoId(photo.getId().toString())
                 .uploaderId(photo.getUploaderId().toString())
                 .uploaderNickname("가짜닉")    // TODO
-                .favouriteCount(1)  // TODO
                 .originalLink(photo.getOriginalLink())
                 .uploadedAt(photo.getId().getDate())
                 .tags(photo.getTags())

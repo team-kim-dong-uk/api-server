@@ -41,7 +41,6 @@ public class AlbumService {
                 .userId(userObjectId)
                 .photoId(photoObjectId)
                 .thumbnailLink(photo.getThumbnailLink())
-                .favourite(false)
                 .lastViewed(new Date())
                 .tags(photo.getTags())
                 .build();
@@ -102,31 +101,6 @@ public class AlbumService {
     }
 
     /**
-     * 저장한 사진의 즐겨찾기 여부 변경
-     *
-     * @param userId    the user id
-     * @param albumId   the album id
-     * @param favourite the favourite
-     * @return the album detail dto
-     * @throws AlbumNotFoundException the album not found exception
-     * @throws PhotoNotFoundException the photo not found exception
-     */
-    public AlbumDetailDto updateAlbumFavourite(String userId, String albumId, Boolean favourite)
-            throws AlbumNotFoundException, PhotoNotFoundException{
-        ObjectId albumObjectId = new ObjectId(albumId);
-
-        Album album = albumRepository.findById(albumObjectId)
-                .orElseThrow(() -> new AlbumNotFoundException(albumObjectId));
-        Photo photo = photoRepository.findById(album.getPhotoId())
-                .orElseThrow(() -> new PhotoNotFoundException(album.getPhotoId()));
-
-        album.setFavourite(favourite);
-        albumRepository.save(album);
-
-        return toAlbumDetailDto(album, photo);
-    }
-
-    /**
      * 저장한 사진의 태그 정보 변경.
      * userId가 업로드한 사진일 경우, 다른 유저들의 검색 결과에도 반영된다.
      *
@@ -179,9 +153,7 @@ public class AlbumService {
                 .albumId(album.getId().toString())
                 .uploaderId(photo.getUploaderId().toString())
                 .uploaderNickname("가짜닉")    // TODO
-                .favouriteCount(1)  // TODO
                 .originalLink(photo.getOriginalLink())
-                .favourite(album.getFavourite())
                 .savedAt(album.getId().getDate())
                 .tags(album.getTags())
                 .build();

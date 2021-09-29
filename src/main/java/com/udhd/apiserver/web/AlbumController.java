@@ -57,7 +57,6 @@ public class AlbumController {
      * @param tags           검색 태그 목록
      * @param sortBy         정렬 기준
      * @param uploadedOnly   true이면 내가 업로드한 사진만, false면 업로드/저장한 사진을 모두 보여줌
-     * @param favouriteFirst 즐겨찾기 사진들을 먼저 보여줄지 여부
      * @param findAfter      지난번 검색결과의 가장 마지막 원소의 id. 이 원소 다음부터 찾기 시작한다. null이면 처음부터 찾는다.
      * @param fetchSize       the fetch size
      * @return the list
@@ -69,31 +68,11 @@ public class AlbumController {
             @RequestParam(defaultValue = "") List<String> tags,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "false") Boolean uploadedOnly,
-            @RequestParam(defaultValue = "true") Boolean favouriteFirst,
             @RequestParam(required = false) String findAfter,
             @RequestParam(defaultValue = "21") Integer fetchSize) {
         SecurityUtils.checkUser(userId);
 
         return albumService.findAlbums(userId, tags, findAfter, fetchSize);
-    }
-
-    /**
-     * 앨범 사진 즐겨찾기 여부를 업데이트한다.
-     *
-     * @param userId                  the user id
-     * @param albumId                 the album id
-     * @param updateFavouriteRequest the update favourite request
-     * @return the album photo detail response
-     */
-    @PatchMapping("/{albumId}/favourite")
-    @ResponseStatus(HttpStatus.OK)
-    public AlbumDetailDto updateAlbumFavourite(
-            @PathVariable String userId,
-            @PathVariable String albumId,
-            @RequestBody @Valid UpdateFavouriteRequest updateFavouriteRequest) {
-        SecurityUtils.checkUser(userId);
-
-        return albumService.updateAlbumFavourite(userId, albumId, updateFavouriteRequest.getFavourite());
     }
 
     /**

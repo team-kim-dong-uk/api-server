@@ -22,10 +22,6 @@ public class PhotoDetailDto {
      */
     private String uploaderNickname;
     /**
-     * 해당 사진을 즐겨찾기에 등록한 사람 수
-     */
-    private Integer favouriteCount;
-    /**
      * 원본사진 링크
      */
     private String originalLink;

@@ -70,8 +70,6 @@ public class AlbumControllerTest {
             .uploaderId("123")
             .uploaderNickname("업로더")
             .originalLink("http://link.com/456")
-            .favourite(true)
-            .favouriteCount(532)
             .savedAt(new Date())
             .tags(Arrays.asList("오마이걸", "멤버1", "1집"))
             .build();
@@ -192,31 +190,10 @@ public class AlbumControllerTest {
                 mockAlbumOutlineDto));
 
         // when
-        String requestUri = "/api/v1/users/" + userId + "/album?tags=오마이걸,1집&favouriteFirst" +
-                "=true&sortBy=id&fetchSize=21";
+        String requestUri = "/api/v1/users/" + userId + "/album?tags=오마이걸,1집&" +
+                "sortBy=id&fetchSize=21";
         ResultActions actions = mockMvc
                 .perform(get(requestUri).with(userToken()));
-
-        // then
-        actions
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void updateAlbumFavourite() throws Exception {
-        // given
-        String userId = "123";
-        String albumId = "456";
-        String updateAlbumFavouriteRequest = "{\"favourite\" : true}";
-
-        given(albumService.updateAlbumFavourite(userId, albumId, true)).willReturn(mockAlbumDetailDto);
-
-        // when
-        String requestUri = "/api/v1/users/" + userId + "/album/" + albumId + "/favourite";
-        ResultActions actions = mockMvc
-                .perform(patch(requestUri).with(userToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(updateAlbumFavouriteRequest));
 
         // then
         actions

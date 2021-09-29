@@ -53,7 +53,6 @@ public class PhotoControllerTest {
             .uploaderId("123")
             .uploaderNickname("업로더")
             .originalLink("http://link.com/456")
-            .favouriteCount(532)
             .uploadedAt(new Date())
             .tags(Arrays.asList("오마이걸", "멤버1", "1집", "210701"))
             .build();

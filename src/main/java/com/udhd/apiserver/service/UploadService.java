@@ -138,7 +138,6 @@ public class UploadService {
                 photo.getTags() : upload.getTags();
         Album album = Album.builder()
                 .tags(tags)
-                .favourite(false)
                 .thumbnailLink(photo.getThumbnailLink())
                 .lastViewed(new Date())
                 .photoId(photo.getId())

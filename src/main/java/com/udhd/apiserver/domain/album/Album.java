@@ -23,13 +23,9 @@ public class Album {
     private ObjectId userId;
     private ObjectId photoId;
     private String thumbnailLink;
-    private Boolean favourite;
     private Date lastViewed;
     private List<String> tags;
 
-    public void setFavourite(Boolean favourite) {
-        this.favourite = favourite;
-    }
 
     public void setTags(List<String> tags) {
         this.tags = tags;
