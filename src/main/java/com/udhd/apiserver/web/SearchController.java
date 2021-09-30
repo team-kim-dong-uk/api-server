@@ -52,21 +52,30 @@ public class SearchController {
             @RequestParam(required = false) String findAfter,
             @RequestParam(defaultValue = "21") Integer fetchSize) {
         SecurityUtils.checkUser(userId);
-
-        List<PhotoOutlineDto> fetchedData = photoService.findPhotos(tags, uploaderId, findAfter, fetchSize);
-
-        List<String> notDuplicatedPhotoIds = searchService.remainNotOwned(userId,
-            fetchedData.stream().map(PhotoOutlineDto::getPhotoId).collect(Collectors.toList())
-        );
-
-        Set<String> notDuplicatedPhotoIdsSet = new HashSet<>(notDuplicatedPhotoIds);
-
         List<PhotoOutlineDto> retval = new ArrayList<>();
-        for (PhotoOutlineDto photoOutlineDto : fetchedData) {
-            if (notDuplicatedPhotoIdsSet.contains(photoOutlineDto.getPhotoId())) {
-                retval.add(photoOutlineDto);
+
+        // 원하는 크기가 될때까지 데이터를 가져온다.
+        while (retval.size() < fetchSize) {
+            List<PhotoOutlineDto> fetchedData = photoService
+                .findPhotos(tags, uploaderId, findAfter, fetchSize);
+
+            if (fetchedData.isEmpty())
+                break;
+
+            List<String> notDuplicatedPhotoIds = searchService.remainNotOwned(userId,
+                fetchedData.stream().map(PhotoOutlineDto::getPhotoId).collect(Collectors.toList())
+            );
+
+            Set<String> notDuplicatedPhotoIdsSet = new HashSet<>(notDuplicatedPhotoIds);
+
+            for (PhotoOutlineDto photoOutlineDto : fetchedData) {
+                if (notDuplicatedPhotoIdsSet.contains(photoOutlineDto.getPhotoId())) {
+                    retval.add(photoOutlineDto);
+                }
             }
         }
+        // trim Data for afterId
+        retval.subList(0, Math.min(fetchSize, retval.size()));
 
         return retval;
     }

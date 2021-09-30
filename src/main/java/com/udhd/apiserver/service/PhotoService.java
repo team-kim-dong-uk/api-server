@@ -142,7 +142,7 @@ public class PhotoService {
         List<PhotoOutlineDto> retval = new ArrayList<>();
         photoRepository.findAllById(photoIds).forEach(photo -> {
             retval.add(PhotoOutlineDto.builder()
-                .photoId(photo.getId().toHexString())
+                .photoId(photo.getId().toString())
                 .thumbnailLink(photo.getThumbnailLink())
                 .build());
         });
