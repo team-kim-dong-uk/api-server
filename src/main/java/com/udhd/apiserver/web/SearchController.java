@@ -61,6 +61,7 @@ public class SearchController {
 
             if (fetchedData.isEmpty())
                 break;
+            findAfter = fetchedData.get(fetchedData.size() - 1).getPhotoId();
 
             List<String> notDuplicatedPhotoIds = searchService.remainNotOwned(userId,
                 fetchedData.stream().map(PhotoOutlineDto::getPhotoId).collect(Collectors.toList())
