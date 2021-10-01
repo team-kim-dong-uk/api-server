@@ -64,13 +64,13 @@ public class PhotoService {
         Stream<Photo> photos;
 
         /* 1. create query parameter */
-        ObjectId uploaderObjectId = StringUtils.isNullOrEmpty(uploaderId) && ObjectId.isValid(uploaderId)
+        ObjectId uploaderObjectId = StringUtils.isNullOrEmpty(uploaderId) || !ObjectId.isValid(uploaderId)
             ? null
             : new ObjectId(uploaderId);
         Sort sort = StringUtils.isNullOrEmpty(sortBy)
             ? Sort.by(Photo.DEFAULT_SORT)
             : Sort.by(sortBy);
-        ObjectId findAfterObjectId = StringUtils.isNullOrEmpty(findAfterId) && ObjectId.isValid(findAfterId)
+        ObjectId findAfterObjectId = StringUtils.isNullOrEmpty(findAfterId) || !ObjectId.isValid(findAfterId)
             ? new ObjectId(Photo.HEAD_ID)
             : new ObjectId(findAfterId);
 
