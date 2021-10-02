@@ -65,7 +65,7 @@ public class UploadController {
       try {
           uploadService.confirmUpload(pollingKey, checksum);
       } catch (Exception e) {
-          log.info("failed to mark pollingKey : " + pollingKey + " checksum : " + checksum);
+          log.info("failed to mark pollingKey : " + pollingKey + " checksum : " + checksum, e);
       }
       return getProgress(pollingKey);
     }
