@@ -10,6 +10,7 @@ import com.udhd.apiserver.domain.upload.Upload;
 import com.udhd.apiserver.domain.upload.UploadRepository;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.upload.UploadWithGoogleDriveRequest;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
@@ -191,7 +192,12 @@ public class UploadService {
                 } catch (URISyntaxException e) {
                     log.error("upload parse url error ", e);
                 }
-                List<String> tags =  tagService.recommendTags(url);
+                List<String> tags = null;
+                try {
+                    tags = tagService.recommendTags(new URL(url));
+                } catch (MalformedURLException e) {
+                    log.info("url is malformed", e);
+                }
                 Photo newPhoto = Photo.builder()
                     .id(upload.getId())
                     .checksum(upload.getChecksum())
@@ -241,7 +247,6 @@ public class UploadService {
      *   i번째 사진이 새 사진인 경우 presigned url이고,
      *   i번째 사진이 기존에 있던 사진인 경우 null 이다.
      *
-     * @param checksums the checksums
      * @return the pre signed urls
      */
     public void fillPresignedUrl(List<Upload> uploads) {
