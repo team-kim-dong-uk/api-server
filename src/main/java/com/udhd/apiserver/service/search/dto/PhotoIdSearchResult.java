@@ -39,8 +39,9 @@ public class PhotoIdSearchResult implements SearchResult {
     if (_query instanceof PhotoIdSearchQuery) {
       PhotoIdSearchQuery query = (PhotoIdSearchQuery) _query;
       photoIds.addAll(query.photoIds);
+    } else {
+      throw new IllegalArgumentException("Unsupported type for PhotoIdSearchQuery");
     }
-    throw new IllegalArgumentException("Unsupported type for PhotoIdSearchQuery");
   }
 
   @Override

@@ -40,8 +40,9 @@ public class URLSearchResult implements SearchResult {
     if (_query instanceof URLSearchQuery) {
       URLSearchQuery query = (URLSearchQuery) _query;
       queryUrls.addAll(query.urls);
+    } else {
+      throw new IllegalArgumentException("Unsupported type for URLSearchResult");
     }
-    throw new IllegalArgumentException("Unsupported type for URLSearchResult");
   }
 
   @Override
