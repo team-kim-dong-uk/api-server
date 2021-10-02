@@ -191,7 +191,7 @@ public class UploadService {
                 } catch (URISyntaxException e) {
                     log.error("upload parse url error ", e);
                 }
-                List<String> tags =  tagService.fetchTag(upload);
+                List<String> tags =  tagService.recommendTags(url);
                 Photo newPhoto = Photo.builder()
                     .id(upload.getId())
                     .checksum(upload.getChecksum())

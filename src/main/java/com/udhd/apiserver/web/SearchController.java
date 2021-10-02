@@ -1,14 +1,10 @@
 package com.udhd.apiserver.web;
 
 import com.udhd.apiserver.service.PhotoService;
-import com.udhd.apiserver.service.SearchService;
+import com.udhd.apiserver.service.search.SearchService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import com.udhd.apiserver.web.dto.search.SearchCandidateDto;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

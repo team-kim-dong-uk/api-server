@@ -1,4 +1,4 @@
-package com.udhd.apiserver.service;
+package com.udhd.apiserver.service.search;
 
 import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.photo.Photo;
@@ -6,8 +6,15 @@ import com.udhd.apiserver.domain.tag.Tag;
 import com.udhd.apiserver.domain.tag.TagRepository;
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.domain.user.UserRepository;
+import com.udhd.apiserver.service.AlbumService;
+import com.udhd.apiserver.service.PhotoService;
+import com.udhd.apiserver.service.search.dto.SearchQuery;
+import com.udhd.apiserver.service.search.dto.SearchQueryFactory;
+import com.udhd.apiserver.service.search.dto.SearchResult;
+import com.udhd.apiserver.service.search.dto.SearchResultFactory;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import com.udhd.apiserver.web.dto.search.SearchCandidateDto;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import pics.udhd.kafka.QueryCommander;
-import pics.udhd.kafka.dto.PhotoDto;
 import pics.udhd.kafka.dto.QueryResultDto;
 
 @RequiredArgsConstructor
@@ -71,44 +77,20 @@ public class SearchService {
    * @param photoIds : 사진의 ObjectId의 String 값
    * @return : (PhotoId, PhotoIds) 로 구성되는 Map
    */
-  private Map<String, List<String>> searchSimilarPhotos(List<String> photoIds) {
+  public SearchResult searchSimilarPhotos(SearchQuery query) {
     QueryResultDto searched = null;
+    SearchResult result = SearchResultFactory.generate(query);
     try {
-      searched = queryCommander.search(photoIds.stream()
-          .map(photoId -> PhotoDto.builder()
-              .photoId(photoId)
-              .build())
-          .collect(Collectors.toList()));
+      searched = queryCommander.search(query.getPhotoDtos());
     } catch (Exception e) {
       log.info("queryCommander has created exception", e);
     }
 
-    // 지금 상황에서 아무것도 파악하지 못할때,
-    // 단순히 자기 자신을 유사한 이미지라고 하고 반환시켜준다.
-    // 최소한 유사한 이미지가 본인은 있다는 전제를 유지함으로써 이 함수를 호출하는 쪽에서
-    // 미정의 행동을 하지 않도록 한다.
-    if (searched == null) {
-      Map<String, List<String>> retval = new HashMap<>();
-      photoIds.forEach(photoId -> {
-        retval.put(photoId, Collections.singletonList(photoId));
-      });
-      return retval;
+    if (searched != null) {
+      searched.getValue().forEach(result::setSimilarPhotoIds);
     }
 
-    Map<String, List<String>> retval = new HashMap<>();
-    searched.getValue().forEach((key, value) -> {
-      // TODO : Photo 객체를 키로 재활용
-      // TODO : 지금은 그냥 객체 탐색해서 일일이 비교 연산하지만, 이럴게 아니라 다른 방식으로 조회해야함.
-      List<String> matched = photoIds.stream().filter(photo -> photo.equals(key))
-          .collect(Collectors.toList());
-      if (matched.isEmpty()) {
-        return;
-      }
-      // PhotoId만 가지고 있는 객체에서 변경
-      retval.put(matched.get(0), value);
-    });
-
-    return retval;
+    return result;
   }
 
   public List<String> searchSimilarPhotoNoOwned(String userId, String photoId) {
@@ -125,8 +107,9 @@ public class SearchService {
   }
 
   public List<String> searchSimilarPhoto(String photoId) {
-    Map<String, List<String>> searched = searchSimilarPhotos(Collections.singletonList(photoId));
-    return searched.get(photoId);
+    SearchQuery searchQuery = SearchQueryFactory.generatePhotoIdQuery(Collections.singletonList(photoId));
+    SearchResult searched = searchSimilarPhotos(searchQuery);
+    return searched.getSimilarPhotoIds(photoId);
   }
 
   public List<String> searchSimilarPhoto(Photo photo) {
@@ -138,21 +121,23 @@ public class SearchService {
     Set<String> retval = new HashSet<>(photoIds);
 
     /* 비슷한 이미지 photoId를 모두 가져온다. */
-    Map<String, List<String>> searched = searchSimilarPhotos(photoIds);
+    SearchQuery searchQuery = SearchQueryFactory.generatePhotoIdQuery(photoIds);
+    SearchResult searched = searchSimilarPhotos(searchQuery);
 
     /* 역으로 참조해야하기 때문에 이를 위한 Mapping Table을 만든다. */
     Map<ObjectId, String> reverseMap = new HashMap<>();
-    List<ObjectId> searchQuery = new ArrayList<>();
+    List<ObjectId> flattenSimilarPhotos = new ArrayList<>();
 
-    searched.forEach((key, value) -> {
-      value.forEach((elem) -> {
-        ObjectId e = new ObjectId(elem);
-        reverseMap.put(e, key);
-        searchQuery.add(e);
+    photoIds.forEach(photoId -> {
+      List<String> similarPhotos = searched.getSimilarPhotoIds(photoId);
+      similarPhotos.forEach(similarPhotoId -> {
+        ObjectId e = new ObjectId(similarPhotoId);
+        reverseMap.put(e, photoId);
+        flattenSimilarPhotos.add(e);
       });
     });
 
-    List<Album> alreadyHas = albumService.findAllByUserIdAndPhotoIdIn(userId, searchQuery);
+    List<Album> alreadyHas = albumService.findAllByUserIdAndPhotoIdIn(userId, flattenSimilarPhotos);
     for (Album album : alreadyHas) {
       String containedPhotoId = reverseMap.get(album.getPhotoId());
       /* Don't have to check that it contains photoId. remove() is ignore it. */

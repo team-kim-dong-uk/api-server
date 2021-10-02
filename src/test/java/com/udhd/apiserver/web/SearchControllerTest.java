@@ -9,7 +9,7 @@ import com.udhd.apiserver.domain.tag.Tag;
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.PhotoService;
-import com.udhd.apiserver.service.SearchService;
+import com.udhd.apiserver.service.search.SearchService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import com.udhd.apiserver.web.dto.search.SearchCandidateDto;
