@@ -36,11 +36,11 @@ public class PhotoIdSearchResult implements SearchResult {
 
   @Override
   public void setQuery(SearchQuery _query) {
-    if (_query instanceof URLSearchQuery) {
-      URLSearchQuery query = (URLSearchQuery) _query;
-      photoIds.addAll(query.urls);
+    if (_query instanceof PhotoIdSearchQuery) {
+      PhotoIdSearchQuery query = (PhotoIdSearchQuery) _query;
+      photoIds.addAll(query.photoIds);
     }
-    throw new IllegalArgumentException("Unsupported type for URLSearchResult");
+    throw new IllegalArgumentException("Unsupported type for PhotoIdSearchQuery");
   }
 
   @Override
