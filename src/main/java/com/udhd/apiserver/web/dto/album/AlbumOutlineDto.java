@@ -7,6 +7,10 @@ import lombok.Getter;
 @Builder
 public class AlbumOutlineDto {
     /**
+     * 저장된 앨범의 id
+     */
+    private String albumId;
+    /**
      * 저장된 사진의 id
      */
     private String photoId;

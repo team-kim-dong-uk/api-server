@@ -14,6 +14,10 @@ import java.util.List;
 @AllArgsConstructor
 public class AlbumDetailDto {
     /**
+     * 저장한 앨범의 id
+     */
+    private String albumId;
+    /**
      * 저장한 사진의 id
      */
     private String photoId;

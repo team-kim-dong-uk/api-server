@@ -84,7 +84,7 @@ public class AlbumService {
 
     public Album getAlbumDetail(String userId, String photoId){
         ObjectId objectPhotoId = new ObjectId(photoId);
-        return albumRepository.findByIdAndPhotoId(new ObjectId(userId), objectPhotoId)
+        return albumRepository.findByUserIdAndPhotoId(new ObjectId(userId), objectPhotoId)
                 .orElseThrow(() -> new AlbumNotFoundException(objectPhotoId));
     }
 
@@ -138,7 +138,8 @@ public class AlbumService {
 
     private AlbumDetailDto toAlbumDetailDto(Album album, Photo photo) {
         return AlbumDetailDto.builder()
-                .photoId(album.getId().toString())
+                .albumId(album.getId().toString())
+                .photoId(photo.getId().toString())
                 .uploaderId(photo.getUploaderId().toString())
                 .uploaderNickname("가짜닉")    // TODO
                 .originalLink(photo.getOriginalLink())
@@ -149,7 +150,8 @@ public class AlbumService {
 
     private AlbumOutlineDto toAlbumOutlineDto(Album album) {
         return AlbumOutlineDto.builder()
-                .photoId(album.getId().toString())
+                .albumId(album.getId().toString())
+                .photoId(album.getPhotoId().toString())
                 .thumbnailLink(album.getThumbnailLink())
                 .build();
     }
