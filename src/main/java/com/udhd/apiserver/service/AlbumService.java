@@ -50,24 +50,6 @@ public class AlbumService {
         return toAlbumDetailDto(album, photo);
     }
 
-    /**
-     * Gets album detail.
-     *
-     * @param albumId the album id
-     * @return the album detail
-     * @throws AlbumNotFoundException the album not found exception
-     * @throws PhotoNotFoundException the photo not found exception
-     */
-    public AlbumDetailDto getAlbumDetail(String albumId) throws AlbumNotFoundException, PhotoNotFoundException{
-        ObjectId albumObjectId = new ObjectId(albumId);
-
-        Album album = albumRepository.findById(albumObjectId)
-                .orElseThrow(() -> new AlbumNotFoundException(albumObjectId));
-        Photo photo = photoRepository.findById(album.getPhotoId())
-                .orElseThrow(() -> new PhotoNotFoundException(album.getPhotoId()));
-
-        return toAlbumDetailDto(album, photo);
-    }
 
     /**
      * Find albums list.
@@ -98,6 +80,12 @@ public class AlbumService {
         return albums.stream().limit(fetchSize)
                 .map(album -> toAlbumOutlineDto(album))
                 .collect(Collectors.toList());
+    }
+
+    public Album getAlbumDetail(String userId, String photoId){
+        ObjectId objectPhotoId = new ObjectId(photoId);
+        return albumRepository.findByIdAndPhotoId(new ObjectId(userId), objectPhotoId)
+                .orElseThrow(() -> new AlbumNotFoundException(objectPhotoId));
     }
 
     /**
@@ -150,7 +138,7 @@ public class AlbumService {
 
     private AlbumDetailDto toAlbumDetailDto(Album album, Photo photo) {
         return AlbumDetailDto.builder()
-                .albumId(album.getId().toString())
+                .photoId(album.getId().toString())
                 .uploaderId(photo.getUploaderId().toString())
                 .uploaderNickname("가짜닉")    // TODO
                 .originalLink(photo.getOriginalLink())
@@ -161,7 +149,7 @@ public class AlbumService {
 
     private AlbumOutlineDto toAlbumOutlineDto(Album album) {
         return AlbumOutlineDto.builder()
-                .albumId(album.getId().toString())
+                .photoId(album.getId().toString())
                 .thumbnailLink(album.getThumbnailLink())
                 .build();
     }

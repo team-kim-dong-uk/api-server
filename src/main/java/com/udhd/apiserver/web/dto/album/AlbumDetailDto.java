@@ -16,7 +16,7 @@ public class AlbumDetailDto {
     /**
      * 저장한 사진의 id
      */
-    private String albumId;
+    private String photoId;
     /**
      * 사진 업로더 id
      */

@@ -1,18 +1,19 @@
 package com.udhd.apiserver.service;
 
+import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.domain.photo.PhotoRepository;
-import com.udhd.apiserver.domain.user.User;
-import com.udhd.apiserver.domain.user.UserRepository;
-import com.udhd.apiserver.exception.EntityNotFoundException;
+import com.udhd.apiserver.exception.album.AlbumNotFoundException;
 import com.udhd.apiserver.exception.photo.PhotoNotFoundException;
 import com.udhd.apiserver.web.dto.photo.PhotoDetailDto;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -21,22 +22,38 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class PhotoService {
+
+    private AlbumService albumService;
     private final PhotoRepository photoRepository;
+
+    @Autowired
+    PhotoService(AlbumService albumService, PhotoRepository photoRepository){
+        this.albumService = albumService;
+        this.photoRepository = photoRepository;
+    }
 
     /**
      * Gets photo detail.
      *
      * @param photoId the photo id
-     * @return the photo detail
+     * @param userId the user id
+     * @return the photo detail included album data
      * @throws PhotoNotFoundException the photo not found exception
      */
-    public PhotoDetailDto getPhotoDetail(String photoId) throws PhotoNotFoundException {
+    public PhotoDetailDto getPhotoDetail(String userId, String photoId) throws PhotoNotFoundException {
         ObjectId photoObjectId = new ObjectId(photoId);
 
         Photo photo = photoRepository.findById(photoObjectId)
-                        .orElseThrow(() -> new PhotoNotFoundException(photoObjectId));
+                .orElseThrow(() -> new PhotoNotFoundException(photoObjectId));
 
-        return toPhotoDetailDto(photo);
+        Album album;
+        try {
+            album = albumService.getAlbumDetail(userId, photoId);
+        } catch (AlbumNotFoundException e) {
+            return toPhotoDetailDto(photo);
+        }
+
+        return toPhotoDetailDtoWithAlbum(photo, album);
     }
 
     public List<PhotoOutlineDto> findPhotos(List<String> tags, String uploaderId, String findAfterId, int fetchSize) {
@@ -91,10 +108,29 @@ public class PhotoService {
                 .build();
     }
 
+    private PhotoDetailDto toPhotoDetailDtoWithAlbum(Photo photo, Album album) {
+        PhotoDetailDto photoDetailDto = toPhotoDetailDto(photo);
+        photoDetailDto.setTags(album.getTags());
+        photoDetailDto.setSavedAt(album.getId().getDate());
+        return photoDetailDto;
+    }
+
     private PhotoOutlineDto toPhotoOutlineDto(Photo photo) {
         return PhotoOutlineDto.builder()
                 .photoId(photo.getId().toString())
                 .thumbnailLink(photo.getThumbnailLink())
                 .build();
+    }
+    private static <T> Collector<T, ?, T> toSingle() {
+        return Collectors.collectingAndThen(
+                Collectors.toList(),
+                list -> {
+                    try {
+                        return list.get(0);
+                    } catch (IndexOutOfBoundsException e) {
+                        return null;
+                    }
+                }
+        );
     }
 }

@@ -30,6 +30,8 @@ import java.util.Date;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(RestDocumentationExtension.class)
@@ -129,7 +131,7 @@ public class PhotoControllerTest {
         // given
         String photoId = "456";
 
-        given(photoService.getPhotoDetail(photoId)).willReturn(mockPhotoDetailDto);
+        given(photoService.getPhotoDetail(null, photoId)).willReturn(mockPhotoDetailDto);
         // when
         String requestUri = "/api/v1/photos/"+photoId;
         ResultActions actions = mockMvc
@@ -137,7 +139,29 @@ public class PhotoControllerTest {
 
         // then
         actions
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("userId").doesNotExist())
+
+        ;
+    }
+
+    @Test
+    void detailPhotoByUserId() throws Exception {
+        // given
+        String photoId = "456";
+        String userId = "123";
+
+        given(photoService.getPhotoDetail(userId, photoId)).willReturn(mockPhotoDetailDto);
+        // when
+        String requestUri = "/api/v1/photos/"+photoId+"?users="+userId;
+        ResultActions actions = mockMvc
+                .perform(get(requestUri));
+
+        // then
+        actions
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
 }

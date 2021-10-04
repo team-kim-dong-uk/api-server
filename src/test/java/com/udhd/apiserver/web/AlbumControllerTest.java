@@ -66,7 +66,7 @@ public class AlbumControllerTest {
 
     private final AlbumDetailDto mockAlbumDetailDto
             = AlbumDetailDto.builder()
-            .albumId("456")
+            .photoId("456")
             .uploaderId("123")
             .uploaderNickname("업로더")
             .originalLink("http://link.com/456")
@@ -76,7 +76,7 @@ public class AlbumControllerTest {
 
     private final AlbumOutlineDto mockAlbumOutlineDto
             = AlbumOutlineDto.builder()
-            .albumId("456")
+            .photoId("456")
             .thumbnailLink("http://link.com/456")
             .build();
 
@@ -162,23 +162,6 @@ public class AlbumControllerTest {
                 .andExpect(status().isCreated());
     }
 
-    @Test
-    void detailAlbum() throws Exception {
-        // given
-        String userId = "123";
-        String albumId = "456";
-
-        given(albumService.getAlbumDetail(albumId)).willReturn(mockAlbumDetailDto);
-
-        // when
-        String requestUri = "/api/v1/users/" + userId + "/album/" + albumId;
-        ResultActions actions = mockMvc
-                .perform(get(requestUri).with(userToken()));
-
-        // then
-        actions
-                .andExpect(status().isOk());
-    }
 
     @Test
     void listAlbum() throws Exception {

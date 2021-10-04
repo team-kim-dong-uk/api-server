@@ -33,22 +33,6 @@ public class AlbumController {
         return albumService.saveAlbum(userId, newAlbumRequest.getPhotoId());
     }
 
-    /**
-     * 앨범 사진의 상세정보를 반환한다.
-     *
-     * @param userId  the user id
-     * @param albumId the album id
-     * @return the album photo detail response
-     */
-    @GetMapping("/{albumId}")
-    @ResponseStatus(HttpStatus.OK)
-    public AlbumDetailDto detailAlbum(
-            @PathVariable String userId,
-            @PathVariable String albumId) {
-        SecurityUtils.checkUser(userId);
-
-        return albumService.getAlbumDetail(albumId);
-    }
 
     /**
      * 내 앨범 사진 리스트. TODO

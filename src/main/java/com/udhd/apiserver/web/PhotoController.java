@@ -43,12 +43,14 @@ public class PhotoController {
      *  사진의 상세정보를 반환한다.
      *
      * @param photoId the photo id
+     * @param userId check to find album (optional)
      * @return the uploaded photo detail response
      */
     @GetMapping("/{photoId}")
     @ResponseStatus(HttpStatus.OK)
     public PhotoDetailDto detailPhoto(
-            @PathVariable String photoId) {
-        return photoService.getPhotoDetail(photoId);
+            @PathVariable String photoId,
+            @RequestParam(required = false) String userId) {
+        return photoService.getPhotoDetail(userId, photoId);
     }
 }

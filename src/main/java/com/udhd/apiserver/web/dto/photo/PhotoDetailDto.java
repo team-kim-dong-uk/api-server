@@ -30,7 +30,23 @@ public class PhotoDetailDto {
      */
     private Date uploadedAt;
     /**
+     * 저장 날짜
+     */
+    private Date savedAt = null;
+    /**
+     * 앨범 여부
+     */
+    private boolean inAlbum = false;
+    /**
      * 태그
      */
     private List<String> tags;
+
+    public void setSavedAt(Date savedAt){
+        this.savedAt = savedAt;
+        this.inAlbum = true;
+    }
+    public void setTags(List<String> tags){
+        this.tags = tags;
+    }
 }
