@@ -49,7 +49,7 @@ public class PhotoService {
         Album album;
         try {
             album = albumService.getAlbumDetail(userId, photoId);
-        } catch (AlbumNotFoundException e) {
+        } catch (AlbumNotFoundException | IllegalArgumentException e) {
             return toPhotoDetailDto(photo);
         }
 
