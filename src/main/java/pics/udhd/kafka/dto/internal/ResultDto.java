@@ -21,6 +21,7 @@ import lombok.Data;
 public class ResultDto {
   UUID queryKey;
   String photoId;
+  String url;
   List<String> value; /* 겹치는 그림 ID */
 
   public ResultDto() {}

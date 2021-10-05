@@ -13,7 +13,7 @@ public class QueryState {
   public List<PhotoDto> query;
   public QueryCallback callback;
 
-  public void accumulateResult(ResultDto resultDto) {
+  public void accumulateResult(ResultDto resultDto) throws Exception{
     result.accumulate(resultDto);
   }
 

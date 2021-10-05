@@ -186,7 +186,12 @@ public class QueryCommander {
           ", photoId : " + resultDto.getPhotoId());
       return;
     }
-    queryState.accumulateResult(resultDto);
+    try {
+      queryState.accumulateResult(resultDto);
+    } catch (Exception e) {
+      log.info("query state cannot be accumulated", e);
+      log.info(resultDto.toString());
+    }
 
     if (queryState.isDone()) {
       reply(queryState);

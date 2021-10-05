@@ -22,7 +22,13 @@ public class QueryResultDto {
     return value.size();
   }
 
-  public void accumulate(ResultDto resultDto) {
-    value.put(resultDto.getPhotoId(), resultDto.getValue());
+  public void accumulate(ResultDto resultDto) throws Exception{
+    if (resultDto.getPhotoId() != null) {
+      value.put(resultDto.getPhotoId(), resultDto.getValue());
+    } else if (resultDto.getUrl() != null) {
+      value.put(resultDto.getUrl(), resultDto.getValue());
+    } else {
+      throw new Exception("unsupported resultDto type");
+    }
   }
 }
