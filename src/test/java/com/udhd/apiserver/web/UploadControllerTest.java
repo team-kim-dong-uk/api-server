@@ -6,6 +6,7 @@ import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udhd.apiserver.config.auth.JwtAuthenticationFilter;
+import com.udhd.apiserver.domain.upload.Upload;
 import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.UploadService;
 import com.udhd.apiserver.util.JsonUtils;
@@ -16,6 +17,7 @@ import com.udhd.apiserver.web.dto.album.AlbumOutlineDto;
 import com.udhd.apiserver.web.dto.upload.PresignedURLResponse;
 import java.util.HashMap;
 import java.util.Map;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
@@ -132,7 +134,7 @@ public class UploadControllerTest {
     @Test
     void presignedUrls() throws Exception {
         // given
-        String userId = "123";
+        String userId = "60e2fea74c17cf5152fb5b78";
         List<String> checksums = Arrays.asList(
             "912ec803b2ce49e4a541068d495ab570",
             "6a204bd89f3c8348afd5c77c717a097a");
@@ -141,13 +143,28 @@ public class UploadControllerTest {
         data.put("checksums", checksums);
         String presignedUrlRequest = JsonUtils.getInstance().stringify(data);
 
+        String dummyPollingKey = uploadService.generatePollingKey(userId);
+
         PresignedURLResponse dummyRes = PresignedURLResponse.builder()
-            .pollingKey(userId + System.currentTimeMillis())
+            .pollingKey(uploadService.generatePollingKey(userId))
             .checksums(checksums) /* Dummy md5 value */
             .urls(resultUrls)
             .build();
 
-        given(uploadService.getPreSignedURLs(any())).willReturn(resultUrls);
+            List<Upload> dummyUploads = Arrays.asList(
+                Upload.builder().pollingKey(dummyPollingKey)
+                .checksum(checksums.get(0))
+                .s3Url(resultUrls.get(0))
+                .uploaderId(new ObjectId(userId))
+                .build(),
+                Upload.builder().pollingKey(dummyPollingKey)
+                    .checksum(checksums.get(1))
+                    .s3Url(resultUrls.get(1))
+                    .uploaderId(new ObjectId(userId))
+                    .build()
+            );
+        given(uploadService.createUpload(any(), any(), any()))
+            .willReturn(dummyUploads);
 
         // when
         String requestUri = "/api/v1/upload/presigned-url";

@@ -97,11 +97,22 @@ def upload(meta, data):
 
         preprocessed_data.append(preprocessed_info)
 
-    polling_key, urls = get_presigned_url(meta['url'], meta['auth'], preprocessed_data)
+    polling_key, urls = get_presigned_url(meta['url'], meta['auth'],
+                                          preprocessed_data)
     print(polling_key, urls)
+    for i in range(len(preprocessed_data)):
+        if urls[i] is None:
+            continue
+        else:
+            put_image(urls[i], load_binary(preprocessed_data[i]))
+            preprocessed_data[i]['url'] = urls[i]
+            check_upload_progress(polling_key=polling_key,
+                                  info=preprocessed_data[i],
+                                  url=meta['url'],
+                                  auth=meta['auth'])
 
 
-# TODO
+# TODO : Unsafety. Does not check it works properly.
 def put_image(presigned_url, binary):
     req = request.Request(presigned_url, method="PUT", data=binary)
     res = request.urlopen(req)
@@ -136,7 +147,13 @@ def load_binary(info):
 
 
 # TODO
-def check_upload_progress(url, auth):
+def check_upload_progress(polling_key, info, url, auth):
+    target_url = url + '/presigned-url/' + polling_key + '/' + info['hash']
+    headers = {'Authorization': auth}
+    req = request.Request(target_url, headers=headers)
+    with request.urlopen(req) as res:
+        print(res)
+
     return None
 
 

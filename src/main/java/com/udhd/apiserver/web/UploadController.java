@@ -60,11 +60,13 @@ public class UploadController {
     }
 
     @RequestMapping("/presigned-url/{pollingKey}/{checksum}")
-    public void markProgress(@PathVariable String pollingKey,
+    public Long markProgress(@PathVariable String pollingKey,
         @PathVariable String checksum) {
-      // TODO: Album 에 넣어줘야함. GDrive에서 업로드할때는 타는 로직인데, directly upload 에서는 아직 구성 안함
-        boolean success = uploadService.markCompleted(pollingKey, checksum);
-        if (!success)
-            log.info("failed to mark pollingKey : " + pollingKey + " checksum : "+ checksum);
+      try {
+          uploadService.confirmUpload(pollingKey, checksum);
+      } catch (Exception e) {
+          log.info("failed to mark pollingKey : " + pollingKey + " checksum : " + checksum);
+      }
+      return getProgress(pollingKey);
     }
 }

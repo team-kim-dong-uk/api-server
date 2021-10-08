@@ -119,39 +119,58 @@ public class UploadService {
         confirmUpload(upload);
     }
 
+    public void confirmUpload(String pollingKey, String checksum) {
+        Upload upload = uploadRepository.findByPollingKeyAndChecksum(pollingKey, checksum);
+        // TODO: upload를 못찾을 때 에러
+        confirmUpload(upload);
+    }
+
     @Async
     public void confirmUpload(Upload upload) {
         // Photo collection에서 checksum으로 해당 사진을 찾음. 없으면 새로 저장함.
-        Photo photo = photoRepository.findByChecksum(upload.getChecksum())
-                .orElseGet(() -> {
-                    // TODO: ML 서버에서 추천태그 바다오기
-                    List<String> tags = Arrays.asList("오마이걸", "1집");
-                    Photo newPhoto = Photo.builder()
-                            .id(upload.getId())
-                            .checksum(upload.getChecksum())
-                            .originalLink(upload.getS3Url())
-                            .thumbnailLink(upload.getS3Url())
-                            .uploaderId(upload.getUploaderId())
-                            .tags(tags)
-                            .build();
-                    photoRepository.insert(newPhoto);
-                    return newPhoto;
-                });
+        Photo photo = fetchOrCreatePhotoByUpload(upload);
 
         // Photo 정보와 tag 정보를 조합해 Album collection에 새 사진 저장.
-        List<String> tags = upload.getTags() == null ?
-                photo.getTags() : upload.getTags();
-        Album album = Album.builder()
-                .tags(tags)
-                .thumbnailLink(photo.getThumbnailLink())
-                .lastViewed(new Date())
-                .photoId(photo.getId())
-                .userId(upload.getUploaderId())
-                .build();
-        albumRepository.insert(album);
+        if (upload.getTags() == null)
+            saveIntoAlbum(upload.getUploaderId(), photo);
+        else
+            saveIntoAlbum(upload.getUploaderId(), photo, upload.getTags());
 
         // Upload collection 에 저장 완료로 표시
         markCompleted(upload);
+    }
+
+    void saveIntoAlbum(ObjectId userId, Photo photo) {
+        saveIntoAlbum(userId, photo, photo.getTags());
+    }
+    void saveIntoAlbum(ObjectId userId, Photo photo, List<String> tags) {
+        Album album = Album.builder()
+          .tags(tags)
+          .thumbnailLink(photo.getThumbnailLink())
+          .lastViewed(new Date())
+          .photoId(photo.getId())
+          .userId(userId)
+          .build();
+        albumRepository.insert(album);
+    }
+
+    Photo fetchOrCreatePhotoByUpload(Upload upload) {
+        Photo photo = photoRepository.findByChecksum(upload.getChecksum())
+            .orElseGet(() -> {
+                // TODO: ML 서버에서 추천태그 바다오기
+                List<String> tags = Arrays.asList("오마이걸", "1집");
+                Photo newPhoto = Photo.builder()
+                    .id(upload.getId())
+                    .checksum(upload.getChecksum())
+                    .originalLink(upload.getS3Url())
+                    .thumbnailLink(upload.getS3Url())
+                    .uploaderId(upload.getUploaderId())
+                    .tags(tags)
+                    .build();
+                photoRepository.insert(newPhoto);
+                return newPhoto;
+            });
+        return photo;
     }
 
     public Long getProgress(String pollingKey) {
