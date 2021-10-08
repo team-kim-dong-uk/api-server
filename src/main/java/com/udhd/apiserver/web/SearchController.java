@@ -27,12 +27,6 @@ public class SearchController {
     private final PhotoService photoService;
     private final SearchService searchService;
 
-    private final List<PhotoOutlineDto> mockSearchResults
-            = Arrays.asList(PhotoOutlineDto.builder()
-                                    .photoId("456")
-                                    .thumbnailLink("http://link.com/456")
-                                    .build());
-
     @GetMapping("/tags/recommended")
     public List<SearchCandidateDto> recommendedTags(@RequestParam String keyword) {
         return searchService.getRecommendedKeywords(keyword);
@@ -90,12 +84,13 @@ public class SearchController {
             @PathVariable String userId,
             @PathVariable String photoId) {
         SecurityUtils.checkUser(userId);
-
         try {
-            searchService.remainNotOwned(userId, Arrays.asList(photoId));
+            List<String> photoIds = searchService.remainNotOwned(userId, Arrays.asList(photoId));
+            List<PhotoOutlineDto> retval = photoService.getPhotoDetailAll(photoIds);
+            return retval;
         } catch (Exception e) {
             log.info("error", e);
+            return Arrays.asList();
         }
-        return mockSearchResults;
     }
 }

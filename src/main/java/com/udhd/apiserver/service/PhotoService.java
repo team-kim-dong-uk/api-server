@@ -7,6 +7,7 @@ import com.udhd.apiserver.exception.album.AlbumNotFoundException;
 import com.udhd.apiserver.exception.photo.PhotoNotFoundException;
 import com.udhd.apiserver.web.dto.photo.PhotoDetailDto;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,6 +122,7 @@ public class PhotoService {
                 .thumbnailLink(photo.getThumbnailLink())
                 .build();
     }
+
     private static <T> Collector<T, ?, T> toSingle() {
         return Collectors.collectingAndThen(
                 Collectors.toList(),
@@ -133,4 +135,18 @@ public class PhotoService {
                 }
         );
     }
+
+  public List<PhotoOutlineDto> getPhotoDetailAll(List<String> _photoIds) {
+        List<ObjectId> photoIds = _photoIds.stream().map(ObjectId::new)
+            .collect(Collectors.toList());
+        List<PhotoOutlineDto> retval = new ArrayList<>();
+        photoRepository.findAllById(photoIds).forEach(photo -> {
+            retval.add(PhotoOutlineDto.builder()
+                .photoId(photo.getId().toHexString())
+                .thumbnailLink(photo.getThumbnailLink())
+                .build());
+        });
+
+        return retval;
+  }
 }
