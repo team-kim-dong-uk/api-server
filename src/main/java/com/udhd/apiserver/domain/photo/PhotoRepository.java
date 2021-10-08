@@ -1,10 +1,9 @@
 package com.udhd.apiserver.domain.photo;
 
-import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.repository.MongoRepository;
-
 import java.util.List;
 import java.util.Optional;
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
     Photo insert(Photo photo);
@@ -17,4 +16,5 @@ public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
     List<Photo> findAllByUploaderId(ObjectId uploaderId);
     List<Photo> findAllByUploaderIdAndIdAfter(ObjectId uploaderId, ObjectId findAfter);
     Boolean existsPhotoByChecksum(String checksum);
+    List<Photo> findAllByTagsIn(List<String> tags);
 }

@@ -30,6 +30,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
+import pics.udhd.kafka.TagCommander;
 
 @RequiredArgsConstructor
 @Service
@@ -40,6 +41,7 @@ public class UploadService {
     private final UploadRepository uploadRepository;
     private final AlbumRepository albumRepository;
     private final RestTemplate restTemplate;
+    private final TagService tagService;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -157,8 +159,7 @@ public class UploadService {
     Photo fetchOrCreatePhotoByUpload(Upload upload) {
         Photo photo = photoRepository.findByChecksum(upload.getChecksum())
             .orElseGet(() -> {
-                // TODO: ML 서버에서 추천태그 바다오기
-                List<String> tags = Arrays.asList("오마이걸", "1집");
+                List<String> tags =  tagService.fetchTag(upload);
                 Photo newPhoto = Photo.builder()
                     .id(upload.getId())
                     .checksum(upload.getChecksum())

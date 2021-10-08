@@ -116,7 +116,10 @@ def upload(meta, data):
 
 # TODO : Unsafety. Does not check it works properly.
 def put_image(presigned_url, binary):
-    req = request.Request(presigned_url, method="PUT", data=binary)
+    headers = {
+        'Content-Type':'image/jpeg'
+    }
+    req = request.Request(presigned_url, method="PUT", data=binary, headers=headers)
     res = request.urlopen(req)
     print(res)
 
@@ -159,8 +162,9 @@ def load_binary(info):
 
 # TODO
 def check_upload_progress(polling_key, info, url, auth):
-    target_url = url + '/api/v1/presigned-url/' + polling_key + '/' + info['hash']
+    target_url = url + '/api/v1/upload/presigned-url/' + polling_key + '/' + info['hash']
     headers = {'Authorization': auth}
+    print(target_url)
     req = request.Request(target_url, headers=headers)
     with request.urlopen(req) as res:
         print(res)

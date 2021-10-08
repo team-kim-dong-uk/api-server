@@ -1,6 +1,9 @@
 package com.udhd.apiserver.domain.tag;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,7 +13,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @Document(collection = "tag")
 public class Tag {
-    @Id
-    private String tag;
-    private int count;
+
+  @Id
+  private String tag;
+  private int count;
 }
