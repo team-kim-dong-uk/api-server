@@ -10,10 +10,12 @@ import com.udhd.apiserver.web.dto.album.AlbumDetailDto;
 import com.udhd.apiserver.web.dto.album.AlbumOutlineDto;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 public class AlbumService {
     private final AlbumRepository albumRepository;
     private final PhotoRepository photoRepository;
+
 
     /**
      * user userId saves photo photoId
@@ -33,6 +36,11 @@ public class AlbumService {
     public AlbumDetailDto saveAlbum(String userId, String photoId) throws PhotoNotFoundException {
         ObjectId userObjectId = new ObjectId(userId);
         ObjectId photoObjectId = new ObjectId(photoId);
+
+        Optional<Album> existingAlbum = albumRepository.findByUserIdAndPhotoId(userObjectId, photoObjectId);
+        if (existingAlbum.isPresent()){
+            throw new DuplicateKeyException("이미 가지고 있는 사진입니다.");
+        }
 
         Photo photo = photoRepository.findById(photoObjectId)
                 .orElseThrow(() -> new PhotoNotFoundException(photoObjectId));
@@ -82,6 +90,14 @@ public class AlbumService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Find albums detail.
+     * userId, photoId로 앨범 데이터 하나 가져오기
+     *
+     * @param userId the user id
+     * @param photoId  the photo Id
+     * @return the album data
+     */
     public Album getAlbumDetail(String userId, String photoId){
         ObjectId objectPhotoId = new ObjectId(photoId);
         return albumRepository.findByUserIdAndPhotoId(new ObjectId(userId), objectPhotoId)
