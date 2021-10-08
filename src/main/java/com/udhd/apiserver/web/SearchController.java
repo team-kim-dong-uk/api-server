@@ -1,7 +1,5 @@
 package com.udhd.apiserver.web;
 
-import com.udhd.apiserver.domain.tag.TagRepository;
-import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.service.SearchService;
 import com.udhd.apiserver.util.SecurityUtils;
@@ -52,33 +50,7 @@ public class SearchController {
             @RequestParam(required = false) String findAfter,
             @RequestParam(defaultValue = "21") Integer fetchSize) {
         SecurityUtils.checkUser(userId);
-        List<PhotoOutlineDto> retval = new ArrayList<>();
-
-        // 원하는 크기가 될때까지 데이터를 가져온다.
-        while (retval.size() < fetchSize) {
-            List<PhotoOutlineDto> fetchedData = photoService
-                .findPhotos(tags, uploaderId, findAfter, fetchSize);
-
-            if (fetchedData.isEmpty())
-                break;
-            findAfter = fetchedData.get(fetchedData.size() - 1).getPhotoId();
-
-            List<String> notDuplicatedPhotoIds = searchService.remainNotOwned(userId,
-                fetchedData.stream().map(PhotoOutlineDto::getPhotoId).collect(Collectors.toList())
-            );
-
-            Set<String> notDuplicatedPhotoIdsSet = new HashSet<>(notDuplicatedPhotoIds);
-
-            for (PhotoOutlineDto photoOutlineDto : fetchedData) {
-                if (notDuplicatedPhotoIdsSet.contains(photoOutlineDto.getPhotoId())) {
-                    retval.add(photoOutlineDto);
-                }
-            }
-        }
-        // trim Data for afterId
-        retval.subList(0, Math.min(fetchSize, retval.size()));
-
-        return retval;
+        return searchService.searchTag(userId, tags, uploaderId, sortBy, findAfter, fetchSize);
     }
 
     /**

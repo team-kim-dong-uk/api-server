@@ -36,4 +36,7 @@ public class Photo {
 
   @LastModifiedDate
   private LocalDateTime modifiedDate;
+
+  public static String DEFAULT_SORT = "id";
+  public static String HEAD_ID = "000000000000000000000000";
 }

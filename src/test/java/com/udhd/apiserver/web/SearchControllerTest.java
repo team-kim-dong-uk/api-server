@@ -159,7 +159,7 @@ public class SearchControllerTest {
         List<String> tags = Arrays.asList("오마이걸", "1집");
         List<String> photoIds = Arrays.asList("6110066323a94f7c27f9cf4c");
 
-        given(photoService.findPhotos(tags, userId, null, 21))
+        given(photoService.findPhotos(tags, null, userId, null, 21))
             .willReturn(Arrays.asList(mockPhotoOutlineDto));
         given(searchService.remainNotOwned(userId, photoIds))
             .willReturn(photoIds);

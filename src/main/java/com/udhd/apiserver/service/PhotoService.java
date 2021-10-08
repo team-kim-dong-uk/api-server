@@ -4,13 +4,16 @@ import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.exception.album.AlbumNotFoundException;
+import com.amazonaws.util.StringUtils;
 import com.udhd.apiserver.exception.photo.PhotoNotFoundException;
 import com.udhd.apiserver.web.dto.photo.PhotoDetailDto;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -57,28 +60,34 @@ public class PhotoService {
         return toPhotoDetailDtoWithAlbum(photo, album);
     }
 
-    public List<PhotoOutlineDto> findPhotos(List<String> tags, String uploaderId, String findAfterId, int fetchSize) {
-        List<Photo> photos;
-        ObjectId findAfterObjectId = findAfterId == null
-                ? new ObjectId("000000000000000000000000") : new ObjectId(findAfterId);
-        if (uploaderId == null || uploaderId.equals("")) {
-            if (tags.size() == 0) {
-                photos = photoRepository.findAllByIdAfter(findAfterObjectId);
-            } else {
-                photos = photoRepository.findAllByTagsInAndIdAfter(tags, findAfterObjectId);
-            }
+    public List<PhotoOutlineDto> findPhotos(List<String> tags, String sortBy, String uploaderId, String findAfterId, int fetchSize) {
+        Stream<Photo> photos;
+
+        /* 1. create query parameter */
+        ObjectId uploaderObjectId = StringUtils.isNullOrEmpty(uploaderId) && ObjectId.isValid(uploaderId)
+            ? null
+            : new ObjectId(uploaderId);
+        Sort sort = StringUtils.isNullOrEmpty(sortBy)
+            ? Sort.by(Photo.DEFAULT_SORT)
+            : Sort.by(sortBy);
+        ObjectId findAfterObjectId = StringUtils.isNullOrEmpty(findAfterId) && ObjectId.isValid(findAfterId)
+            ? new ObjectId(Photo.HEAD_ID)
+            : new ObjectId(findAfterId);
+
+        /* 2. fetch photo from db */
+        if (uploaderObjectId == null) {
+            photos = (tags.size() == 0)
+                ? photoRepository.findAllByIdAfter(findAfterObjectId, sort)
+                : photoRepository.findAllByTagsInAndIdAfter(tags, findAfterObjectId, sort);
         } else {
-            ObjectId uploaderObjectId = new ObjectId(uploaderId);
-            if (tags.size() == 0) {
-                photos = photoRepository.findAllByUploaderIdAndIdAfter(uploaderObjectId, findAfterObjectId);
-            } else {
-                photos = photoRepository.findAllByUploaderIdAndTagsInAndIdAfter(uploaderObjectId, tags,
-                        findAfterObjectId);
-            }
+          photos = (tags.size() == 0)
+              ? photoRepository.findAllByUploaderIdAndIdAfter(uploaderObjectId, findAfterObjectId, sort)
+              : photoRepository.findAllByUploaderIdAndTagsInAndIdAfter(uploaderObjectId, tags, findAfterObjectId, sort);
         }
 
-        return photos.stream().limit(fetchSize)
-                .map(photo -> toPhotoOutlineDto(photo))
+        /* 3. convert to proper type */
+        return photos.limit(fetchSize)
+                .map(PhotoService::toPhotoOutlineDto)
                 .collect(Collectors.toList());
     }
 
@@ -116,7 +125,7 @@ public class PhotoService {
         return photoDetailDto;
     }
 
-    private PhotoOutlineDto toPhotoOutlineDto(Photo photo) {
+    private static PhotoOutlineDto toPhotoOutlineDto(Photo photo) {
         return PhotoOutlineDto.builder()
                 .photoId(photo.getId().toString())
                 .thumbnailLink(photo.getThumbnailLink())
