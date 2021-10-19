@@ -66,7 +66,8 @@ deploy:
   stage: deploy
   script:
     #- aws ecs register-task-definition --cli-input-json file://./t-d-1.json
-    - aws ecs update-service --region "$AWS_DEFAULT_REGION" --cluster "$CI_AWS_ECS_CLUSTER" --service "$CI_AWS_SERVICE_NAME"  --task-definition "$CI_AWS_ECS_TASK_DEFINITION" --force-new-deployment
+    #- aws ecs update-service --region "$AWS_DEFAULT_REGION" --cluster "$CI_AWS_ECS_CLUSTER" --service "$CI_AWS_SERVICE_NAME"  --task-definition "$CI_AWS_ECS_TASK_DEFINITION" --force-new-deployment
+    - aws ecs update-service --region "$AWS_DEFAULT_REGION" --cluster "$CI_AWS_ECS_CLUSTER" --service "$CI_AWS_SERVICE_NAME" --force-new-deployment
 
   tags:
     - api
