@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -61,7 +63,7 @@ public class PhotoService {
     }
 
     public List<PhotoOutlineDto> findPhotos(List<String> tags, String sortBy, String uploaderId, String findAfterId, int fetchSize) {
-        Stream<Photo> photos;
+        List<Photo> photos;
 
         /* 1. create query parameter */
         ObjectId uploaderObjectId = StringUtils.isNullOrEmpty(uploaderId) || !ObjectId.isValid(uploaderId)
@@ -74,19 +76,20 @@ public class PhotoService {
             ? new ObjectId(Photo.HEAD_ID)
             : new ObjectId(findAfterId);
 
+        Pageable pageable = PageRequest.of(0, fetchSize, sort);
         /* 2. fetch photo from db */
         if (uploaderObjectId == null) {
             photos = (tags.size() == 0)
-                ? photoRepository.findAllByIdAfter(findAfterObjectId, sort)
-                : photoRepository.findAllByTagsInAndIdAfter(tags, findAfterObjectId, sort);
+                ? photoRepository.findAllByIdAfter(findAfterObjectId, pageable)
+                : photoRepository.findAllByTagsInAndIdAfter(tags, findAfterObjectId, pageable);
         } else {
           photos = (tags.size() == 0)
-              ? photoRepository.findAllByUploaderIdAndIdAfter(uploaderObjectId, findAfterObjectId, sort)
-              : photoRepository.findAllByUploaderIdAndTagsInAndIdAfter(uploaderObjectId, tags, findAfterObjectId, sort);
+              ? photoRepository.findAllByUploaderIdAndIdAfter(uploaderObjectId, findAfterObjectId, pageable)
+              : photoRepository.findAllByUploaderIdAndTagsInAndIdAfter(uploaderObjectId, tags, findAfterObjectId, pageable);
         }
 
         /* 3. convert to proper type */
-        return photos.limit(fetchSize)
+        return photos.stream()
                 .map(PhotoService::toPhotoOutlineDto)
                 .collect(Collectors.toList());
     }
