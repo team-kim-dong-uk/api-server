@@ -4,11 +4,13 @@ package com.udhd.apiserver.domain.feed;
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
+import lombok.Data;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 @Builder
+@Data
 public class Comment {
   @NotNull
   private ObjectId id; // subdocument 이기 때문에 직접 생성해서 넣어줘야함

@@ -31,10 +31,16 @@ public class FeedService {
   public List<Feed> getFeeds(String userId) throws FeedException {
     return getFeeds(userId, FEED_HEAD_ID);
   }
+
   public List<Feed> getFeeds(String userId, String lastFeedId) throws FeedException {
     return getFeeds(userId, lastFeedId, DEFAULT_FEED_COUNT);
   }
+
   public List<Feed> getFeeds(String userId, String lastFeedId, int feedCount) throws FeedException {
+    return mockupFeeds;
+  }
+
+  public List<Feed> getRelatedFeeds(String userId, String photoId) throws FeedException {
     return mockupFeeds;
   }
 
@@ -43,4 +49,5 @@ public class FeedService {
 
   public void deleteComment(String userId, String feedId, String commentId) throws CommentException {
   }
+
 }
