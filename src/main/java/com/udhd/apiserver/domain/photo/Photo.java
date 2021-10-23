@@ -1,5 +1,6 @@
 package com.udhd.apiserver.domain.photo;
 
+import com.udhd.apiserver.domain.feed.Comment;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;

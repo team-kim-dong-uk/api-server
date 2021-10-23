@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Getter
-public class ErrorResponse {
+public class ErrorResponse implements GeneralResponse {
     int code;
     String message;
     List<String> errors;
