@@ -3,13 +3,21 @@ package com.udhd.apiserver.service.feed;
 import com.udhd.apiserver.domain.feed.Comment;
 import com.udhd.apiserver.domain.feed.Feed;
 import com.udhd.apiserver.domain.feed.FeedRepository;
+import com.udhd.apiserver.domain.feed.Like;
 import com.udhd.apiserver.domain.photo.Photo;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,20 +25,10 @@ public class FeedService {
   @Autowired
   FeedRepository feedRepository;
 
-  private static String FEED_HEAD_ID = "000000000000000000000000";
+  private static Integer FEED_HEAD_ID = 0;
   private static int DEFAULT_FEED_COUNT = 20;
-  /*
-  {"_id":{"$oid":"616d24f1f9a88621add4fa18"},
-  "uploaderId":{"$oid":"615425cbf83812399805ea84"},
-  "thumbnailLink":"https://udhdbucket.s3.ap-northeast-2.amazonaws.com/dcf4af04c49cd976eb1d1862d528d365",
-  "originalLink":"https://udhdbucket.s3.ap-northeast-2.amazonaws.com/dcf4af04c49cd976eb1d1862d528d365",
-  "checksum":"dcf4af04c49cd976eb1d1862d528d365",
-  "tags":["오마이걸","1집"],
-  "modifiedDate":{"$date":"2021-10-18T07:45:34.292Z"},
-  "_class":"com.udhd.apiserver.domain.photo.Photo"}
-   */
+
   private static List<Feed> mockupFeeds = Arrays.asList(Feed.builder()
-      .id(new ObjectId())
       .photo(Photo.builder()
           .id(new ObjectId())
           .uploaderId(new ObjectId())
@@ -51,8 +49,8 @@ public class FeedService {
               .modifiedDate(LocalDateTime.now())
               .deleted(false)
               .build()))
+          .order(11)
           .build(), Feed.builder()
-          .id(new ObjectId())
           .photo(Photo.builder()
               .id(new ObjectId())
               .uploaderId(new ObjectId())
@@ -73,19 +71,23 @@ public class FeedService {
                   .modifiedDate(LocalDateTime.now())
                   .deleted(false)
                   .build()
-          )).build()
+          ))
+          .order(10)
+          .build()
       );
 
   public List<Feed> getFeeds(String userId) throws FeedException {
     return getFeeds(userId, FEED_HEAD_ID);
   }
 
-  public List<Feed> getFeeds(String userId, String lastFeedId) throws FeedException {
-    return getFeeds(userId, lastFeedId, DEFAULT_FEED_COUNT);
+  public List<Feed> getFeeds(String userId, Integer lastOrder) throws FeedException {
+    return getFeeds(userId, lastOrder, DEFAULT_FEED_COUNT);
   }
 
-  public List<Feed> getFeeds(String userId, String lastFeedId, int feedCount) throws FeedException {
-    return mockupFeeds;
+  public List<Feed> getFeeds(String userId, Integer lastOrder, int feedCount) throws FeedException {
+    // Unused userId
+    Pageable pageable = PageRequest.of(0, feedCount);
+    return feedRepository.findAllByOrderGreaterThanEqual(lastOrder, pageable);
   }
 
   public List<Feed> getRelatedFeeds(String userId, String photoId) throws FeedException {
@@ -108,5 +110,53 @@ public class FeedService {
   }
 
   public void deleteSavedFeed(String userId, String feedId) throws FeedException {
+  }
+
+  protected void pushComment(ObjectId feedId, Comment comment) {
+    push(feedId, "comments", comment);
+  }
+
+  protected void deleteComment(ObjectId feedId, ObjectId commentId) {
+    pull(feedId, "comments", Comment.builder().id(commentId).build());
+  }
+
+  protected void pushLike(ObjectId feedId, Like like) {
+    push(feedId, "likes", like);
+  }
+
+  protected void deleteLike(ObjectId feedId, ObjectId userId) {
+    pull(feedId, "likes", Like.builder().userId(userId).build());
+  }
+
+  public Feed getFeed(String userId, String feedId) throws FeedException {
+     Optional<Feed> feedOptional = feedRepository.findById(new ObjectId(feedId));
+     if (feedOptional.isEmpty())
+       throw new FeedException(FeedException.ERR_NO_FEED);
+     return feedOptional.get();
+  }
+
+
+  /**
+   * TODO: 분리해야함 data layer
+   */
+  @Autowired
+  protected MongoTemplate mongoTemplate;
+
+  void push(ObjectId id, String property, Object value) {
+    mongoTemplate.updateFirst(
+        Query.query(Criteria.where("id").is(id)),
+        new Update().push(property, value), Feed.class
+    );
+  }
+  void pull(ObjectId id, String property, Object value) {
+    mongoTemplate.updateFirst(
+        Query.query(Criteria.where("id").is(id)),
+        new Update().pull(property, value), Feed.class
+    );
+  }
+
+  public void createDummyData() {
+    feedRepository.save(mockupFeeds.get(0));
+    feedRepository.save(mockupFeeds.get(1));
   }
 }

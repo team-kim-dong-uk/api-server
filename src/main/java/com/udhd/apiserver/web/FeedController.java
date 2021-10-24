@@ -124,34 +124,28 @@ public class FeedController {
 
   @PutMapping("/{feedId}/comment")
   @ResponseBody
-  GeneralResponse registerComment(@PathVariable String feedId, String content, HttpServletResponse response) {
+  Object registerComment(@PathVariable String feedId, String content, HttpServletResponse response) {
     String userId = SecurityUtils.getLoginUserId();
-    SuccessResponse retval = new SuccessResponse();
     try {
       feedService.registerComment(userId, feedId, content);
-      retval.setMessage(SUCCESS_MESSAGE);
-    } catch (CommentException e) {
+      return feedService.getFeed(userId, feedId);
+    } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }
-
-    return retval;
   }
 
   @DeleteMapping("/{feedId}/comment/{commentId}")
   @ResponseBody
-  GeneralResponse deleteComment(@PathVariable String feedId, @PathVariable String commentId, HttpServletResponse response) {
+  Object deleteComment(@PathVariable String feedId, @PathVariable String commentId, HttpServletResponse response) {
     String userId = SecurityUtils.getLoginUserId();
-    SuccessResponse retval = new SuccessResponse();
     try {
       feedService.deleteComment(userId, feedId, commentId);
-      retval.setMessage(SUCCESS_MESSAGE);
-    } catch (CommentException e) {
+      return feedService.getFeed(userId, feedId);
+    } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }
-
-    return retval;
   }
 
   @PutMapping("/{feedId}/like")
@@ -210,5 +204,10 @@ public class FeedController {
     }
 
     return retval;
+  }
+
+  @RequestMapping("/dummy")
+  void createDummyData() {
+    feedService.createDummyData();
   }
 }
