@@ -36,6 +36,7 @@ public class FeedController {
   @Autowired
   FeedService feedService;
 
+  final String SUCCESS_MESSAGE = "success";
 
   @GetMapping("")
   @ResponseBody
@@ -95,6 +96,7 @@ public class FeedController {
             .thumbnailLink(photo.getThumbnailLink())
             .createdDate(photo.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
             .modifiedDate(photo.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+            .tags(photo.getTags())
             .build();
         List<CommentDto> commentDtos = feed.getComments().stream().map(comment -> CommentDto.builder()
             .id(comment.getId().toString())
@@ -126,7 +128,7 @@ public class FeedController {
     SuccessResponse retval = new SuccessResponse();
     try {
       feedService.registerComment(userId, feedId, content);
-      retval.setMessage("success");
+      retval.setMessage(SUCCESS_MESSAGE);
     } catch (CommentException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -142,8 +144,66 @@ public class FeedController {
     SuccessResponse retval = new SuccessResponse();
     try {
       feedService.deleteComment(userId, feedId, commentId);
-      retval.setMessage("success");
+      retval.setMessage(SUCCESS_MESSAGE);
     } catch (CommentException e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    }
+
+    return retval;
+  }
+
+  @PutMapping("/{feedId}/favorite")
+  GeneralResponse addFavorite(@PathVariable String feedId, HttpServletResponse response) {
+    String userId = SecurityUtils.getLoginUserId();
+    SuccessResponse retval = new SuccessResponse();
+    try {
+      feedService.addFavorite(userId, feedId);
+      retval.setMessage(SUCCESS_MESSAGE);
+    } catch (FeedException e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    }
+
+    return retval;
+  }
+  @DeleteMapping("/{feedId}/favorite")
+  GeneralResponse deleteFavorite(@PathVariable String feedId, HttpServletResponse response) {
+    String userId = SecurityUtils.getLoginUserId();
+    SuccessResponse retval = new SuccessResponse();
+    try {
+      feedService.deleteFavorite(userId, feedId);
+      retval.setMessage(SUCCESS_MESSAGE);
+    } catch (FeedException e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    }
+
+    return retval;
+  }
+
+  @PutMapping("/{feedId}/save")
+  GeneralResponse saveFeed(@PathVariable String feedId, HttpServletResponse response) {
+    String userId = SecurityUtils.getLoginUserId();
+    SuccessResponse retval = new SuccessResponse();
+    try {
+      feedService.saveFeed(userId, feedId);
+      retval.setMessage(SUCCESS_MESSAGE);
+    } catch (FeedException e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    }
+
+    return retval;
+  }
+  @DeleteMapping("/{feedId}/save")
+  GeneralResponse deleteSavedFeed(@PathVariable String feedId, HttpServletResponse response) {
+    String userId = SecurityUtils.getLoginUserId();
+    SuccessResponse retval = new SuccessResponse();
+    try {
+      feedService.deleteSavedFeed(userId, feedId);
+      retval.setMessage(SUCCESS_MESSAGE);
+    } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }
