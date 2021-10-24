@@ -49,6 +49,7 @@ public class FeedController {
         Photo photo = feed.getPhoto();
         PhotoDto photoDto = PhotoDto.builder()
             .id(photo.getId().toString())
+            .uploaderId(photo.getUploaderId().toString())
             .checksum(photo.getChecksum())
             .originalLink(photo.getOriginalLink())
             .thumbnailLink(photo.getThumbnailLink())
