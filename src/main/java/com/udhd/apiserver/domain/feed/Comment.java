@@ -19,9 +19,9 @@ public class Comment {
   @NotNull
   private String userName;
   @CreatedDate
-  private LocalDateTime createdAt; // unix timestamp
+  private LocalDateTime createdDate; // unix timestamp
   @LastModifiedDate
-  private LocalDateTime lastModifiedAt; // unix timestmap
+  private LocalDateTime modifiedDate; // unix timestmap
 
   boolean deleted; // 만약 true이라면 반드시 다른 데이터들은 null임
   String content;
