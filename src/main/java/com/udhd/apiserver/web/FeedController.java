@@ -1,6 +1,7 @@
 package com.udhd.apiserver.web;
 
 import com.udhd.apiserver.domain.feed.Feed;
+import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.service.feed.CommentException;
 import com.udhd.apiserver.service.feed.FeedException;
 import com.udhd.apiserver.service.feed.FeedService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,6 +40,28 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       List<Feed> feeds = feedService.getFeeds(userId);
+      List<FeedDto> feedDtos = feeds.stream().map(feed -> FeedDto.builder()
+          .id(feed.getId().toString()) // TODO: 이거 나중에 service layer에서도 dto 만들어줘서 string 추상화 해줘야함
+          .photo(feed.getPhoto())
+          .comments(feed.getComments())
+          .build()).collect(Collectors.toList());
+      retval.setFeeds(feedDtos);
+    } catch (FeedException e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    }
+    return retval;
+  }
+
+  @GetMapping("/related")
+  @ResponseBody
+  GeneralResponse getRelatedFeeds(@PathVariable String feedId,
+      @RequestParam(defaultValue = "") String photoId,
+      HttpServletResponse response) {
+    FeedResponse retval = new FeedResponse();
+    String userId = SecurityUtils.getLoginUserId();
+    try {
+      List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId);
       List<FeedDto> feedDtos = feeds.stream().map(feed -> FeedDto.builder()
           .id(feed.getId().toString()) // TODO: 이거 나중에 service layer에서도 dto 만들어줘서 string 추상화 해줘야함
           .photo(feed.getPhoto())
