@@ -29,12 +29,12 @@ public class FeedService {
   "modifiedDate":{"$date":"2021-10-18T07:45:34.292Z"},
   "_class":"com.udhd.apiserver.domain.photo.Photo"}
    */
-  private static List<Feed> mockupFeeds = Collections.singletonList(Feed.builder()
+  private static List<Feed> mockupFeeds = Arrays.asList(Feed.builder()
       .id(new ObjectId())
       .photo(Photo.builder()
           .id(new ObjectId())
           .uploaderId(new ObjectId())
-          .checksum("dcf4af04c49cd976eb1d1862d528d365") // random md5 dummy hash
+          .checksum("3426318387510b2276beb5447c4f4142") // random md5 dummy hash
           .originalLink("https://udhdbucket.s3.ap-northeast-2.amazonaws.com/3426318387510b2276beb5447c4f4142")
           .thumbnailLink("https://udhdbucket.s3.ap-northeast-2.amazonaws.com/3426318387510b2276beb5447c4f4142")
           .createdDate(LocalDateTime.now())
@@ -50,8 +50,31 @@ public class FeedService {
               .createdDate(LocalDateTime.now())
               .modifiedDate(LocalDateTime.now())
               .deleted(false)
-              .build()
-      )).build());
+              .build()))
+          .build(), Feed.builder()
+          .id(new ObjectId())
+          .photo(Photo.builder()
+              .id(new ObjectId())
+              .uploaderId(new ObjectId())
+              .checksum("dcf4af04c49cd976eb1d1862d528d365") // random md5 dummy hash
+              .originalLink("https://udhdbucket.s3.ap-northeast-2.amazonaws.com/dcf4af04c49cd976eb1d1862d528d365")
+              .thumbnailLink("https://udhdbucket.s3.ap-northeast-2.amazonaws.com/dcf4af04c49cd976eb1d1862d528d365")
+              .createdDate(LocalDateTime.now())
+              .modifiedDate(LocalDateTime.now())
+              .tags(Arrays.asList("오마이걸", "2집"))
+              .build())
+          .comments(Collections.singletonList(
+              Comment.builder()
+                  .id(new ObjectId())
+                  .userId(new ObjectId())
+                  .userName("dummy user2")
+                  .content("dummy comment 2")
+                  .createdDate(LocalDateTime.now())
+                  .modifiedDate(LocalDateTime.now())
+                  .deleted(false)
+                  .build()
+          )).build()
+      );
 
   public List<Feed> getFeeds(String userId) throws FeedException {
     return getFeeds(userId, FEED_HEAD_ID);
@@ -75,4 +98,15 @@ public class FeedService {
   public void deleteComment(String userId, String feedId, String commentId) throws CommentException {
   }
 
+  public void addFavorite(String userId, String feedId) throws FeedException {
+  }
+
+  public void deleteFavorite(String userId, String feedId) throws FeedException {
+  }
+
+  public void saveFeed(String userId, String feedId) throws FeedException {
+  }
+
+  public void deleteSavedFeed(String userId, String feedId) throws FeedException {
+  }
 }
