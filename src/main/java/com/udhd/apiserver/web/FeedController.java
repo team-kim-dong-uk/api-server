@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,6 +54,7 @@ public class FeedController {
             .thumbnailLink(photo.getThumbnailLink())
             .createdDate(photo.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
             .modifiedDate(photo.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+            .tags(photo.getTags())
             .build();
         List<CommentDto> commentDtos = feed.getComments().stream().map(comment -> CommentDto.builder()
             .id(comment.getId().toString())
@@ -154,7 +154,7 @@ public class FeedController {
     return retval;
   }
 
-  @PutMapping("/{feedId}/favorite")
+  @PutMapping("/{feedId}/like")
   GeneralResponse addFavorite(@PathVariable String feedId, HttpServletResponse response) {
     String userId = SecurityUtils.getLoginUserId();
     SuccessResponse retval = new SuccessResponse();
@@ -168,7 +168,7 @@ public class FeedController {
 
     return retval;
   }
-  @DeleteMapping("/{feedId}/favorite")
+  @DeleteMapping("/{feedId}/like")
   GeneralResponse deleteFavorite(@PathVariable String feedId, HttpServletResponse response) {
     String userId = SecurityUtils.getLoginUserId();
     SuccessResponse retval = new SuccessResponse();
