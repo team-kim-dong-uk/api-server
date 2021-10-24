@@ -1,8 +1,8 @@
 package com.udhd.apiserver.web.dto;
 
-import lombok.Setter;
+import lombok.Data;
 
+@Data
 public class SuccessResponse implements GeneralResponse {
-  @Setter
   String message;
 }
