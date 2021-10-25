@@ -86,7 +86,7 @@ public class UserService {
     }
 
     public User findById(String userId) throws IllegalArgumentException {
-        if (StringUtils.isEmpty(userId) || ObjectId.isValid(userId))
+        if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId))
             throw new IllegalArgumentException("userId is invalid(userId : " + userId + ")");
         Optional<User> userOptional = userRepository.findById(new ObjectId(userId));
 

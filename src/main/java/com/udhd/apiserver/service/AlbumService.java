@@ -49,10 +49,10 @@ public class AlbumService {
      * @throws PhotoNotFoundException the photo not found exception
      */
     public AlbumDetailDto saveAlbum(String userId, String feedId) throws PhotoNotFoundException {
-        if (StringUtils.isEmpty(userId) || ObjectId.isValid(userId))
-            throw new IllegalArgumentException("userId cannot be converted to ObjectId. feedId: " + userId);
+        if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId))
+            throw new IllegalArgumentException("userId cannot be converted to ObjectId. userId: " + userId);
 
-        if (StringUtils.isEmpty(feedId) || ObjectId.isValid(feedId))
+        if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId))
             throw new IllegalArgumentException("feedId cannot be converted to ObjectId. feedId: " + feedId);
 
         ObjectId userObjectId = new ObjectId(userId);

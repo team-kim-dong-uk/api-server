@@ -125,10 +125,10 @@ public class FeedService {
   }
 
   public void registerComment(String userId, String feedId, String content) throws CommentException {
-    if (StringUtils.isEmpty(userId) || ObjectId.isValid(userId))
+    if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId))
       throw new CommentException("userId cannot be converted to ObjectId. feedId: " + userId);
 
-    if (StringUtils.isEmpty(feedId) || ObjectId.isValid(feedId))
+    if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId))
       throw new CommentException("feedId cannot be converted to ObjectId. feedId: " + feedId);
 
     ObjectId userObjectId = new ObjectId(userId);
@@ -150,10 +150,10 @@ public class FeedService {
   }
 
   public void deleteComment(String userId, String feedId, String commentId) throws CommentException {
-    if (StringUtils.isEmpty(userId) || ObjectId.isValid(userId))
+    if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId))
       throw new CommentException("userId cannot be converted to ObjectId. feedId: " + userId);
 
-    if (StringUtils.isEmpty(feedId) || ObjectId.isValid(feedId))
+    if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId))
       throw new CommentException("feedId cannot be converted to ObjectId. feedId: " + feedId);
 
     ObjectId userObjectId = new ObjectId(userId);
