@@ -58,12 +58,12 @@ public class PhotoServiceTest {
         List<Album> albums = Arrays.asList(
                 Album.builder()
                         .id(new ObjectId(userId))
-                        .photoId(new ObjectId(photoId))
+                        .feedId(new ObjectId(photoId))
                         .tags(Arrays.asList("오마이걸", "1집", "아이스크림"))
                         .build(),
                 Album.builder()
                         .id(new ObjectId(userId))
-                        .photoId(new ObjectId(photoId_A))
+                        .feedId(new ObjectId(photoId_A))
                         .tags(Arrays.asList("오마이걸", "1집", "내 태그 뀨잉"))
                         .build()
         );

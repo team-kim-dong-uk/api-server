@@ -224,7 +224,7 @@ public class FeedService {
     pull(feedId, "likes", Like.builder().userId(userId).build());
   }
 
-  public Feed getFeed(String userId, String feedId) throws FeedException {
+  public Feed getFeed(String feedId) throws FeedException {
      Optional<Feed> feedOptional = feedRepository.findById(new ObjectId(feedId));
      if (feedOptional.isEmpty())
        throw new FeedException(FeedException.ERR_NO_FEED);

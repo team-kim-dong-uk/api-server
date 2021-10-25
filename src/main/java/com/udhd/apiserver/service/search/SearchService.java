@@ -1,6 +1,7 @@
 package com.udhd.apiserver.service.search;
 
 import com.udhd.apiserver.domain.album.Album;
+import com.udhd.apiserver.domain.feed.Feed;
 import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.domain.tag.Tag;
 import com.udhd.apiserver.domain.tag.TagRepository;
@@ -8,6 +9,7 @@ import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.domain.user.UserRepository;
 import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.PhotoService;
+import com.udhd.apiserver.service.feed.FeedService;
 import com.udhd.apiserver.service.search.dto.SearchQuery;
 import com.udhd.apiserver.service.search.dto.SearchQueryFactory;
 import com.udhd.apiserver.service.search.dto.SearchResult;
@@ -41,6 +43,7 @@ public class SearchService {
   private final TagRepository tagRepository;
   private final UserRepository userRepository;
   private final AlbumService albumService;
+  private final FeedService feedService;
   private final PhotoService photoService;
   private final QueryCommander queryCommander;
 
@@ -100,9 +103,13 @@ public class SearchService {
 
     List<Album> alreadyHas = albumService.findAllByUserIdAndPhotoIdIn(userId, searchQuery);
     Set<String> retval = new HashSet<>(similarPhotoIds);
+    /*
     for (Album album : alreadyHas) {
       retval.remove(album.getPhotoId().toString());
+    TODO : 지금 당장 사용할 기능 아닌데 컴파일 에러 발생시켜 주석처리함.
     }
+
+     */
     return new ArrayList<>(retval);
   }
 
@@ -138,11 +145,13 @@ public class SearchService {
     });
 
     List<Album> alreadyHas = albumService.findAllByUserIdAndPhotoIdIn(userId, flattenSimilarPhotos);
+    /*
     for (Album album : alreadyHas) {
-      String containedPhotoId = reverseMap.get(album.getPhotoId());
-      /* Don't have to check that it contains photoId. remove() is ignore it. */
+      String containedPhotoId = reverseMap.get(album.getFeedId());
       retval.remove(containedPhotoId);
     }
+    TODO : 지금 당장 사용할 기능 아닌데 컴파일 에러 발생시켜 주석처리함.
+    */
 
     return new ArrayList<>(retval);
   }

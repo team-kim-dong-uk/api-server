@@ -81,7 +81,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.registerComment(userId, feedId, content);
-      return toFeedDto(feedService.getFeed(userId, feedId));
+      return toFeedDto(feedService.getFeed(feedId));
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -94,7 +94,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.deleteComment(userId, feedId, commentId);
-      return toFeedDto(feedService.getFeed(userId, feedId));
+      return toFeedDto(feedService.getFeed(feedId));
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());

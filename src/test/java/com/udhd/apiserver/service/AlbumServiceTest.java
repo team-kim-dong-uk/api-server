@@ -47,7 +47,7 @@ public class AlbumServiceTest {
         String photoId = "6110066423a94f0000000000";
 
         // 이미 가지고 있는 앨범 데이터
-        given(albumRepository.findByUserIdAndPhotoId(new ObjectId(userId), new ObjectId(photoId)))
+        given(albumRepository.findByUserIdAndFeedId(new ObjectId(userId), new ObjectId(photoId)))
                 .willThrow(DuplicateKeyException.class);
 
         assertThrows(DuplicateKeyException.class,
