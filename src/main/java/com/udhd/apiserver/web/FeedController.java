@@ -44,33 +44,9 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       List<Feed> feeds = feedService.getFeeds(userId);
-      List<FeedDto> feedDtos = feeds.stream().map(feed -> {
-        Photo photo = feed.getPhoto();
-        PhotoDto photoDto = PhotoDto.builder()
-            .id(photo.getId().toString())
-            .uploaderId(photo.getUploaderId().toString())
-            .checksum(photo.getChecksum())
-            .originalLink(photo.getOriginalLink())
-            .thumbnailLink(photo.getThumbnailLink())
-            .createdDate(photo.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .modifiedDate(photo.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .tags(photo.getTags())
-            .build();
-        List<CommentDto> commentDtos = feed.getComments().stream().map(comment -> CommentDto.builder()
-            .id(comment.getId().toString())
-            .userId(comment.getUserId().toString())
-            .userName(comment.getUserName())
-            .content(comment.getContent())
-            .deleted(comment.isDeleted())
-            .createdDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .modifiedDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .build()).collect(Collectors.toList());
-        return FeedDto.builder()
-            .id(feed.getId().toString()) // TODO: 이거 나중에 service layer에서도 dto 만들어줘서 string 추상화 해줘야함
-            .photo(photoDto)
-            .comments(commentDtos)
-            .build();
-      }).collect(Collectors.toList());
+      List<FeedDto> feedDtos = feeds.stream()
+              .map(feed -> toFeedDto(feed))
+              .collect(Collectors.toList());
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -88,32 +64,9 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId);
-      List<FeedDto> feedDtos = feeds.stream().map(feed -> {
-        Photo photo = feed.getPhoto();
-        PhotoDto photoDto = PhotoDto.builder()
-            .id(photo.getId().toString())
-            .checksum(photo.getChecksum())
-            .originalLink(photo.getOriginalLink())
-            .thumbnailLink(photo.getThumbnailLink())
-            .createdDate(photo.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .modifiedDate(photo.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .tags(photo.getTags())
-            .build();
-        List<CommentDto> commentDtos = feed.getComments().stream().map(comment -> CommentDto.builder()
-            .id(comment.getId().toString())
-            .userId(comment.getUserId().toString())
-            .userName(comment.getUserName())
-            .content(comment.getContent())
-            .deleted(comment.isDeleted())
-            .createdDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .modifiedDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .build()).collect(Collectors.toList());
-        return FeedDto.builder()
-            .id(feed.getId().toString()) // TODO: 이거 나중에 service layer에서도 dto 만들어줘서 string 추상화 해줘야함
-            .photo(photoDto)
-            .comments(commentDtos)
-            .build();
-      }).collect(Collectors.toList());
+      List<FeedDto> feedDtos = feeds.stream()
+              .map(feed -> toFeedDto(feed))
+              .collect(Collectors.toList());
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -128,7 +81,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.registerComment(userId, feedId, content);
-      return feedService.getFeed(userId, feedId);
+      return toFeedDto(feedService.getFeed(userId, feedId));
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -141,7 +94,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.deleteComment(userId, feedId, commentId);
-      return feedService.getFeed(userId, feedId);
+      return toFeedDto(feedService.getFeed(userId, feedId));
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -209,5 +162,33 @@ public class FeedController {
   @RequestMapping("/dummy")
   void createDummyData() {
     feedService.createDummyData();
+  }
+
+  public static FeedDto toFeedDto(Feed feed) {
+    Photo photo = feed.getPhoto();
+    PhotoDto photoDto = PhotoDto.builder()
+            .id(photo.getId().toString())
+            .uploaderId(photo.getUploaderId().toString())
+            .checksum(photo.getChecksum())
+            .originalLink(photo.getOriginalLink())
+            .thumbnailLink(photo.getThumbnailLink())
+            .createdDate(photo.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+            .modifiedDate(photo.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+            .tags(photo.getTags())
+            .build();
+    List<CommentDto> commentDtos = feed.getComments().stream().map(comment -> CommentDto.builder()
+            .id(comment.getId().toString())
+            .userId(comment.getUserId().toString())
+            .userName(comment.getUserName())
+            .content(comment.getContent())
+            .deleted(comment.isDeleted())
+            .createdDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+            .modifiedDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+            .build()).collect(Collectors.toList());
+    return FeedDto.builder()
+            .id(feed.getId().toString()) // TODO: 이거 나중에 service layer에서도 dto 만들어줘서 string 추상화 해줘야함
+            .photo(photoDto)
+            .comments(commentDtos)
+            .build();
   }
 }
