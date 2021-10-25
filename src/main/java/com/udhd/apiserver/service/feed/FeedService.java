@@ -7,10 +7,7 @@ import com.udhd.apiserver.domain.feed.Like;
 import com.udhd.apiserver.domain.photo.Photo;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.udhd.apiserver.web.dto.feed.CommentDto;
@@ -35,6 +32,7 @@ public class FeedService {
   private static int DEFAULT_FEED_COUNT = 20;
 
   private static List<Feed> mockupFeeds = Arrays.asList(Feed.builder()
+      .id(new ObjectId())
       .photo(Photo.builder()
           .id(new ObjectId())
           .uploaderId(new ObjectId())
@@ -56,7 +54,9 @@ public class FeedService {
               .deleted(false)
               .build()))
           .order(11)
-          .build(), Feed.builder()
+          .build(),
+          Feed.builder()
+          .id(new ObjectId())
           .photo(Photo.builder()
               .id(new ObjectId())
               .uploaderId(new ObjectId())
@@ -98,6 +98,16 @@ public class FeedService {
 
   public List<Feed> getRelatedFeeds(String userId, String photoId) throws FeedException {
     return mockupFeeds;
+  }
+
+  public List<Feed> getSavedFeeds(String userId, int count, int page) throws FeedException {
+    return mockupFeeds;
+  }
+
+  public List<Feed> getLikedFeeds(String userId, int count, int page) throws FeedException {
+    List<Feed> ret = new ArrayList<>(mockupFeeds);
+    Collections.reverse(ret);
+    return ret;
   }
 
   public void registerComment(String userId, String feedId, String content) throws CommentException {
