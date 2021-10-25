@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/feeds")
 @RestController
+@Slf4j
 public class FeedController {
   @Autowired
   FeedService feedService;
@@ -44,9 +46,11 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       List<Feed> feeds = feedService.getFeeds(userId);
+      log.info("feed", feeds);
       List<FeedDto> feedDtos = feeds.stream()
               .map(feed -> toFeedDto(feed))
               .collect(Collectors.toList());
+      log.info("feedDto", feedDtos);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

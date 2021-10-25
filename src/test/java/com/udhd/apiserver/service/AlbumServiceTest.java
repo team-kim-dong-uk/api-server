@@ -43,8 +43,8 @@ public class AlbumServiceTest {
     @Test
     @DisplayName("중복된 사진 앨범 추가")
     void saveAlbum_Duplicate() throws Exception {
-        String userId = "6110066423a94f1111111111";
-        String photoId = "6110066423a94f0000000000";
+        String userId = "60e2fea74c17cf5152fb5b78";
+        String photoId = "60e2fea74c17cf5152fb5b78";
 
         // 이미 가지고 있는 앨범 데이터
         given(albumRepository.findByUserIdAndFeedId(new ObjectId(userId), new ObjectId(photoId)))
