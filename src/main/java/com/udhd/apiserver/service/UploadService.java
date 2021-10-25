@@ -168,7 +168,7 @@ public class UploadService {
           .tags(tags)
           .thumbnailLink(photo.getThumbnailLink())
           .lastViewed(new Date())
-          .photoId(photo.getId())
+          .feedId(photo.getId())
           .userId(userId)
           .build();
         albumRepository.insert(album);

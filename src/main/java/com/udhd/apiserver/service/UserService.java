@@ -8,6 +8,7 @@ import com.udhd.apiserver.exception.user.UserNotFoundException;
 import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
 import com.udhd.apiserver.web.dto.user.UserDto;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
@@ -82,6 +83,17 @@ public class UserService {
 
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public User findById(String userId) throws IllegalArgumentException {
+        if (StringUtils.isEmpty(userId) || ObjectId.isValid(userId))
+            throw new IllegalArgumentException("userId is invalid(userId : " + userId + ")");
+        Optional<User> userOptional = userRepository.findById(new ObjectId(userId));
+
+        if (userOptional.isEmpty())
+            throw new IllegalArgumentException("there is no user (userId : " + userId + ")");
+
+        return userOptional.get();
     }
 
     public User insert(User user) {

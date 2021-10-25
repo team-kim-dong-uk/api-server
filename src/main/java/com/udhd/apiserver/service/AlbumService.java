@@ -2,6 +2,8 @@ package com.udhd.apiserver.service;
 
 import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.album.AlbumRepository;
+import com.udhd.apiserver.domain.feed.Feed;
+import com.udhd.apiserver.domain.feed.FeedRepository;
 import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.exception.album.AlbumNotFoundException;
@@ -17,6 +19,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -34,39 +37,46 @@ import pics.udhd.kafka.dto.QueryResultDto;
 public class AlbumService {
     private final AlbumRepository albumRepository;
     private final PhotoRepository photoRepository;
+    private final FeedRepository feedRepository;
 
 
     /**
      * user userId saves photo photoId
      *
      * @param userId  the user id
-     * @param photoId the photo id
+     * @param feedId the feed id
      * @return the album detail dto
      * @throws PhotoNotFoundException the photo not found exception
      */
-    public AlbumDetailDto saveAlbum(String userId, String photoId) throws PhotoNotFoundException {
-        ObjectId userObjectId = new ObjectId(userId);
-        ObjectId photoObjectId = new ObjectId(photoId);
+    public AlbumDetailDto saveAlbum(String userId, String feedId) throws PhotoNotFoundException {
+        if (StringUtils.isEmpty(userId) || ObjectId.isValid(userId))
+            throw new IllegalArgumentException("userId cannot be converted to ObjectId. feedId: " + userId);
 
-        Optional<Album> existingAlbum = albumRepository.findByUserIdAndPhotoId(userObjectId, photoObjectId);
+        if (StringUtils.isEmpty(feedId) || ObjectId.isValid(feedId))
+            throw new IllegalArgumentException("feedId cannot be converted to ObjectId. feedId: " + feedId);
+
+        ObjectId userObjectId = new ObjectId(userId);
+        ObjectId feedObjectId = new ObjectId(feedId);
+
+        Optional<Album> existingAlbum = albumRepository.findByUserIdAndFeedId(userObjectId, feedObjectId);
         if (existingAlbum.isPresent()){
             throw new DuplicateKeyException("이미 가지고 있는 사진입니다.");
         }
 
-        Photo photo = photoRepository.findById(photoObjectId)
-                .orElseThrow(() -> new PhotoNotFoundException(photoObjectId));
+        Feed feed = feedRepository.findById(feedObjectId)
+            .orElseThrow(() -> new PhotoNotFoundException(feedObjectId));
 
         Album albumTobeSaved = Album.builder()
                 .userId(userObjectId)
-                .photoId(photoObjectId)
-                .thumbnailLink(photo.getThumbnailLink())
+                .feedId(feedObjectId)
+                .thumbnailLink(feed.getPhoto().getThumbnailLink())
                 .lastViewed(new Date())
-                .tags(photo.getTags())
+                .tags(feed.getPhoto().getTags())
                 .build();
 
         Album album = albumRepository.insert(albumTobeSaved);
 
-        return toAlbumDetailDto(album, photo);
+        return toAlbumDetailDto(album, feed.getPhoto());
     }
 
 
@@ -111,7 +121,7 @@ public class AlbumService {
      */
     public Album getAlbumDetail(String userId, String photoId){
         ObjectId objectPhotoId = new ObjectId(photoId);
-        return albumRepository.findByUserIdAndPhotoId(new ObjectId(userId), objectPhotoId)
+        return albumRepository.findByUserIdAndFeedId(new ObjectId(userId), objectPhotoId)
                 .orElseThrow(() -> new AlbumNotFoundException(objectPhotoId));
     }
 
@@ -132,8 +142,10 @@ public class AlbumService {
 
         Album album = albumRepository.findById(albumObjectId)
                 .orElseThrow(() -> new AlbumNotFoundException(albumObjectId));
-        Photo photo = photoRepository.findById(album.getPhotoId())
-                .orElseThrow(() -> new PhotoNotFoundException(album.getPhotoId()));
+        Feed feed = feedRepository.findById(album.getFeedId())
+                .orElseThrow(() -> new AlbumNotFoundException(albumObjectId));
+        Photo photo = photoRepository.findById(album.getFeedId())
+                .orElseThrow(() -> new PhotoNotFoundException(album.getFeedId()));
 
         album.setTags(tags);
         albumRepository.save(album);
@@ -151,16 +163,18 @@ public class AlbumService {
      * Delete album.
      *
      * @param userId  the user id
-     * @param albumId the album id
+     * @param feedId the feed id
      * @throws AlbumNotFoundException the album not found exception
      */
-    public void deleteAlbum(String userId, String albumId) throws AlbumNotFoundException{
-        ObjectId albumObjectId = new ObjectId(albumId);
+    public void deleteAlbum(String userId, String feedId) throws AlbumNotFoundException{
+        ObjectId userObjectId = new ObjectId(userId);
+        ObjectId feedObjectId = new ObjectId(feedId);
 
-        Album album = albumRepository.findById(albumObjectId)
-                .orElseThrow(() -> new AlbumNotFoundException(albumObjectId));
+        Album album = albumRepository.findByUserIdAndFeedId(userObjectId, feedObjectId)
+                .orElseThrow(() -> new AlbumNotFoundException(feedObjectId));
 
-        albumRepository.deleteById(albumObjectId);
+        album.setDeleted(true);
+        albumRepository.save(album);
     }
 
     private AlbumDetailDto toAlbumDetailDto(Album album, Photo photo) {
@@ -178,12 +192,12 @@ public class AlbumService {
     private AlbumOutlineDto toAlbumOutlineDto(Album album) {
         return AlbumOutlineDto.builder()
                 .albumId(album.getId().toString())
-                .photoId(album.getPhotoId().toString())
+                .photoId(album.getFeedId().toString())
                 .thumbnailLink(album.getThumbnailLink())
                 .build();
     }
 
     public List<Album> findAllByUserIdAndPhotoIdIn(String userId, List<ObjectId> searchQuery) {
-        return albumRepository.findAllByUserIdAndPhotoIdIn(new ObjectId(userId), searchQuery);
+        return albumRepository.findAllByUserIdAndFeedIdIn(new ObjectId(userId), searchQuery);
     }
 }

@@ -106,7 +106,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     SuccessResponse retval = new SuccessResponse();
     try {
-      feedService.addFavorite(userId, feedId);
+      feedService.addLike(userId, feedId);
       retval.setMessage(SUCCESS_MESSAGE);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -120,7 +120,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     SuccessResponse retval = new SuccessResponse();
     try {
-      feedService.deleteFavorite(userId, feedId);
+      feedService.deleteLike(userId, feedId);
       retval.setMessage(SUCCESS_MESSAGE);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
