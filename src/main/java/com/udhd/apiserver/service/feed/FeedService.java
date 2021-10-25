@@ -68,19 +68,20 @@ public class FeedService {
               .deleted(false)
               .build()))
           .order(11)
+          .likes(Collections.emptyList())
           .build(),
           Feed.builder()
-          .id(new ObjectId())
-          .photo(Photo.builder()
               .id(new ObjectId())
-              .uploaderId(new ObjectId())
-              .checksum("dcf4af04c49cd976eb1d1862d528d365") // random md5 dummy hash
-              .originalLink("https://udhdbucket.s3.ap-northeast-2.amazonaws.com/dcf4af04c49cd976eb1d1862d528d365")
-              .thumbnailLink("https://udhdbucket.s3.ap-northeast-2.amazonaws.com/dcf4af04c49cd976eb1d1862d528d365")
-              .createdDate(LocalDateTime.now())
-              .modifiedDate(LocalDateTime.now())
-              .tags(Arrays.asList("오마이걸", "2집"))
-              .build())
+              .photo(Photo.builder()
+                .id(new ObjectId())
+                .uploaderId(new ObjectId())
+                .checksum("dcf4af04c49cd976eb1d1862d528d365") // random md5 dummy hash
+                .originalLink("https://udhdbucket.s3.ap-northeast-2.amazonaws.com/dcf4af04c49cd976eb1d1862d528d365")
+                .thumbnailLink("https://udhdbucket.s3.ap-northeast-2.amazonaws.com/dcf4af04c49cd976eb1d1862d528d365")
+                .createdDate(LocalDateTime.now())
+                .modifiedDate(LocalDateTime.now())
+                .tags(Arrays.asList("오마이걸", "2집"))
+                .build())
           .comments(Collections.singletonList(
               Comment.builder()
                   .id(new ObjectId())
@@ -92,6 +93,7 @@ public class FeedService {
                   .deleted(false)
                   .build()
           ))
+          .likes(Collections.emptyList())
           .order(10)
           .build()
       );
@@ -239,13 +241,13 @@ public class FeedService {
   protected MongoTemplate mongoTemplate;
 
   void push(ObjectId id, String property, Object value) {
-    mongoTemplate.updateFirst(
+    mongoTemplate.updateMulti(
         Query.query(Criteria.where("id").is(id)),
         new Update().push(property, value), Feed.class
     );
   }
   void pull(ObjectId id, String property, Object value) {
-    UpdateResult result = mongoTemplate.updateFirst(
+    UpdateResult result = mongoTemplate.updateMulti(
         Query.query(Criteria.where("id").is(id)),
         new Update().pull(property, value), Feed.class
     );

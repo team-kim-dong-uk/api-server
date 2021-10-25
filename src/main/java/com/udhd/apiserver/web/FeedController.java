@@ -12,6 +12,7 @@ import com.udhd.apiserver.web.dto.SuccessResponse;
 import com.udhd.apiserver.web.dto.feed.CommentDto;
 import com.udhd.apiserver.web.dto.feed.FeedDto;
 import com.udhd.apiserver.web.dto.feed.FeedResponse;
+import com.udhd.apiserver.web.dto.feed.LikeDto;
 import com.udhd.apiserver.web.dto.feed.PhotoDto;
 import java.time.ZoneId;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -81,7 +83,7 @@ public class FeedController {
 
   @PutMapping("/{feedId}/comment")
   @ResponseBody
-  Object registerComment(@PathVariable String feedId, String content, HttpServletResponse response) {
+  Object registerComment(@PathVariable String feedId, @RequestBody String content, HttpServletResponse response) {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.registerComment(userId, feedId, content);
@@ -189,10 +191,12 @@ public class FeedController {
             .createdDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
             .modifiedDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
             .build()).collect(Collectors.toList());
+    List<LikeDto> likeDtos = feed.getLikes().stream().map(like -> LikeDto.builder().id(like.getId().toString()).userId(like.getUserId().toString()).userName(like.getUserName()).build()).collect(Collectors.toList());
     return FeedDto.builder()
             .id(feed.getId().toString()) // TODO: 이거 나중에 service layer에서도 dto 만들어줘서 string 추상화 해줘야함
             .photo(photoDto)
             .comments(commentDtos)
+            .likes(likeDtos)
             .build();
   }
 }
