@@ -121,8 +121,7 @@ public class FeedService {
   }
 
   public List<Feed> getLikedFeeds(String userId, int count, int page) throws FeedException {
-    List<Feed> ret = new ArrayList<>(mockupFeeds);
-    Collections.reverse(ret);
+    List<Feed> ret = feedRepository.findAllLikedFeedsByUserId(new ObjectId(userId));
     return ret;
   }
 
