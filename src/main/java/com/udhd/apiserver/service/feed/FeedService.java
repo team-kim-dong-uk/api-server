@@ -207,6 +207,9 @@ public class FeedService {
   }
 
   protected void pushComment(ObjectId feedId, Comment comment) {
+    if (comment.getCreatedDate() == null)
+      comment.setCreatedDate(LocalDateTime.now());
+    comment.setModifiedDate(LocalDateTime.now());
     push(feedId, "comments", comment);
   }
 
@@ -219,6 +222,9 @@ public class FeedService {
   }
 
   protected void pushLike(ObjectId feedId, Like like) {
+    if (like.getCreatedDate() == null)
+      like.setCreatedDate(LocalDateTime.now());
+    like.setModifiedDate(LocalDateTime.now());
     push(feedId, "likes", like);
   }
 
