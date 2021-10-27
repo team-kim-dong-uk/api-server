@@ -13,4 +13,10 @@ public class AppController {
     public void healthCheck() {
         return;
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping("favicon.ico")
+    public void favicon() {
+        return;
+    }
 }
