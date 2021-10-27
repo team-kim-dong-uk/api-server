@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -199,5 +200,9 @@ public class AlbumService {
 
     public List<Album> findAllByUserIdAndPhotoIdIn(String userId, List<ObjectId> searchQuery) {
         return albumRepository.findAllByUserIdAndFeedIdIn(new ObjectId(userId), searchQuery);
+    }
+
+    public List<Album> findAllByUserId(String userId, Pageable pageable) {
+        return albumRepository.findAllByUserId(new ObjectId(userId), pageable);
     }
 }

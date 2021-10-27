@@ -15,5 +15,7 @@ public interface FeedRepository extends MongoRepository<Feed, ObjectId> {
   List<Feed> findAllByCreatedDateBetween(LocalDateTime s, LocalDateTime e, Pageable pageable);
 
   @Query("{ 'likes': { $elemMatch : { '_id': ?0 }}}")
-  List<Feed> findAllLikedFeedsByUserId(ObjectId userId);
+  List<Feed> findAllLikedFeedsByUserId(ObjectId userId, Pageable pageable);
+
+  List<Feed> findAllById(List<ObjectId> feedIds);
 }

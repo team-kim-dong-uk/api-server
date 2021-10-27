@@ -1,6 +1,7 @@
 package com.udhd.apiserver.service.feed;
 
 import com.mongodb.client.result.UpdateResult;
+import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.feed.Comment;
 import com.udhd.apiserver.domain.feed.Feed;
 import com.udhd.apiserver.domain.feed.FeedRepository;
@@ -117,11 +118,15 @@ public class FeedService {
   }
 
   public List<Feed> getSavedFeeds(String userId, int count, int page) throws FeedException {
-    return mockupFeeds;
+    Pageable pageable = PageRequest.of(page, count);
+    List<Album> savedAlbums = albumService.findAllByUserId(userId, pageable);
+    List<ObjectId> feedIds = savedAlbums.stream().map(album -> album.getFeedId()).collect(Collectors.toList());
+    return feedRepository.findAllById(feedIds);
   }
 
   public List<Feed> getLikedFeeds(String userId, int count, int page) throws FeedException {
-    List<Feed> ret = feedRepository.findAllLikedFeedsByUserId(new ObjectId(userId));
+    Pageable pageable = PageRequest.of(page, count);
+    List<Feed> ret = feedRepository.findAllLikedFeedsByUserId(new ObjectId(userId), pageable);
     return ret;
   }
 
