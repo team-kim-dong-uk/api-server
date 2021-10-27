@@ -39,7 +39,7 @@ public class URLSearchResult implements SearchResult {
   public void setQuery(SearchQuery _query) {
     if (_query instanceof URLSearchQuery) {
       URLSearchQuery query = (URLSearchQuery) _query;
-      queryUrls.addAll(query.urls);
+      //queryUrls.addAll(query.urls);
     } else {
       throw new IllegalArgumentException("Unsupported type for URLSearchResult");
     }

@@ -10,6 +10,7 @@ import com.udhd.apiserver.web.dto.ErrorResponse;
 import com.udhd.apiserver.web.dto.GeneralResponse;
 import com.udhd.apiserver.web.dto.SuccessResponse;
 import com.udhd.apiserver.web.dto.feed.CommentDto;
+import com.udhd.apiserver.web.dto.feed.CommentRequest;
 import com.udhd.apiserver.web.dto.feed.FeedDto;
 import com.udhd.apiserver.web.dto.feed.FeedResponse;
 import com.udhd.apiserver.web.dto.feed.LikeDto;
@@ -83,9 +84,10 @@ public class FeedController {
 
   @PutMapping("/{feedId}/comment")
   @ResponseBody
-  Object registerComment(@PathVariable String feedId, @RequestBody String content, HttpServletResponse response) {
+  Object registerComment(@PathVariable String feedId, @RequestBody CommentRequest commentRequest, HttpServletResponse response) {
     String userId = SecurityUtils.getLoginUserId();
     try {
+      String content = commentRequest.getContent();
       feedService.registerComment(userId, feedId, content);
       return toFeedDto(feedService.getFeed(feedId));
     } catch (CommentException | FeedException e) {

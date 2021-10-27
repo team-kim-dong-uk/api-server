@@ -13,6 +13,7 @@ import com.udhd.apiserver.exception.photo.PhotoNotFoundException;
 import com.udhd.apiserver.exception.user.UserNotFoundException;
 import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.UserService;
+import com.udhd.apiserver.service.search.SearchService;
 import com.udhd.apiserver.web.dto.user.UserDto;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -42,6 +43,9 @@ public class FeedService {
 
   @Autowired
   AlbumService albumService;
+
+  @Autowired
+  SearchService searchService;
 
   private static Integer FEED_HEAD_ID = 0;
   private static int DEFAULT_FEED_COUNT = 20;
@@ -114,7 +118,12 @@ public class FeedService {
   }
 
   public List<Feed> getRelatedFeeds(String userId, String photoId) throws FeedException {
-    return mockupFeeds;
+    int defaultCount = 20;
+    List<String> similarPhotos = searchService.searchSimilarPhoto(photoId, defaultCount);
+    // TODO: count 개수도 변화하도록 바꿔야함
+    return feedRepository.findAllByPhotoIdInOrderByOrder(similarPhotos
+        .stream().map(ObjectId::new).collect(
+        Collectors.toList()), PageRequest.of(0, 20));
   }
 
   public List<Feed> getSavedFeeds(String userId, int count, int page) throws FeedException {

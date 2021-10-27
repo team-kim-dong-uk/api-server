@@ -1,4 +1,4 @@
-package pics.udhd.kafka.dto;
+package pics.udhd.query.service.dto;
 
 import lombok.Builder;
 import lombok.Data;

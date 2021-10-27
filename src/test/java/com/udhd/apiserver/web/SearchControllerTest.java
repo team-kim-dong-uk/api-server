@@ -152,27 +152,6 @@ public class SearchControllerTest {
     }
 
 
-    @Test
-    void searchTags() throws Exception {
-        // given
-        String userId = "60e2fea74c17cf5152fb5b78";
-        List<String> tags = Arrays.asList("오마이걸", "1집");
-        List<String> photoIds = Arrays.asList("6110066323a94f7c27f9cf4c");
-
-        given(photoService.findPhotos(tags, null, userId, null, 21))
-            .willReturn(Arrays.asList(mockPhotoOutlineDto));
-        given(searchService.remainNotOwned(userId, photoIds))
-            .willReturn(photoIds);
-
-        // when
-        String requestUri = "/api/v1/users/" + userId + "/search?tags=오마이걸,1집&sortBy=random&fetchSize=21";
-        ResultActions actions = mockMvc
-                .perform(get(requestUri).with(userToken()));
-
-        // then
-        actions
-                .andExpect(status().isOk());
-    }
 
     @Test
     void searchSimilar() throws Exception {

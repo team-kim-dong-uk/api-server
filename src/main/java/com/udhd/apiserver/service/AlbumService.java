@@ -29,10 +29,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import pics.udhd.kafka.QueryCommander;
-import pics.udhd.kafka.dto.PhotoDto;
-import pics.udhd.kafka.dto.QueryResultDto;
-
 @Service
 @RequiredArgsConstructor
 public class AlbumService {
