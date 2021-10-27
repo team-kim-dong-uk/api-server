@@ -50,7 +50,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public GeneralResponse listSaved(
             @RequestParam(defaultValue = "20") int count,
-            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int page,
             @PathVariable String userId,
             HttpServletResponse response
     ) {
@@ -72,7 +72,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public GeneralResponse listLiked(
             @RequestParam(defaultValue = "20") int count,
-            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int page,
             @PathVariable String userId,
             HttpServletResponse response
     ) {
