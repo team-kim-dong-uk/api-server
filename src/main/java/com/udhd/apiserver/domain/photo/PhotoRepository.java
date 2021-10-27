@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
@@ -29,4 +30,7 @@ public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
     Stream<Photo> findAllByUploaderIdAndIdAfter(ObjectId uploaderId, ObjectId findAfter, Sort sort);
     Boolean existsPhotoByChecksum(String checksum);
     List<Photo> findAllByTagsIn(List<String> tags);
+
+    @Aggregation(value = "{ $sample: { size: ?0 } } ")
+    List<Photo> findRandomPhotos(int count);
 }

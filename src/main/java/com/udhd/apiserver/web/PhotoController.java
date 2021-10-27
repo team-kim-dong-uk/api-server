@@ -2,6 +2,7 @@ package com.udhd.apiserver.web;
 
 import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.web.dto.photo.PhotoDetailDto;
+import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import com.udhd.apiserver.web.dto.photo.TagListDto;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/photos")
@@ -26,6 +28,12 @@ public class PhotoController {
     @ResponseStatus(HttpStatus.CREATED)
     public void uploadPhotos() {
         return;
+    }
+
+    @GetMapping("/random")
+    public List<PhotoOutlineDto> randomPhotos(
+            @RequestParam(defaultValue = "24") int count ) {
+        return photoService.getRandomPhotos(count);
     }
 
     /**

@@ -121,6 +121,13 @@ public class PhotoService {
                 .build();
     }
 
+    public List<PhotoOutlineDto> getRandomPhotos(int count) {
+        List<Photo> randomPhotos = photoRepository.findRandomPhotos(count);
+        return randomPhotos.stream()
+                .map(photo -> toPhotoOutlineDto(photo))
+                .collect(Collectors.toList());
+    }
+
     private PhotoDetailDto toPhotoDetailDtoWithAlbum(Photo photo, Album album) {
         PhotoDetailDto photoDetailDto = toPhotoDetailDto(photo);
         photoDetailDto.setTags(album.getTags());
