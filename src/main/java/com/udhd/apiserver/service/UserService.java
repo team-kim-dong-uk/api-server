@@ -95,9 +95,25 @@ public class UserService {
 
         return userOptional.get();
     }
-
+    public User updateCount(String userId, String type){
+        User user = findById(userId);
+        switch(type){
+            case "addLike":
+                user.addLike();break;
+            case "deleteLike":
+                user.deleteLike();break;
+            case "addSave":
+                user.addSave();break;
+            case "deleteSave":
+                user.deleteSave();
+        }
+        return userRepository.save(user);
+    }
     public User insert(User user) {
         return userRepository.insert(user);
+    }
+    public User save(User user) {
+        return userRepository.save(user);
     }
 
     private UserDto toUserDto(User user) {
@@ -108,6 +124,8 @@ public class UserService {
                 .group(user.getGroup())
                 .numAlbumPhotos(2)      // TODO
                 .numUploadedPhotos(user.getUploadCount())
+                .numLikePhotos(user.getLikeCount() != null ? user.getLikeCount() : 0)
+                .numSavePhotos(user.getSaveCount()  != null ? user.getSaveCount() : 0)
                 .build();
     }
 }

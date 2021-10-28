@@ -30,4 +30,12 @@ public class UserDto {
      * 앨범에 저장한 사진 수
      */
     Integer numAlbumPhotos;
+    /**
+     * 좋아요한 사진 수
+     */
+    Integer numLikePhotos;
+    /**
+     * 앨범에 저장한 사진 수
+     */
+    Integer numSavePhotos;
 }

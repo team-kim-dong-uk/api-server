@@ -61,9 +61,17 @@ public class AlbumService {
 
         Optional<Album> existingAlbum = albumRepository.findByUserIdAndFeedId(userObjectId, feedObjectId);
         if (existingAlbum.isPresent()){
-            throw new DuplicateKeyException("이미 가지고 있는 사진입니다.");
+            Album existingAlbumContent = existingAlbum.get();
+            if (existingAlbumContent.isDeleted()){
+                existingAlbumContent.setDeleted(false);
+                Album album = albumRepository.save(existingAlbumContent);
+                Feed feed = feedRepository.findById(feedObjectId)
+                        .orElseThrow(() -> new PhotoNotFoundException(feedObjectId));
+                return toAlbumDetailDto(album, feed.getPhoto());
+            } else {
+                throw new DuplicateKeyException("이미 가지고 있는 사진입니다.");
+            }
         }
-
         Feed feed = feedRepository.findById(feedObjectId)
             .orElseThrow(() -> new PhotoNotFoundException(feedObjectId));
 
