@@ -10,6 +10,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
@@ -18,7 +19,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @AllArgsConstructor
 @Document(collection = "user")
-public class User {
+public class User implements Persistable<ObjectId> {
 
   @Id
   private ObjectId id;
@@ -42,5 +43,10 @@ public class User {
 
   public void setRefreshToken(String refreshToken) {
     this.refreshToken = refreshToken;
+  }
+
+  @Override
+  public boolean isNew() {
+    return id == null;
   }
 }
