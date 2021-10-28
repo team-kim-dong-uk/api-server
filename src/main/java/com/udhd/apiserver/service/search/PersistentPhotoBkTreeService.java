@@ -27,9 +27,7 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
   Metric<TaggedPhotoDto> hammingDistance;
   BkTreeSearcher<TaggedPhotoDto> searcher;
   private static final int defaultDistance = 5;
-  private final HashService hashService;
   private final TaggedPhotoService taggedPhotoService;
-  private final TaggedPhotoDtoMapper taggedPhotoDtoMapper;
 
   @Getter
   private int size;
