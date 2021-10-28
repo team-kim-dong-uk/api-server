@@ -10,7 +10,6 @@ import com.udhd.apiserver.domain.upload.Upload;
 import com.udhd.apiserver.domain.upload.UploadRepository;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.upload.UploadWithGoogleDriveRequest;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
-import pics.udhd.query.service.dto.PhotoDto;
+import com.udhd.apiserver.service.search.PhotoDto;
 
 @RequiredArgsConstructor
 @Service

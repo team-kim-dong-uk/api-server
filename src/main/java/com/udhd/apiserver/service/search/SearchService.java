@@ -12,9 +12,6 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pics.udhd.query.service.PhotoBkTreeService;
-import pics.udhd.query.service.TaggedPhotoService;
-import pics.udhd.query.service.dto.TaggedPhoto;
 
 @RequiredArgsConstructor
 @Service
@@ -54,11 +51,11 @@ public class SearchService {
   }
 
   public List<String> searchSimilarPhoto(String photoId, int count) {
-    TaggedPhoto taggedPhoto = taggedPhotoService.fetchByPhotoId(photoId);
+    TaggedPhotoDto taggedPhoto = taggedPhotoService.fetchByPhotoId(photoId);
     if (taggedPhoto == null)
       return Collections.emptyList();
     return bkTreeService.search(taggedPhoto, 20, count)
         .stream()
-        .map(TaggedPhoto::getPhotoId).collect(Collectors.toList());
+        .map(TaggedPhotoDto::getPhotoId).collect(Collectors.toList());
   }
 }

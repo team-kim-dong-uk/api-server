@@ -1,4 +1,4 @@
-package pics.udhd.query.util.bktree;
+package com.udhd.apiserver.util.bktree;
 
 import static java.lang.String.format;
 
@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.lang.Nullable;
-import pics.udhd.query.util.bktree.Exception.IllegalMetricException;
+import com.udhd.apiserver.util.bktree.Exception.IllegalMetricException;
 
 /**
  * A mutable {@linkplain edu.gatech.gtri.bktree.BkTree BK-tree}.

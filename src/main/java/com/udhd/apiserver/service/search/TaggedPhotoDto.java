@@ -1,4 +1,4 @@
-package pics.udhd.query.service.dto;
+package com.udhd.apiserver.service.search;
 
 import dev.brachtendorf.jimagehash.hash.Hash;
 import lombok.Builder;
@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class TaggedPhoto {
+public class TaggedPhotoDto {
   String photoId;
   Hash hash;
   String url;

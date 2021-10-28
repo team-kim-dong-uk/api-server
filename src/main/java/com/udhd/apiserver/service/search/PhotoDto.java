@@ -1,4 +1,4 @@
-package pics.udhd.query.service.dto;
+package com.udhd.apiserver.service.search;
 
 import lombok.Builder;
 import lombok.Data;

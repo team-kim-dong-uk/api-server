@@ -4,6 +4,6 @@ import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface TaggedPhotoRepository extends MongoRepository<TaggedPhotoVO, ObjectId> {
-  Optional<TaggedPhotoVO> findById(ObjectId id);
+public interface TaggedPhotoRepository extends MongoRepository<TaggedPhoto, ObjectId> {
+  Optional<TaggedPhoto> findById(ObjectId id);
 }

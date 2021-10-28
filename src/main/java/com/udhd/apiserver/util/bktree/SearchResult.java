@@ -1,9 +1,9 @@
-package pics.udhd.query.util.bktree;
+package com.udhd.apiserver.util.bktree;
 
 import java.util.Set;
 import lombok.Builder;
 import lombok.Data;
-import pics.udhd.query.util.bktree.BkTreeSearcher.Match;
+import com.udhd.apiserver.util.bktree.BkTreeSearcher.Match;
 
 @Data
 @Builder

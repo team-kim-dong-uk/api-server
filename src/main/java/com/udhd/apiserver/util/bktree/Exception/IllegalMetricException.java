@@ -1,4 +1,4 @@
-package pics.udhd.query.util.bktree.Exception;
+package com.udhd.apiserver.util.bktree.Exception;
 
 public class IllegalMetricException extends RuntimeException {
 

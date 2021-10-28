@@ -1,4 +1,4 @@
-package pics.udhd.query.service;
+package com.udhd.apiserver.service.search;
 
 import dev.brachtendorf.jimagehash.hash.Hash;
 import dev.brachtendorf.jimagehash.hashAlgorithms.DifferenceHash;

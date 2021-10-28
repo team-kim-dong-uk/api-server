@@ -1,4 +1,4 @@
-package pics.udhd.query.util;
+package com.udhd.apiserver.util;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

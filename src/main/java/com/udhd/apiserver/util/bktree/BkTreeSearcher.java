@@ -1,4 +1,4 @@
-package pics.udhd.query.util.bktree;
+package com.udhd.apiserver.util.bktree;
 
 import static java.lang.Math.max;
 import static java.lang.String.format;
@@ -7,8 +7,8 @@ import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
-import pics.udhd.query.util.bktree.BkTree.Node;
-import pics.udhd.query.util.bktree.Exception.IllegalMetricException;
+import com.udhd.apiserver.util.bktree.BkTree.Node;
+import com.udhd.apiserver.util.bktree.Exception.IllegalMetricException;
 
 /**
  * Searches a {@link BkTree}.

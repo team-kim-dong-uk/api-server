@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "TAGGED_IMAGE")
 @Data
 @Builder
-public class TaggedPhotoVO {
+public class TaggedPhoto {
   @Id
   private ObjectId photoId;
   private String hash;
