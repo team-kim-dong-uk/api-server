@@ -50,7 +50,7 @@ public class User implements Persistable<ObjectId> {
 
   @Override
   public boolean isNew() {
-    return id == null;
+    return createdDate == null;
   }
 
   public void addLike(){ this.likeCount += 1; }
