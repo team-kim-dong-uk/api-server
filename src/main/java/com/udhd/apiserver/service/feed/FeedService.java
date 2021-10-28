@@ -14,16 +14,10 @@ import com.udhd.apiserver.exception.user.UserNotFoundException;
 import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.UserService;
 import com.udhd.apiserver.web.dto.user.UserDto;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
-import com.udhd.apiserver.web.dto.feed.CommentDto;
-import com.udhd.apiserver.web.dto.feed.FeedDto;
-import com.udhd.apiserver.web.dto.feed.PhotoDto;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -31,6 +25,13 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FeedService {
@@ -169,12 +170,17 @@ public class FeedService {
     deleteComment(feedObjectId, userObjectId, commentObjectId);
   }
 
-  public void addLike(String userId, String feedId) throws FeedException {
+  public void addLike(String userId, String feedId) throws FeedException, DuplicateKeyException {
     if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId))
       throw new FeedException("Invalid feedId : " + feedId + ". It must be non-empty and proper hexstring");
 
     if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId))
       throw new FeedException("Invalid userId : " + userId + ". It must be non-empty and proper hexstring");
+
+    Optional<Feed> existingLikedFeed = feedRepository.existsFeedByUserId(new ObjectId(feedId), new ObjectId(userId));
+    if (existingLikedFeed.isPresent()){
+      throw new FeedException("이미 좋아요한 사진입니다.");
+    }
 
     User user = userService.findById(userId);
     userService.updateCount(userId, "addLike");
