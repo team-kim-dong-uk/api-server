@@ -177,6 +177,7 @@ public class FeedService {
       throw new FeedException("Invalid userId : " + userId + ". It must be non-empty and proper hexstring");
 
     User user = userService.findById(userId);
+    userService.updateCount(userId, "addLike");
     pushLike(new ObjectId(feedId),
         Like.builder()
         .userId(new ObjectId(userId))
@@ -192,6 +193,7 @@ public class FeedService {
       throw new FeedException("Invalid userId : " + userId + ". It must be non-empty and proper hexstring");
 
     deleteLike(new ObjectId(feedId), new ObjectId(userId));
+    userService.updateCount(userId, "deleteLike");
   }
 
   public void saveFeed(String userId, String feedId) throws FeedException {
@@ -200,6 +202,7 @@ public class FeedService {
     } catch (PhotoNotFoundException e) {
       throw new FeedException(e.getMessage());
     }
+    userService.updateCount(userId, "addSave");
   }
 
   public void deleteSavedFeed(String userId, String feedId) throws FeedException {
@@ -208,6 +211,7 @@ public class FeedService {
     } catch (AlbumNotFoundException e) {
       throw new FeedException(e.getMessage());
     }
+    userService.updateCount(userId, "deleteSave");
   }
 
   protected void pushComment(ObjectId feedId, Comment comment) {

@@ -28,6 +28,9 @@ public class User implements Persistable<ObjectId> {
   private String group;
   private String refreshToken;
   private int uploadCount;
+  private Integer likeCount = 0;
+  private Integer saveCount = 0;
+
   @CreatedDate
   private LocalDateTime createdDate;
   @LastModifiedDate
@@ -48,5 +51,16 @@ public class User implements Persistable<ObjectId> {
   @Override
   public boolean isNew() {
     return id == null;
+  }
+
+  public void addLike(){ this.likeCount += 1; }
+  public void addSave(){ this.saveCount += 1; }
+  public void deleteLike(){
+    if(this.likeCount > 0)
+      this.likeCount -= 1;
+  }
+  public void deleteSave(){
+    if(this.saveCount > 0)
+      this.saveCount -= 1;
   }
 }
