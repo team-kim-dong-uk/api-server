@@ -19,7 +19,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @AllArgsConstructor
 @Document(collection = "user")
-public class User implements Persistable<ObjectId> {
+public class User {
 
   @Id
   private ObjectId id;
@@ -31,11 +31,6 @@ public class User implements Persistable<ObjectId> {
   private Integer likeCount = 0;
   private Integer saveCount = 0;
 
-  @CreatedDate
-  private LocalDateTime createdDate;
-  @LastModifiedDate
-  private LocalDateTime modifiedDate;
-
   public void setNickname(String nickname) {
     this.nickname = nickname;
   }
@@ -46,11 +41,6 @@ public class User implements Persistable<ObjectId> {
 
   public void setRefreshToken(String refreshToken) {
     this.refreshToken = refreshToken;
-  }
-
-  @Override
-  public boolean isNew() {
-    return createdDate == null;
   }
 
   public void addLike(){ this.likeCount += 1; }
