@@ -18,8 +18,7 @@ import com.udhd.apiserver.domain.taggedphoto.TaggedPhoto;
 @Slf4j
 @RequiredArgsConstructor
 public class TaggedPhotoService {
-  @Resource
-  TaggedPhotoRepository taggedPhotoRepository;
+  final TaggedPhotoRepository taggedPhotoRepository;
   final HashService hashService;
   final TaggedPhotoDtoMapper taggedPhotoDtoMapper;
 
