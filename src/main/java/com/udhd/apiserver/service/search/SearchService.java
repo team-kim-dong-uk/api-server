@@ -5,6 +5,7 @@ import com.udhd.apiserver.domain.tag.TagRepository;
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.domain.user.UserRepository;
 import com.udhd.apiserver.web.dto.search.SearchCandidateDto;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,6 +55,8 @@ public class SearchService {
 
   public List<String> searchSimilarPhoto(String photoId, int count) {
     TaggedPhoto taggedPhoto = taggedPhotoService.fetchByPhotoId(photoId);
+    if (taggedPhoto == null)
+      return Collections.emptyList();
     return bkTreeService.search(taggedPhoto, 20, count)
         .stream()
         .map(TaggedPhoto::getPhotoId).collect(Collectors.toList());
