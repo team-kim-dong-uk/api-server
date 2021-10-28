@@ -9,11 +9,8 @@ import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.ErrorResponse;
 import com.udhd.apiserver.web.dto.GeneralResponse;
 import com.udhd.apiserver.web.dto.SuccessResponse;
-import com.udhd.apiserver.web.dto.feed.CommentDto;
-import com.udhd.apiserver.web.dto.feed.FeedDto;
-import com.udhd.apiserver.web.dto.feed.FeedResponse;
-import com.udhd.apiserver.web.dto.feed.LikeDto;
-import com.udhd.apiserver.web.dto.feed.PhotoDto;
+import com.udhd.apiserver.web.dto.feed.*;
+
 import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -83,10 +80,11 @@ public class FeedController {
 
   @PutMapping("/{feedId}/comment")
   @ResponseBody
-  Object registerComment(@PathVariable String feedId, @RequestBody String content, HttpServletResponse response) {
+  Object registerComment(@PathVariable String feedId, @RequestBody RegisterCommentRequestDto registerCommentRequestDto,
+                         HttpServletResponse response) {
     String userId = SecurityUtils.getLoginUserId();
     try {
-      feedService.registerComment(userId, feedId, content);
+      feedService.registerComment(userId, feedId, registerCommentRequestDto.getContent());
       return toFeedDto(feedService.getFeed(feedId));
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
