@@ -34,6 +34,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                         .queryParam("accessToken", loginInfoDto.getAccessToken())
                         .queryParam("refreshToken", loginInfoDto.getRefreshToken())
                         .queryParam("nickname", loginInfoDto.getNickname())
+                        .queryParam("isNewUser", loginInfoDto.isNewUser())
                         .build().toUriString()
                 );
     }
