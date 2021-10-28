@@ -10,6 +10,7 @@ import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.ErrorResponse;
 import com.udhd.apiserver.web.dto.GeneralResponse;
 import com.udhd.apiserver.web.dto.feed.FeedDto;
+import com.udhd.apiserver.web.dto.feed.FeedDtoMapper;
 import com.udhd.apiserver.web.dto.feed.FeedResponse;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
@@ -23,8 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.udhd.apiserver.web.FeedController.toFeedDto;
-
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
 @RestController
@@ -32,6 +31,7 @@ public class UserController {
     private final UserService userService;
     private final PhotoService photoService;
     private final FeedService feedService;
+    private final FeedDtoMapper feedDtoMapper;
 
     /**
      * 유저 상세정보 조회.
@@ -58,7 +58,7 @@ public class UserController {
         try {
             List<Feed> feeds = feedService.getSavedFeeds(userId, count, page);
             List<FeedDto> feedDtos = feeds.stream()
-                    .map(feed -> toFeedDto(feed))
+                    .map(feedDtoMapper::toDto)
                     .collect(Collectors.toList());
             retval.setFeeds(feedDtos);
         } catch (FeedException e) {
@@ -80,7 +80,7 @@ public class UserController {
         try {
             List<Feed> feeds = feedService.getLikedFeeds(userId, count, page);
             List<FeedDto> feedDtos = feeds.stream()
-                    .map(feed -> toFeedDto(feed))
+                    .map(feedDtoMapper::toDto)
                     .collect(Collectors.toList());
             retval.setFeeds(feedDtos);
         } catch (FeedException e) {

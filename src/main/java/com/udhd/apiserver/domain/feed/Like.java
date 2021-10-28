@@ -1,6 +1,7 @@
 package com.udhd.apiserver.domain.feed;
 
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.bson.types.ObjectId;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Persistable;
 
 @Data
 @Builder
+@AllArgsConstructor
 public class Like implements Persistable<ObjectId> {
   @Id
   ObjectId userId;

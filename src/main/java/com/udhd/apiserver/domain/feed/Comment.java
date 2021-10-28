@@ -3,6 +3,7 @@ package com.udhd.apiserver.domain.feed;
 
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.bson.types.ObjectId;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Persistable;
 
 @Builder
 @Data
+@AllArgsConstructor
 public class Comment implements Persistable<ObjectId> {
   @Id
   private ObjectId id; // subdocument 이기 때문에 직접 생성해서 넣어줘야함

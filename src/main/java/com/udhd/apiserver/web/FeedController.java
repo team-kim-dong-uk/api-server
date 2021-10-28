@@ -12,6 +12,7 @@ import com.udhd.apiserver.web.dto.SuccessResponse;
 import com.udhd.apiserver.web.dto.feed.CommentDto;
 import com.udhd.apiserver.web.dto.feed.CommentRequest;
 import com.udhd.apiserver.web.dto.feed.FeedDto;
+import com.udhd.apiserver.web.dto.feed.FeedDtoMapper;
 import com.udhd.apiserver.web.dto.feed.FeedResponse;
 import com.udhd.apiserver.web.dto.feed.LikeDto;
 import com.udhd.apiserver.web.dto.feed.PhotoDto;
@@ -39,6 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class FeedController {
   @Autowired
   FeedService feedService;
+  @Autowired
+  FeedDtoMapper feedDtoMapper;
 
   final String SUCCESS_MESSAGE = "success";
 
@@ -51,7 +54,7 @@ public class FeedController {
       List<Feed> feeds = feedService.getFeeds(userId);
       log.info("feed", feeds);
       List<FeedDto> feedDtos = feeds.stream()
-              .map(feed -> toFeedDto(feed))
+              .map(feedDtoMapper::toDto)
               .collect(Collectors.toList());
       log.info("feedDto", feedDtos);
       retval.setFeeds(feedDtos);
@@ -71,7 +74,7 @@ public class FeedController {
     try {
       List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId);
       List<FeedDto> feedDtos = feeds.stream()
-              .map(feed -> toFeedDto(feed))
+              .map(feedDtoMapper::toDto)
               .collect(Collectors.toList());
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
@@ -88,7 +91,7 @@ public class FeedController {
     try {
       String content = commentRequest.getContent();
       feedService.registerComment(userId, feedId, content);
-      return toFeedDto(feedService.getFeed(feedId));
+      return feedDtoMapper.toDto(feedService.getFeed(feedId));
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -101,7 +104,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.deleteComment(userId, feedId, commentId);
-      return toFeedDto(feedService.getFeed(feedId));
+      return feedDtoMapper.toDto(feedService.getFeed(feedId));
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -164,40 +167,5 @@ public class FeedController {
     }
 
     return retval;
-  }
-
-  @RequestMapping("/dummy")
-  void createDummyData() {
-    feedService.createDummyData();
-  }
-
-  public static FeedDto toFeedDto(Feed feed) {
-    Photo photo = feed.getPhoto();
-    PhotoDto photoDto = PhotoDto.builder()
-            .id(photo.getId().toString())
-            .uploaderId(photo.getUploaderId().toString())
-            .checksum(photo.getChecksum())
-            .originalLink(photo.getOriginalLink())
-            .thumbnailLink(photo.getThumbnailLink())
-            .createdDate(photo.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .modifiedDate(photo.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .tags(photo.getTags())
-            .build();
-    List<CommentDto> commentDtos = feed.getComments().stream().map(comment -> CommentDto.builder()
-            .id(comment.getId().toString())
-            .userId(comment.getUserId().toString())
-            .userName(comment.getUserName())
-            .content(comment.getContent())
-            .deleted(comment.isDeleted())
-            .createdDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .modifiedDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .build()).collect(Collectors.toList());
-    List<LikeDto> likeDtos = feed.getLikes().stream().map(like -> LikeDto.builder().id(like.getId().toString()).userId(like.getUserId().toString()).userName(like.getUserName()).build()).collect(Collectors.toList());
-    return FeedDto.builder()
-            .id(feed.getId().toString()) // TODO: 이거 나중에 service layer에서도 dto 만들어줘서 string 추상화 해줘야함
-            .photo(photoDto)
-            .comments(commentDtos)
-            .likes(likeDtos)
-            .build();
   }
 }
