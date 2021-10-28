@@ -123,7 +123,7 @@ public class FeedService {
     // TODO: count 개수도 변화하도록 바꿔야함
     return feedRepository.findAllByPhotoIdInOrderByOrder(similarPhotos
         .stream().map(ObjectId::new).collect(
-        Collectors.toList()), PageRequest.of(0, 20));
+        Collectors.toList()), PageRequest.of(0, defaultCount));
   }
 
   public List<Feed> getSavedFeeds(String userId, int count, int page) throws FeedException {

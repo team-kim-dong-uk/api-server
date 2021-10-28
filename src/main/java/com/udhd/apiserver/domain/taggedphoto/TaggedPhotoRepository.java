@@ -1,4 +1,4 @@
-package pics.udhd.query.domain;
+package com.udhd.apiserver.domain.taggedphoto;
 
 import java.util.Optional;
 import org.bson.types.ObjectId;

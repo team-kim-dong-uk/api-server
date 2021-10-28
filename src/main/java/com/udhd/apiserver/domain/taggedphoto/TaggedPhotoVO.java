@@ -1,4 +1,4 @@
-package pics.udhd.query.domain;
+package com.udhd.apiserver.domain.taggedphoto;
 
 import java.time.LocalDateTime;
 import lombok.Builder;

@@ -9,8 +9,8 @@ import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
-import pics.udhd.query.domain.TaggedPhotoRepository;
-import pics.udhd.query.domain.TaggedPhotoVO;
+import com.udhd.apiserver.domain.taggedphoto.TaggedPhotoRepository;
+import com.udhd.apiserver.domain.taggedphoto.TaggedPhotoVO;
 import pics.udhd.query.service.dto.TaggedPhoto;
 
 @Service
