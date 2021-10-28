@@ -83,26 +83,30 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
   }
 
   public List<? extends TaggedPhoto> search(TaggedPhoto taggedPhoto, int distance) {
+    return this.search(taggedPhoto, Integer.MIN_VALUE, distance, Integer.MAX_VALUE);
+  }
+
+  @Override
+  public List<? extends TaggedPhoto> search(TaggedPhoto taggedPhoto, int maxDistance, int limit) {
+    return this.search(taggedPhoto, maxDistance, limit, Integer.MIN_VALUE);
+  }
+
+  @Override
+  public List<? extends TaggedPhoto> search(TaggedPhoto taggedPhoto, int maxDistance, int limit,
+      int minDistance) {
     log.info("searcher : " + searcher.toString());
     log.info("taggedPhoto : " + taggedPhoto.toString());
-    SearchOption searchOption = SearchOption.builder().maxDistance(distance).build();
+    SearchOption searchOption = SearchOption.builder()
+        .minDistance(minDistance)
+        .maxDistance(maxDistance)
+        .limit(limit)
+        .build();
     SearchResult<? extends TaggedPhoto> result = searcher.search(taggedPhoto, searchOption);
     List<TaggedPhoto> retval = new ArrayList<>();
     for (Match<? extends TaggedPhoto> element : result.getMatches()) {
       retval.add(element.getMatch());
     }
     return retval;
-  }
-
-  @Override
-  public List<? extends TaggedPhoto> search(TaggedPhoto taggedPhoto, int maxDistance, int limit) {
-    return null;
-  }
-
-  @Override
-  public List<? extends TaggedPhoto> search(TaggedPhoto taggedPhoto, int maxDistance, int limit,
-      int minDistance) {
-    return null;
   }
 
   public List<? extends TaggedPhoto> search(Hash hash) {
