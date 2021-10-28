@@ -64,8 +64,7 @@ public class FeedController {
 
   @GetMapping("/related")
   @ResponseBody
-  GeneralResponse getRelatedFeeds(@PathVariable String feedId,
-      @RequestParam(defaultValue = "") String photoId,
+  GeneralResponse getRelatedFeeds(@RequestParam(defaultValue = "") String photoId,
       HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();
     String userId = SecurityUtils.getLoginUserId();
