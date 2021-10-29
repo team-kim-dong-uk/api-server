@@ -65,11 +65,11 @@ test {
     dependsOn jsonDoclet
 }
 
-asciidoctor {
-    configurations 'asciidoctorExt'
-    inputs.dir snippetsDir
-    dependsOn test
-}
+//asciidoctor {
+    //configurations 'asciidoctorExt'
+    //inputs.dir snippetsDir
+    //dependsOn test
+//}
 
 bootJar {
     dependsOn asciidoctor
