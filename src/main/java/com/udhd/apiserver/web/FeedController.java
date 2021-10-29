@@ -1,7 +1,9 @@
 package com.udhd.apiserver.web;
 
+import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.feed.Feed;
 import com.udhd.apiserver.domain.photo.Photo;
+import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.feed.CommentException;
 import com.udhd.apiserver.service.feed.FeedException;
 import com.udhd.apiserver.service.feed.FeedService;
@@ -9,12 +11,10 @@ import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.ErrorResponse;
 import com.udhd.apiserver.web.dto.GeneralResponse;
 import com.udhd.apiserver.web.dto.SuccessResponse;
-import com.udhd.apiserver.web.dto.feed.CommentDto;
-import com.udhd.apiserver.web.dto.feed.FeedDto;
-import com.udhd.apiserver.web.dto.feed.FeedResponse;
-import com.udhd.apiserver.web.dto.feed.LikeDto;
-import com.udhd.apiserver.web.dto.feed.PhotoDto;
+import com.udhd.apiserver.web.dto.feed.*;
+
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
@@ -38,20 +38,46 @@ import org.springframework.web.bind.annotation.RestController;
 public class FeedController {
   @Autowired
   FeedService feedService;
+  @Autowired
+  AlbumService albumService;
 
   final String SUCCESS_MESSAGE = "success";
 
   @GetMapping("")
   @ResponseBody
-  GeneralResponse getFeeds(HttpServletResponse response) {
+  public GeneralResponse getFeedsForBackCompatibility(HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();
     String userId = SecurityUtils.getLoginUserId();
     try {
       List<Feed> feeds = feedService.getFeeds(userId);
+      List<Album> savedFeeds = userId.length() > 0
+              ? albumService.findAllByUserIdAndFeedIdIn(userId,
+              feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()))
+              : Collections.emptyList();log.info("feed", feeds);
       log.info("feed", feeds);
-      List<FeedDto> feedDtos = feeds.stream()
-              .map(feed -> toFeedDto(feed))
-              .collect(Collectors.toList());
+      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
+      log.info("feedDto", feedDtos);
+      retval.setFeeds(feedDtos);
+    } catch (FeedException e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    }
+    return retval;
+  }
+
+  @GetMapping("/list")
+  @ResponseBody
+  public GeneralResponse getFeeds(HttpServletResponse response) {
+    FeedResponse retval = new FeedResponse();
+    String userId = SecurityUtils.getLoginUserId();
+    try {
+      List<Feed> feeds = feedService.getFeeds(userId);
+      List<Album> savedFeeds = userId.length() > 0
+              ? albumService.findAllByUserIdAndFeedIdIn(userId,
+              feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()))
+              : Collections.emptyList();
+      log.info("feed", feeds);
+      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
       log.info("feedDto", feedDtos);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
@@ -70,9 +96,9 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId);
-      List<FeedDto> feedDtos = feeds.stream()
-              .map(feed -> toFeedDto(feed))
-              .collect(Collectors.toList());
+      List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
+              feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
+      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -83,11 +109,12 @@ public class FeedController {
 
   @PutMapping("/{feedId}/comment")
   @ResponseBody
-  Object registerComment(@PathVariable String feedId, @RequestBody String content, HttpServletResponse response) {
+  Object registerComment(@PathVariable String feedId, @RequestBody RegisterCommentRequestDto registerCommentRequestDto,
+                         HttpServletResponse response) {
     String userId = SecurityUtils.getLoginUserId();
     try {
-      feedService.registerComment(userId, feedId, content);
-      return toFeedDto(feedService.getFeed(feedId));
+      feedService.registerComment(userId, feedId, registerCommentRequestDto.getContent());
+      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId));
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -100,7 +127,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.deleteComment(userId, feedId, commentId);
-      return toFeedDto(feedService.getFeed(feedId));
+      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId));
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -170,7 +197,21 @@ public class FeedController {
     feedService.createDummyData();
   }
 
-  public static FeedDto toFeedDto(Feed feed) {
+  public static List<FeedDto> toFeedDtoList(List<Feed> feeds, List<Album> savedFeeds) {
+    return feeds.stream()
+            .map(feed -> {
+              boolean saved = false;
+              for (Album album : savedFeeds) {
+                if (album.getFeedId().equals(feed.getId())) {
+                  saved = true;
+                }
+              }
+              return toFeedDto(feed, saved);
+            })
+            .collect(Collectors.toList());
+  }
+
+  public static FeedDto toFeedDto(Feed feed, boolean saved) {
     Photo photo = feed.getPhoto();
     PhotoDto photoDto = PhotoDto.builder()
             .id(photo.getId().toString())
@@ -197,6 +238,7 @@ public class FeedController {
             .photo(photoDto)
             .comments(commentDtos)
             .likes(likeDtos)
+            .saved(saved)
             .build();
   }
 }

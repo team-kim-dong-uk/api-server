@@ -88,6 +88,19 @@ public class AlbumService {
         return toAlbumDetailDto(album, feed.getPhoto());
     }
 
+    /**
+     * user가 해당 feed를 저장했는지 여부
+     * @param userId
+     * @param feedId
+     * @return
+     */
+    public boolean isSavedFeed(String userId, String feedId) {
+        ObjectId userObjectId = new ObjectId(userId);
+        ObjectId feedObjectId = new ObjectId(feedId);
+        Optional<Album> album = albumRepository.findByUserIdAndFeedId(userObjectId, feedObjectId);
+        return album.isPresent();
+    }
+
 
     /**
      * Find albums list.
@@ -207,6 +220,10 @@ public class AlbumService {
     }
 
     public List<Album> findAllByUserIdAndPhotoIdIn(String userId, List<ObjectId> searchQuery) {
+        return albumRepository.findAllByUserIdAndFeedIdIn(new ObjectId(userId), searchQuery);
+    }
+
+    public List<Album> findAllByUserIdAndFeedIdIn(String userId, List<ObjectId> searchQuery) {
         return albumRepository.findAllByUserIdAndFeedIdIn(new ObjectId(userId), searchQuery);
     }
 

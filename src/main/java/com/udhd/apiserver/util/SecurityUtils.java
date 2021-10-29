@@ -7,7 +7,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class SecurityUtils {
 
     public static UserInfo getLoginUser() {
-        return (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if ("anonymousUser".equals(principal)) {
+            return null;
+        }
+        return (UserInfo) principal;
     }
 
     public static String getLoginUserId() {
