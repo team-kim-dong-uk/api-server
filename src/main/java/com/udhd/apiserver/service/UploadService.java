@@ -4,6 +4,8 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
 import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.album.AlbumRepository;
+import com.udhd.apiserver.domain.feed.Feed;
+import com.udhd.apiserver.domain.feed.FeedRepository;
 import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.domain.upload.Upload;
@@ -12,6 +14,9 @@ import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.upload.UploadWithGoogleDriveRequest;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
@@ -43,7 +48,7 @@ public class UploadService {
     private final UploadRepository uploadRepository;
     private final AlbumRepository albumRepository;
     private final RestTemplate restTemplate;
-    private final TagService tagService;
+    private final FeedRepository feedRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -137,9 +142,9 @@ public class UploadService {
 
         // Photo 정보와 tag 정보를 조합해 Album collection에 새 사진 저장.
         if (upload.getTags() == null)
-            saveIntoAlbum(upload.getUploaderId(), photo);
+            saveIntoFeed(photo);
         else
-            saveIntoAlbum(upload.getUploaderId(), photo, upload.getTags());
+            saveIntoFeed(photo);
 
         registerPhoto(photo);
         // Upload collection 에 저장 완료로 표시
@@ -159,6 +164,16 @@ public class UploadService {
 
     void saveIntoAlbum(ObjectId userId, Photo photo) {
         saveIntoAlbum(userId, photo, photo.getTags());
+    }
+
+    void saveIntoFeed(Photo photo) {
+        Feed feed = Feed.builder()
+            .order(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+            .photo(photo)
+            .likes(Collections.emptyList())
+            .comments(Collections.emptyList())
+            .build();
+        feedRepository.save(feed);
     }
     void saveIntoAlbum(ObjectId userId, Photo photo, List<String> tags) {
         Album album = Album.builder()
