@@ -31,6 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                                 ,"/docs/"
                                 ,"/healthcheck"
                                 ,"/favicon.ico"
+                                ,"/feeds/list"
                         })
                         , LogoutFilter.class)
                 .csrf().disable()

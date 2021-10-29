@@ -42,9 +42,15 @@ public class FeedController {
 
   final String SUCCESS_MESSAGE = "success";
 
-  @GetMapping("")
+  @GetMapping("/")
   @ResponseBody
-  GeneralResponse getFeeds(HttpServletResponse response) {
+  public String getFeedsForBackCompatibility(HttpServletResponse response) {
+    return "redirect:/list";
+  }
+
+  @GetMapping("/list")
+  @ResponseBody
+  public GeneralResponse getFeeds(HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();
     String userId = SecurityUtils.getLoginUserId();
     try {
