@@ -2,9 +2,14 @@ package com.udhd.apiserver.service.search;
 
 import com.udhd.apiserver.domain.tag.Tag;
 import com.udhd.apiserver.domain.tag.TagRepository;
+import com.udhd.apiserver.domain.taggedphoto.TaggedPhoto;
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.domain.user.UserRepository;
+import com.udhd.apiserver.service.search.dto.TaggedPhotoDtoMapper;
+import com.udhd.apiserver.util.ImageUtils;
 import com.udhd.apiserver.web.dto.search.SearchCandidateDto;
+import dev.brachtendorf.jimagehash.hash.Hash;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +29,8 @@ public class SearchService {
   private final TagRepository tagRepository;
   private final UserRepository userRepository;
   private final PhotoBkTreeService bkTreeService;
+  private final TaggedPhotoDtoMapper taggedPhotoDtoMapper;
+  private final HashService hashService;
 
 
   public List<SearchCandidateDto> getRecommendedKeywords(String keyword) {
@@ -57,5 +64,20 @@ public class SearchService {
     return bkTreeService.search(taggedPhoto, 20, count)
         .stream()
         .map(TaggedPhotoDto::getPhotoId).collect(Collectors.toList());
+  }
+
+  public void registerPhoto(PhotoDto photoDto) {
+    try {
+      Hash hash = hashService.generateHash(ImageUtils.load(photoDto.getUrl()));
+      bkTreeService.insert(
+          TaggedPhotoDto.builder()
+              .photoId(photoDto.getPhotoId())
+              .url(photoDto.getUrl())
+              .hash(hash)
+              .build()
+      );
+    } catch (IOException e) {
+      log.info("error", e);
+    }
   }
 }

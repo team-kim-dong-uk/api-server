@@ -9,7 +9,11 @@ import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import com.udhd.apiserver.domain.taggedphoto.TaggedPhoto;
 import com.udhd.apiserver.util.bktree.BkTreeSearcher;
@@ -22,7 +26,7 @@ import com.udhd.apiserver.util.bktree.SearchResult;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
+public class PersistentPhotoBkTreeService implements PhotoBkTreeService, InitializingBean {
   MutableBkTree<TaggedPhotoDto> bktree;
   Metric<TaggedPhotoDto> hammingDistance;
   BkTreeSearcher<TaggedPhotoDto> searcher;
@@ -32,17 +36,14 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
   @Getter
   private int size;
 
-  @PostConstruct
-  public void postConstruct() {
-    reset();
-  }
-
   public void clear() {
     initialize();
   }
 
   public void reset() {
     initialize();
+    if (taggedPhotoService == null)
+      return;
     List<TaggedPhotoDto> photos = taggedPhotoService.findAll();
     bktree.addAll(photos);
   }
@@ -106,5 +107,10 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
         .hash(hash)
         .build();
     return this.search(tmpImage, distance);
+  }
+
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    reset();
   }
 }

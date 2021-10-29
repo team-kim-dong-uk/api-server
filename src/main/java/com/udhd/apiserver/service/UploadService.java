@@ -10,6 +10,7 @@ import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.domain.upload.Upload;
 import com.udhd.apiserver.domain.upload.UploadRepository;
+import com.udhd.apiserver.service.search.SearchService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.upload.UploadWithGoogleDriveRequest;
 import java.net.URI;
@@ -49,6 +50,7 @@ public class UploadService {
     private final AlbumRepository albumRepository;
     private final RestTemplate restTemplate;
     private final FeedRepository feedRepository;
+    private final SearchService searchService;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -152,6 +154,7 @@ public class UploadService {
     }
 
     private void registerPhoto(Photo photo) {
+        searchService.registerPhoto(toPhotoDto(photo));
         //queryCommander.insert(toPhotoDto(photo));
     }
 
