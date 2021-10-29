@@ -42,24 +42,10 @@ public class FeedController {
 
   final String SUCCESS_MESSAGE = "success";
 
-  @GetMapping("/")
+  @GetMapping("")
   @ResponseBody
-  public GeneralResponse getFeedsForBackCompatibility(HttpServletResponse response) {
-    FeedResponse retval = new FeedResponse();
-    String userId = SecurityUtils.getLoginUserId();
-    try {
-      List<Feed> feeds = feedService.getFeeds(userId);
-      List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
-              feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
-      log.info("feed", feeds);
-      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
-      log.info("feedDto", feedDtos);
-      retval.setFeeds(feedDtos);
-    } catch (FeedException e) {
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-    }
-    return retval;
+  public String getFeedsForBackCompatibility(HttpServletResponse response) {
+    return "redirect:/list";
   }
 
   @GetMapping("/list")
