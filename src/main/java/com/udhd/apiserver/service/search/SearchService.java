@@ -31,11 +31,7 @@ public class SearchService {
   private final TaggedPhotoService taggedPhotoService;
   private final TagRepository tagRepository;
   private final UserRepository userRepository;
-  private final AlbumService albumService;
-  private final FeedService feedService;
-  private final PhotoService photoService;
   private final PhotoBkTreeService bkTreeService;
-  private final TaggedPhotoDtoMapper taggedPhotoDtoMapper;
   private final HashService hashService;
 
 
