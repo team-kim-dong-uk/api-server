@@ -89,7 +89,7 @@ public class FeedController {
 
   @GetMapping("/related")
   @ResponseBody
-  GeneralResponse getRelatedFeeds(@PathVariable String feedId,
+  GeneralResponse getRelatedFeeds(
       @RequestParam(defaultValue = "") String photoId,
       HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();
