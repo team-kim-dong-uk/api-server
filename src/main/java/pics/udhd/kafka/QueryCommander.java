@@ -48,7 +48,6 @@ import pics.udhd.kafka.dto.internal.ResultDto;
  * @author Min-Uk.Lee (makerdark98@gmail.com)
  * @see QueryExecutor
  */
-@Service
 @Slf4j
 public class QueryCommander {
 

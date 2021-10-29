@@ -46,7 +46,6 @@ public class UploadService {
     private final AlbumRepository albumRepository;
     private final RestTemplate restTemplate;
     private final TagService tagService;
-    private final QueryCommander queryCommander;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -150,7 +149,6 @@ public class UploadService {
     }
 
     private void registerPhoto(Photo photo) {
-        queryCommander.insert(toPhotoDto(photo));
     }
 
     private PhotoDto toPhotoDto(Photo photo) {

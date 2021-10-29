@@ -45,7 +45,6 @@ public class SearchService {
   private final AlbumService albumService;
   private final FeedService feedService;
   private final PhotoService photoService;
-  private final QueryCommander queryCommander;
 
 
   public List<SearchCandidateDto> getRecommendedKeywords(String keyword) {
@@ -83,12 +82,6 @@ public class SearchService {
   public SearchResult searchSimilarPhotos(SearchQuery query) {
     QueryResultDto searched = null;
     SearchResult result = SearchResultFactory.generate(query);
-    try {
-      searched = queryCommander.search(query.getPhotoDtos());
-    } catch (Exception e) {
-      log.info("queryCommander has created exception", e);
-    }
-
     if (searched != null) {
       searched.getValue().forEach(result::setSimilarPhotoIds);
     }
