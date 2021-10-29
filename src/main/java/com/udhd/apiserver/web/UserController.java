@@ -1,7 +1,9 @@
 package com.udhd.apiserver.web;
 
+import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.feed.Feed;
 import com.udhd.apiserver.exception.auth.DuplicateNicknameException;
+import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.service.UserService;
 import com.udhd.apiserver.service.feed.FeedException;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.udhd.apiserver.web.FeedController.toFeedDto;
+import static com.udhd.apiserver.web.FeedController.toFeedDtoList;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
@@ -32,6 +35,7 @@ public class UserController {
     private final UserService userService;
     private final PhotoService photoService;
     private final FeedService feedService;
+    private final AlbumService albumService;
 
     /**
      * 유저 상세정보 조회.
@@ -58,7 +62,7 @@ public class UserController {
         try {
             List<Feed> feeds = feedService.getSavedFeeds(userId, count, page);
             List<FeedDto> feedDtos = feeds.stream()
-                    .map(feed -> toFeedDto(feed))
+                    .map(feed -> toFeedDto(feed, true))
                     .collect(Collectors.toList());
             retval.setFeeds(feedDtos);
         } catch (FeedException e) {
@@ -79,9 +83,9 @@ public class UserController {
         FeedResponse retval = new FeedResponse();
         try {
             List<Feed> feeds = feedService.getLikedFeeds(userId, count, page);
-            List<FeedDto> feedDtos = feeds.stream()
-                    .map(feed -> toFeedDto(feed))
-                    .collect(Collectors.toList());
+            List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
+                    feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
+            List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
             retval.setFeeds(feedDtos);
         } catch (FeedException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

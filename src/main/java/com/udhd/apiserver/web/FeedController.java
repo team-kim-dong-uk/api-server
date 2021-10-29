@@ -1,7 +1,9 @@
 package com.udhd.apiserver.web;
 
+import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.feed.Feed;
 import com.udhd.apiserver.domain.photo.Photo;
+import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.feed.CommentException;
 import com.udhd.apiserver.service.feed.FeedException;
 import com.udhd.apiserver.service.feed.FeedService;
@@ -35,6 +37,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class FeedController {
   @Autowired
   FeedService feedService;
+  @Autowired
+  AlbumService albumService;
 
   final String SUCCESS_MESSAGE = "success";
 
@@ -45,10 +49,10 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       List<Feed> feeds = feedService.getFeeds(userId);
+      List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
+              feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
       log.info("feed", feeds);
-      List<FeedDto> feedDtos = feeds.stream()
-              .map(feed -> toFeedDto(feed))
-              .collect(Collectors.toList());
+      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
       log.info("feedDto", feedDtos);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
@@ -67,9 +71,9 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId);
-      List<FeedDto> feedDtos = feeds.stream()
-              .map(feed -> toFeedDto(feed))
-              .collect(Collectors.toList());
+      List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
+              feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
+      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -85,7 +89,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.registerComment(userId, feedId, registerCommentRequestDto.getContent());
-      return toFeedDto(feedService.getFeed(feedId));
+      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId));
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -98,7 +102,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.deleteComment(userId, feedId, commentId);
-      return toFeedDto(feedService.getFeed(feedId));
+      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId));
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -168,7 +172,21 @@ public class FeedController {
     feedService.createDummyData();
   }
 
-  public static FeedDto toFeedDto(Feed feed) {
+  public static List<FeedDto> toFeedDtoList(List<Feed> feeds, List<Album> savedFeeds) {
+    return feeds.stream()
+            .map(feed -> {
+              boolean saved = false;
+              for (Album album : savedFeeds) {
+                if (album.getFeedId().equals(feed.getId())) {
+                  saved = true;
+                }
+              }
+              return toFeedDto(feed, saved);
+            })
+            .collect(Collectors.toList());
+  }
+
+  public static FeedDto toFeedDto(Feed feed, boolean saved) {
     Photo photo = feed.getPhoto();
     PhotoDto photoDto = PhotoDto.builder()
             .id(photo.getId().toString())
@@ -195,6 +213,7 @@ public class FeedController {
             .photo(photoDto)
             .comments(commentDtos)
             .likes(likeDtos)
+            .saved(saved)
             .build();
   }
 }
