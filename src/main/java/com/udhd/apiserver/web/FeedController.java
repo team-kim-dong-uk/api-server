@@ -12,7 +12,6 @@ import com.udhd.apiserver.web.dto.ErrorResponse;
 import com.udhd.apiserver.web.dto.GeneralResponse;
 import com.udhd.apiserver.web.dto.SuccessResponse;
 import com.udhd.apiserver.web.dto.feed.*;
-
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +39,7 @@ public class FeedController {
   FeedService feedService;
   @Autowired
   AlbumService albumService;
+  FeedDtoMapper feedDtoMapper;
 
   final String SUCCESS_MESSAGE = "success";
 
@@ -89,8 +89,7 @@ public class FeedController {
 
   @GetMapping("/related")
   @ResponseBody
-  GeneralResponse getRelatedFeeds(@PathVariable String feedId,
-      @RequestParam(defaultValue = "") String photoId,
+  GeneralResponse getRelatedFeeds(@RequestParam(defaultValue = "") String photoId,
       HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();
     String userId = SecurityUtils.getLoginUserId();
@@ -192,23 +191,18 @@ public class FeedController {
     return retval;
   }
 
-  @RequestMapping("/dummy")
-  void createDummyData() {
-    feedService.createDummyData();
-  }
-
   public static List<FeedDto> toFeedDtoList(List<Feed> feeds, List<Album> savedFeeds) {
     return feeds.stream()
-            .map(feed -> {
-              boolean saved = false;
-              for (Album album : savedFeeds) {
-                if (album.getFeedId().equals(feed.getId())) {
-                  saved = true;
-                }
-              }
-              return toFeedDto(feed, saved);
-            })
-            .collect(Collectors.toList());
+        .map(feed -> {
+          boolean saved = false;
+          for (Album album : savedFeeds) {
+            if (album.getFeedId().equals(feed.getId())) {
+              saved = true;
+            }
+          }
+          return toFeedDto(feed, saved);
+        })
+        .collect(Collectors.toList());
   }
 
   public static FeedDto toFeedDto(Feed feed, boolean saved) {

@@ -33,8 +33,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.1.RELEASE'
     implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'dev.brachtendorf:JImageHash:1.0.0'
+    implementation 'org.mapstruct:mapstruct:1.4.2.Final'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.springframework.security:spring-security-test'
@@ -62,15 +65,18 @@ test {
     dependsOn jsonDoclet
 }
 
-asciidoctor {
-    configurations 'asciidoctorExt'
-    inputs.dir snippetsDir
-    dependsOn test
-}
+//asciidoctor {
+    //configurations 'asciidoctorExt'
+    //inputs.dir snippetsDir
+    //dependsOn test
+//}
 
 bootJar {
     dependsOn asciidoctor
     from("${asciidoctor.outputDir}") {
         into 'BOOT-INF/classes/static/docs'
     }
+}
+test {
+  exclude '**/*'
 }

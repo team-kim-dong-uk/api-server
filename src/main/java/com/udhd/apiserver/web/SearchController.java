@@ -36,6 +36,7 @@ public class SearchController {
      * @param fetchSize the fetch size
      * @return the list
      */
+    /*
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
     public List<PhotoOutlineDto> searchTag(
@@ -48,6 +49,7 @@ public class SearchController {
         SecurityUtils.checkUser(userId);
         return searchService.searchTag(userId, tags, uploaderId, sortBy, findAfter, fetchSize);
     }
+     */
 
     /**
      * userId에게 없는 사진 중 photoId와 유사한 사진을 찾는다. TODO
@@ -56,6 +58,7 @@ public class SearchController {
      * @param photoId the photo id
      * @return the list
      */
+    /*
     @GetMapping("/similar/{photoId}")
     @ResponseStatus(HttpStatus.OK)
     public List<PhotoOutlineDto> searchSimilar(
@@ -71,4 +74,5 @@ public class SearchController {
             return Arrays.asList();
         }
     }
+     */
 }

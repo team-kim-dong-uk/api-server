@@ -12,6 +12,7 @@ import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.ErrorResponse;
 import com.udhd.apiserver.web.dto.GeneralResponse;
 import com.udhd.apiserver.web.dto.feed.FeedDto;
+import com.udhd.apiserver.web.dto.feed.FeedDtoMapper;
 import com.udhd.apiserver.web.dto.feed.FeedResponse;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
@@ -36,6 +37,7 @@ public class UserController {
     private final PhotoService photoService;
     private final FeedService feedService;
     private final AlbumService albumService;
+    private final FeedDtoMapper feedDtoMapper;
 
     /**
      * 유저 상세정보 조회.

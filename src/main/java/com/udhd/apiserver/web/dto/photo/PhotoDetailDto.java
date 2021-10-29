@@ -32,11 +32,11 @@ public class PhotoDetailDto {
     /**
      * 저장 날짜
      */
-    private Date savedAt = null;
+    private Date savedAt;
     /**
      * 앨범 여부
      */
-    private boolean inAlbum = false;
+    private boolean inAlbum;
     /**
      * 태그
      */
