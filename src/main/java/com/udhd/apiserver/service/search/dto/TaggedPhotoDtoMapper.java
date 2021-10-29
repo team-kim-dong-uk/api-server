@@ -2,7 +2,6 @@ package com.udhd.apiserver.service.search.dto;
 
 import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.service.search.HashService;
-import com.udhd.apiserver.service.search.TaggedPhotoDto;
 import com.udhd.apiserver.web.dto.EntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;

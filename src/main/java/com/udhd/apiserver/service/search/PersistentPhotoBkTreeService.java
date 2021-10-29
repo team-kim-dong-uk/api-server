@@ -1,5 +1,6 @@
 package com.udhd.apiserver.service.search;
 
+import com.udhd.apiserver.service.search.dto.TaggedPhotoDto;
 import dev.brachtendorf.jimagehash.hash.Hash;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +8,6 @@ import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 import com.udhd.apiserver.util.bktree.BkTreeSearcher;
 import com.udhd.apiserver.util.bktree.BkTreeSearcher.Match;

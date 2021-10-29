@@ -4,6 +4,7 @@ import com.udhd.apiserver.domain.tag.Tag;
 import com.udhd.apiserver.domain.tag.TagRepository;
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.domain.user.UserRepository;
+import com.udhd.apiserver.service.search.dto.TaggedPhotoDto;
 import com.udhd.apiserver.service.search.dto.TaggedPhotoDtoMapper;
 import com.udhd.apiserver.util.ImageUtils;
 import com.udhd.apiserver.web.dto.search.SearchCandidateDto;

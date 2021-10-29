@@ -2,6 +2,7 @@ package com.udhd.apiserver.service.search;
 
 import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.domain.photo.PhotoRepository;
+import com.udhd.apiserver.service.search.dto.TaggedPhotoDto;
 import com.udhd.apiserver.service.search.dto.TaggedPhotoDtoMapper;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,7 +45,6 @@ public class TaggedPhotoService {
 
   public TaggedPhotoDto save(
       TaggedPhotoDto taggedPhoto) {
-    Photo taggedPhotoVO = taggedPhotoDtoMapper.toEntity(taggedPhoto);
     String photoId = taggedPhoto.getPhotoId();
     if (StringUtils.isEmpty(photoId) || !ObjectId.isValid(photoId))
       throw new IllegalArgumentException("photo id is invalid : " + photoId);

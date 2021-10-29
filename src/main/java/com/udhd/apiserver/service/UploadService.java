@@ -155,7 +155,6 @@ public class UploadService {
 
     private void registerPhoto(Photo photo) {
         searchService.registerPhoto(toPhotoDto(photo));
-        //queryCommander.insert(toPhotoDto(photo));
     }
 
     private PhotoDto toPhotoDto(Photo photo) {

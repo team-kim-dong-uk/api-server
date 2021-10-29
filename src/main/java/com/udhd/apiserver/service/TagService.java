@@ -1,20 +1,7 @@
 package com.udhd.apiserver.service;
 
-import com.udhd.apiserver.domain.photo.Photo;
-import com.udhd.apiserver.domain.photo.PhotoRepository;
-import com.udhd.apiserver.service.search.SearchService;
-import com.udhd.apiserver.service.search.dto.SearchQuery;
-import com.udhd.apiserver.service.search.dto.SearchQueryFactory;
-import com.udhd.apiserver.service.search.dto.SearchResult;
-import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor

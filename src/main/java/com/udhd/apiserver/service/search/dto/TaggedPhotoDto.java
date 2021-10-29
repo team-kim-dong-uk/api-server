@@ -1,4 +1,4 @@
-package com.udhd.apiserver.service.search;
+package com.udhd.apiserver.service.search.dto;
 
 import dev.brachtendorf.jimagehash.hash.Hash;
 import lombok.Builder;

@@ -1,5 +1,6 @@
 package com.udhd.apiserver.service.search;
 
+import com.udhd.apiserver.service.search.dto.TaggedPhotoDto;
 import dev.brachtendorf.jimagehash.hash.Hash;
 import java.util.List;
 import com.udhd.apiserver.util.bktree.Metric;
