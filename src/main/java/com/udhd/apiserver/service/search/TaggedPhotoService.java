@@ -1,5 +1,7 @@
 package com.udhd.apiserver.service.search;
 
+import com.udhd.apiserver.domain.photo.Photo;
+import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.service.search.dto.TaggedPhotoDtoMapper;
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,16 +10,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
-import com.udhd.apiserver.domain.taggedphoto.TaggedPhotoRepository;
-import com.udhd.apiserver.domain.taggedphoto.TaggedPhoto;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class TaggedPhotoService {
-  final TaggedPhotoRepository taggedPhotoRepository;
+  final PhotoRepository photoRepository;
   final HashService hashService;
   final TaggedPhotoDtoMapper taggedPhotoDtoMapper;
 
@@ -29,24 +30,33 @@ public class TaggedPhotoService {
    *         taggedPhoto 객체를 반환. 만약 photoId를 가진 객체가 없다면, null 반환
    */
   public TaggedPhotoDto fetchByPhotoId(String photoId) {
-    Optional<TaggedPhoto> fetchResult = taggedPhotoRepository.findById(new ObjectId(photoId));
+    Optional<Photo> fetchResult = photoRepository.findById(new ObjectId(photoId));
     if (fetchResult.isEmpty()) {
       log.info("photoId : " + photoId + ", but there is no data");
       return null;
     }
-    TaggedPhoto taggedPhotoVO = fetchResult.get();
+    Photo photo = fetchResult.get();
     return TaggedPhotoDto.builder()
-        .photoId(taggedPhotoVO.getPhotoId().toString())
-        .url(taggedPhotoVO.getUrl())
-        .hash(hashService.generateHash(taggedPhotoVO.getHash()))
+        .photoId(photo.toString())
+        .hash(hashService.generateHash(photo.getHash()))
         .build();
   }
 
   public TaggedPhotoDto save(
       TaggedPhotoDto taggedPhoto) {
-    TaggedPhoto taggedPhotoVO = taggedPhotoDtoMapper.toEntity(taggedPhoto);
-    TaggedPhoto savedTaggedPhotoVO = taggedPhotoRepository.save(taggedPhotoVO);
-    return taggedPhotoDtoMapper.toDto(savedTaggedPhotoVO);
+    Photo taggedPhotoVO = taggedPhotoDtoMapper.toEntity(taggedPhoto);
+    String photoId = taggedPhoto.getPhotoId();
+    if (StringUtils.isEmpty(photoId) || !ObjectId.isValid(photoId))
+      throw new IllegalArgumentException("photo id is invalid : " + photoId);
+    Optional<Photo> optionalPhoto = photoRepository.findById(new ObjectId(photoId));
+    if (optionalPhoto.isEmpty())
+      throw new IllegalArgumentException("there is no proper object :" + photoId);
+
+    Photo photo = optionalPhoto.get();
+    photo.setHash(hashService.convertToString(taggedPhoto.getHash()));
+
+    Photo savedPhoto = photoRepository.save(photo);
+    return taggedPhotoDtoMapper.toDto(savedPhoto);
   }
 
   public List<TaggedPhotoDto> saveAll(
@@ -54,13 +64,13 @@ public class TaggedPhotoService {
     return saveAll(Arrays.asList(taggedPhotos));
   }
   public List<TaggedPhotoDto> saveAll(Collection<TaggedPhotoDto> taggedPhotos) {
-    List<TaggedPhoto> savedTaggedPhotoVOs = taggedPhotoRepository.saveAll(
+    List<Photo> savedTaggedPhotoVOs = photoRepository.saveAll(
         taggedPhotos.stream().map(taggedPhotoDtoMapper::toEntity).collect(Collectors.toList()));
     return savedTaggedPhotoVOs.stream().map(taggedPhotoDtoMapper::toDto).collect(Collectors.toList());
   }
 
   public List<TaggedPhotoDto> findAll() {
-    return taggedPhotoRepository.findAll().stream().map(taggedPhotoDtoMapper::toDto)
+    return photoRepository.findAll().stream().map(taggedPhotoDtoMapper::toDto)
         .collect(Collectors.toList());
   }
 }

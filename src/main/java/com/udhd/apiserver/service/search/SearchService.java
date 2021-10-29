@@ -2,7 +2,6 @@ package com.udhd.apiserver.service.search;
 
 import com.udhd.apiserver.domain.tag.Tag;
 import com.udhd.apiserver.domain.tag.TagRepository;
-import com.udhd.apiserver.domain.taggedphoto.TaggedPhoto;
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.domain.user.UserRepository;
 import com.udhd.apiserver.service.search.dto.TaggedPhotoDtoMapper;
@@ -72,7 +71,6 @@ public class SearchService {
       bkTreeService.insert(
           TaggedPhotoDto.builder()
               .photoId(photoDto.getPhotoId())
-              .url(photoDto.getUrl())
               .hash(hash)
               .build()
       );

@@ -1,21 +1,14 @@
 package com.udhd.apiserver.service.search;
 
-import com.udhd.apiserver.service.search.dto.TaggedPhotoDtoMapper;
 import dev.brachtendorf.jimagehash.hash.Hash;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-import com.udhd.apiserver.domain.taggedphoto.TaggedPhoto;
 import com.udhd.apiserver.util.bktree.BkTreeSearcher;
 import com.udhd.apiserver.util.bktree.BkTreeSearcher.Match;
 import com.udhd.apiserver.util.bktree.Metric;
@@ -26,7 +19,7 @@ import com.udhd.apiserver.util.bktree.SearchResult;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PersistentPhotoBkTreeService implements PhotoBkTreeService, InitializingBean {
+public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
   MutableBkTree<TaggedPhotoDto> bktree;
   Metric<TaggedPhotoDto> hammingDistance;
   BkTreeSearcher<TaggedPhotoDto> searcher;
@@ -40,6 +33,7 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService, Initial
     initialize();
   }
 
+  @PostConstruct
   public void reset() {
     initialize();
     if (taggedPhotoService == null)
@@ -107,10 +101,5 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService, Initial
         .hash(hash)
         .build();
     return this.search(tmpImage, distance);
-  }
-
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    reset();
   }
 }

@@ -1,28 +1,26 @@
 package com.udhd.apiserver.service.search.dto;
 
-import com.udhd.apiserver.domain.taggedphoto.TaggedPhoto;
+import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.service.search.HashService;
 import com.udhd.apiserver.service.search.TaggedPhotoDto;
 import com.udhd.apiserver.web.dto.EntityMapper;
-import dev.brachtendorf.jimagehash.hash.Hash;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class TaggedPhotoDtoMapper implements EntityMapper<TaggedPhotoDto, TaggedPhoto> {
+public class TaggedPhotoDtoMapper implements EntityMapper<TaggedPhotoDto, Photo> {
   final HashService hashService;
-  public TaggedPhotoDto toDto(TaggedPhoto e) {
+  public TaggedPhotoDto toDto(Photo e) {
     return TaggedPhotoDto.builder()
-        .photoId(map(e.getPhotoId()))
-        .url(e.getUrl())
+        .photoId(map(e.getId()))
         .hash(hashService.generateHash(e.getHash()))
         .build();
   }
-  public TaggedPhoto toEntity(TaggedPhotoDto d) {
+
+  public Photo toEntity(TaggedPhotoDto d) {
     String photoId = d.getPhotoId();
     ObjectId objectId;
     if (StringUtils.isEmpty(photoId) || ! ObjectId.isValid(photoId))
@@ -30,9 +28,8 @@ public class TaggedPhotoDtoMapper implements EntityMapper<TaggedPhotoDto, Tagged
     else
       objectId = new ObjectId(photoId);
 
-    return TaggedPhoto.builder()
-        .photoId(objectId)
-        .url(d.getUrl())
+    return Photo.builder()
+        .id(objectId)
         .hash(hashService.convertToString(d.getHash()))
         .build();
   }

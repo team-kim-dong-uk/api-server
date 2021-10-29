@@ -9,10 +9,9 @@ import lombok.Data;
 public class TaggedPhotoDto {
   String photoId;
   Hash hash;
-  String url;
 
   @Override
   public String toString() {
-    return "TaggedPhoto(photoId : " + photoId + ", hash :" + hash.toString() + ", url : " + url;
+    return "TaggedPhoto(photoId : " + photoId + ", hash :" + hash.toString();
   }
 }
