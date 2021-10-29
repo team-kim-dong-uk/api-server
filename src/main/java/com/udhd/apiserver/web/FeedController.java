@@ -14,6 +14,7 @@ import com.udhd.apiserver.web.dto.SuccessResponse;
 import com.udhd.apiserver.web.dto.feed.*;
 
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
@@ -49,8 +50,10 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       List<Feed> feeds = feedService.getFeeds(userId);
-      List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
-              feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
+      List<Album> savedFeeds = userId.length() > 0
+              ? albumService.findAllByUserIdAndFeedIdIn(userId,
+              feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()))
+              : Collections.emptyList();log.info("feed", feeds);
       log.info("feed", feeds);
       List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
       log.info("feedDto", feedDtos);
@@ -69,8 +72,10 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       List<Feed> feeds = feedService.getFeeds(userId);
-      List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
-              feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
+      List<Album> savedFeeds = userId.length() > 0
+              ? albumService.findAllByUserIdAndFeedIdIn(userId,
+              feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()))
+              : Collections.emptyList();
       log.info("feed", feeds);
       List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
       log.info("feedDto", feedDtos);
