@@ -11,9 +11,9 @@ import org.springframework.data.mongodb.repository.Query;
 
 public interface FeedRepository extends MongoRepository<Feed, ObjectId> {
   Feed insert(Feed feed);
-  List<Feed> findAllByOrder(Integer order);
-  List<Feed> findAllByOrder(Integer order, Pageable pageable);
-  List<Feed> findAllByOrderGreaterThanEqual(Integer order, Pageable pageable);
+  List<Feed> findAllByOrder(Long order);
+  List<Feed> findAllByOrder(Long order, Pageable pageable);
+  List<Feed> findAllByOrderGreaterThanEqual(Long order, Pageable pageable);
   List<Feed> findAllByCreatedDateBetween(LocalDateTime s, LocalDateTime e, Pageable pageable);
 
   @Query("{ 'likes': { $elemMatch : { '_id': ?0 }}}")

@@ -45,18 +45,18 @@ public class FeedController {
 
   @GetMapping("")
   @ResponseBody
-  public GeneralResponse getFeedsForBackCompatibility(HttpServletResponse response) {
+  public GeneralResponse getFeedsForBackCompatibility(
+      @RequestParam(defaultValue = "0") Long lastOrder,
+      HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();
     String userId = SecurityUtils.getLoginUserId();
     try {
-      List<Feed> feeds = feedService.getFeeds(userId);
+      List<Feed> feeds = feedService.getFeeds(userId, lastOrder);
       List<Album> savedFeeds = userId.length() > 0
               ? albumService.findAllByUserIdAndFeedIdIn(userId,
               feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()))
-              : Collections.emptyList();log.info("feed", feeds);
-      log.info("feed", feeds);
+              : Collections.emptyList();
       List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
-      log.info("feedDto", feedDtos);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -76,9 +76,7 @@ public class FeedController {
               ? albumService.findAllByUserIdAndFeedIdIn(userId,
               feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()))
               : Collections.emptyList();
-      log.info("feed", feeds);
       List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
-      log.info("feedDto", feedDtos);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -91,11 +89,13 @@ public class FeedController {
   @ResponseBody
   GeneralResponse getRelatedFeeds(
       @RequestParam(defaultValue = "") String photoId,
+      @RequestParam(defaultValue = "0") Integer distance,
+      @RequestParam(defaultValue = "21") Integer count,
       HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();
     String userId = SecurityUtils.getLoginUserId();
     try {
-      List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId);
+      List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId, distance, count);
       List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
               feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
       List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
