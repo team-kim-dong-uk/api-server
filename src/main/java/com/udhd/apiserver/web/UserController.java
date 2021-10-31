@@ -39,13 +39,43 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/users")
 @RestController
 public class UserController {
+    private final UserService userService;
+    private final PhotoService photoService;
+    private final FeedService feedService;
+    private final AlbumService albumService;
+    private final FeedDtoMapper feedDtoMapper;
 
-  private final UserService userService;
-  private final PhotoService photoService;
-  private final FeedService feedService;
-  private final AlbumService albumService;
-  private final FeedDtoMapper feedDtoMapper;
+    @GetMapping("/{userId}/like")
+    @ResponseStatus(HttpStatus.OK)
+    public GeneralResponse listLiked(
+            @RequestParam(defaultValue = "20") int count,
+            @RequestParam(defaultValue = "0") int page,
+            @PathVariable String userId,
+            HttpServletResponse response
+    ) {
+        FeedResponse retval = new FeedResponse();
+        try {
+            List<Feed> feeds = feedService.getLikedFeeds(userId, count, page);
+            List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
+                    feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
+            List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds, userId);
+            retval.setFeeds(feedDtos);
+        } catch (FeedException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+        }
+        return retval;
+    }
 
+
+    @PutMapping("/{userId}/nickname")
+    public UserDto setNickname(
+            @PathVariable String userId,
+            @RequestBody UpdateUserRequest updateUserRequest) throws DuplicateNicknameException {
+        SecurityUtils.checkUser(userId);
+
+        return userService.setNickname(userId, updateUserRequest.getNickname());
+      }
   /**
    * 유저 상세정보 조회.
    *
@@ -59,59 +89,6 @@ public class UserController {
     return userService.getUserDetail(userId);
   }
 
-  @GetMapping("/{userId}/save")
-  @ResponseStatus(HttpStatus.OK)
-  public GeneralResponse listSaved(
-      @RequestParam(defaultValue = "20") int count,
-      @RequestParam(defaultValue = "0") int page,
-      @PathVariable String userId,
-      HttpServletResponse response
-  ) {
-    FeedResponse retval = new FeedResponse();
-    try {
-      List<Feed> feeds = feedService.getSavedFeeds(userId, count, page);
-      List<FeedDto> feedDtos = feeds.stream()
-          .map(feed -> toFeedDto(feed, true))
-          .collect(Collectors.toList());
-      retval.setFeeds(feedDtos);
-    } catch (FeedException e) {
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-    }
-    return retval;
-  }
-
-  @GetMapping("/{userId}/like")
-  @ResponseStatus(HttpStatus.OK)
-  public GeneralResponse listLiked(
-      @RequestParam(defaultValue = "20") int count,
-      @RequestParam(defaultValue = "0") int page,
-      @PathVariable String userId,
-      HttpServletResponse response
-  ) {
-    FeedResponse retval = new FeedResponse();
-    try {
-      List<Feed> feeds = feedService.getLikedFeeds(userId, count, page);
-      List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
-          feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
-      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
-      retval.setFeeds(feedDtos);
-    } catch (FeedException e) {
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-    }
-    return retval;
-  }
-
-
-  @PutMapping("/{userId}/nickname")
-  public UserDto setNickname(
-      @PathVariable String userId,
-      @RequestBody UpdateUserRequest updateUserRequest) throws DuplicateNicknameException {
-    SecurityUtils.checkUser(userId);
-
-    return userService.setNickname(userId, updateUserRequest.getNickname());
-  }
 
   @PutMapping("/{userId}/group")
   public UserDto setGroup(
