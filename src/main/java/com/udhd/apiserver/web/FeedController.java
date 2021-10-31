@@ -100,21 +100,74 @@ public class FeedController {
         .build();
   }
 
+  public static List<FeedDto> toFeedDtoList(List<Feed> feeds, List<Album> savedFeeds,
+      String userId) {
+    return feeds.stream()
+        .map(feed -> {
+          boolean saved = false;
+          for (Album album : savedFeeds) {
+            if (album.getFeedId().equals(feed.getId())) {
+              saved = true;
+            }
+          }
+          return toFeedDto(feed, saved, userId);
+        })
+        .collect(Collectors.toList());
+  }
+
+  public static FeedDto toFeedDto(Feed feed, boolean saved, String userId) {
+    Photo photo = feed.getPhoto();
+    PhotoDto photoDto = PhotoDto.builder()
+        .id(photo.getId().toString())
+        .uploaderId(photo.getUploaderId().toString())
+        .checksum(photo.getChecksum())
+        .originalLink(photo.getOriginalLink())
+        .thumbnailLink(photo.getThumbnailLink())
+        .createdDate(
+            photo.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        .modifiedDate(
+            photo.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        .tags(photo.getTags())
+        .build();
+    List<CommentDto> commentDtos = feed.getComments().stream().map(comment -> CommentDto.builder()
+        .id(comment.getId().toString())
+        .userId(comment.getUserId().toString())
+        .userName(comment.getUserName())
+        .content(comment.getContent())
+        .deleted(comment.isDeleted())
+        .createdDate(
+            comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        .modifiedDate(
+            comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        .build()).collect(Collectors.toList());
+    List<LikeDto> likeDtos = feed.getLikes().stream().map(
+        like -> LikeDto.builder().id(like.getId().toString()).userId(like.getUserId().toString())
+            .userName(like.getUserName()).build()).collect(Collectors.toList());
+    return FeedDto.builder()
+        .id(feed.getId().toString()) // TODO: 이거 나중에 service layer에서도 dto 만들어줘서 string 추상화 해줘야함
+        .photo(photoDto)
+        .comments(commentDtos)
+        .likes(likeDtos)
+        .liked(likeDtos.stream()
+            .filter(like -> userId.equals(like.getUserId())).count() > 0)
+        .saved(saved)
+        .build();
+  }
+
   @GetMapping("")
   @ResponseBody
-  public GeneralResponse getFeedsForBackCompatibility(HttpServletResponse response) {
+  public GeneralResponse getFeedsForBackCompatibility(
+      @RequestParam(defaultValue = "0") Long lastOrder,
+      HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();
     String userId = SecurityUtils.getLoginUserId();
     try {
-      List<Feed> feeds = feedService.getFeeds(userId);
+      List<Feed> feeds = feedService.getFeeds(userId, lastOrder);
       List<Album> savedFeeds = userId.length() > 0
           ? albumService.findAllByUserIdAndFeedIdIn(userId,
           feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()))
           : Collections.emptyList();
-      log.info("feed", feeds);
-      log.info("feed", feeds);
       List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds, userId);
-      log.info("feedDto", feedDtos);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -134,9 +187,7 @@ public class FeedController {
           ? albumService.findAllByUserIdAndFeedIdIn(userId,
           feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()))
           : Collections.emptyList();
-      log.info("feed", feeds);
       List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds, userId);
-      log.info("feedDto", feedDtos);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -149,11 +200,13 @@ public class FeedController {
   @ResponseBody
   GeneralResponse getRelatedFeeds(
       @RequestParam(defaultValue = "") String photoId,
+      @RequestParam(defaultValue = "0") Integer distance,
+      @RequestParam(defaultValue = "21") Integer count,
       HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();
     String userId = SecurityUtils.getLoginUserId();
     try {
-      List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId);
+      List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId, distance, count);
       List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
           feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
       List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds, userId);
@@ -173,7 +226,8 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.registerComment(userId, feedId, registerCommentRequestDto.getContent());
-      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId), userId);
+      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId),
+          userId);
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -187,7 +241,8 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.deleteComment(userId, feedId, commentId);
-      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId), userId);
+      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId),
+          userId);
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -252,52 +307,5 @@ public class FeedController {
     }
 
     return retval;
-  }
-
-  public static List<FeedDto> toFeedDtoList(List<Feed> feeds, List<Album> savedFeeds, String userId) {
-    return feeds.stream()
-        .map(feed -> {
-          boolean saved = false;
-          for (Album album : savedFeeds) {
-            if (album.getFeedId().equals(feed.getId())) {
-              saved = true;
-            }
-          }
-          return toFeedDto(feed, saved, userId);
-        })
-        .collect(Collectors.toList());
-  }
-
-  public static FeedDto toFeedDto(Feed feed, boolean saved, String userId) {
-    Photo photo = feed.getPhoto();
-    PhotoDto photoDto = PhotoDto.builder()
-            .id(photo.getId().toString())
-            .uploaderId(photo.getUploaderId().toString())
-            .checksum(photo.getChecksum())
-            .originalLink(photo.getOriginalLink())
-            .thumbnailLink(photo.getThumbnailLink())
-            .createdDate(photo.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .modifiedDate(photo.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .tags(photo.getTags())
-            .build();
-    List<CommentDto> commentDtos = feed.getComments().stream().map(comment -> CommentDto.builder()
-            .id(comment.getId().toString())
-            .userId(comment.getUserId().toString())
-            .userName(comment.getUserName())
-            .content(comment.getContent())
-            .deleted(comment.isDeleted())
-            .createdDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .modifiedDate(comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            .build()).collect(Collectors.toList());
-    List<LikeDto> likeDtos = feed.getLikes().stream().map(like -> LikeDto.builder().id(like.getId().toString()).userId(like.getUserId().toString()).userName(like.getUserName()).build()).collect(Collectors.toList());
-    return FeedDto.builder()
-            .id(feed.getId().toString()) // TODO: 이거 나중에 service layer에서도 dto 만들어줘서 string 추상화 해줘야함
-            .photo(photoDto)
-            .comments(commentDtos)
-            .likes(likeDtos)
-            .liked(likeDtos.stream()
-                    .filter(like -> userId.equals(like.getUserId())).count() > 0)
-            .saved(saved)
-            .build();
   }
 }

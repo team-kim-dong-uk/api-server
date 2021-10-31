@@ -55,12 +55,12 @@ public class SearchService {
     return Stream.concat(tags, users).collect(Collectors.toList());
   }
 
-  public List<String> searchSimilarPhoto(String photoId, int count) {
+  public List<String> searchSimilarPhoto(String photoId, int distance, int count) {
     TaggedPhotoDto taggedPhoto = taggedPhotoService.fetchByPhotoId(photoId);
     if (taggedPhoto == null) {
       return Collections.emptyList();
     }
-    return bkTreeService.search(taggedPhoto, 20, count)
+    return bkTreeService.search(taggedPhoto, distance, count)
         .stream()
         .map(TaggedPhotoDto::getPhotoId).collect(Collectors.toList());
   }

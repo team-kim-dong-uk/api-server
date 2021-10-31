@@ -33,8 +33,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class FeedService {
 
-  private static Integer FEED_HEAD_ID = 0;
-  private static int DEFAULT_FEED_COUNT = 20;
+  private static final Long FEED_HEAD_ID = 0L;
+  private static final int DEFAULT_FEED_COUNT = 20;
   /**
    * TODO: 분리해야함 data layer
    */
@@ -53,23 +53,22 @@ public class FeedService {
     return getFeeds(userId, FEED_HEAD_ID);
   }
 
-  public List<Feed> getFeeds(String userId, Integer lastOrder) throws FeedException {
+  public List<Feed> getFeeds(String userId, Long lastOrder) throws FeedException {
     return getFeeds(userId, lastOrder, DEFAULT_FEED_COUNT);
   }
 
-  public List<Feed> getFeeds(String userId, Integer lastOrder, int feedCount) throws FeedException {
+  public List<Feed> getFeeds(String userId, Long lastOrder, int feedCount) throws FeedException {
     // Unused userId
     Pageable pageable = PageRequest.of(0, feedCount);
     return feedRepository.findAllByOrderGreaterThanEqual(lastOrder, pageable);
   }
 
-  public List<Feed> getRelatedFeeds(String userId, String photoId) throws FeedException {
-    int defaultCount = 20;
-    List<String> similarPhotos = searchService.searchSimilarPhoto(photoId, defaultCount);
+  public List<Feed> getRelatedFeeds(String userId, String photoId, int distance, int count)
+      throws FeedException {
+    List<String> similarPhotos = searchService.searchSimilarPhoto(photoId, distance, count);
     // TODO: count 개수도 변화하도록 바꿔야함
     return feedRepository.findAllByPhotoIdInOrderByOrder(similarPhotos
-        .stream().map(ObjectId::new).collect(
-            Collectors.toList()), PageRequest.of(0, defaultCount));
+        .stream().map(ObjectId::new).collect(Collectors.toList()), PageRequest.of(0, count));
   }
 
   public List<Feed> getSavedFeeds(String userId, int count, int page) throws FeedException {
