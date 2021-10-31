@@ -31,25 +31,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain)
       throws ServletException, IOException {
+    boolean allowed = false;
     // jwt 인증이 필요없는 경로라면, 통과시켜준다.
     // allowedPaths는 SecurityConfig에서 해당 filter를 생성할 때 인자로 넣어준다.
     for (String allowedPath : allowedPaths) {
       if (request.getRequestURI().startsWith(allowedPath)) {
-        filterChain.doFilter(request, response);
-        return;
+        allowed = true;
       }
     }
     // Authorization 헤더를 읽어와 jwt 인증 진행
     String authorizationHeader = request.getHeader("Authorization");
     if (!isAuthorizationHeaderValid(authorizationHeader)) {
-      throw new InvalidAccessTokenException("No Access Token");
+      if (allowed) {
+        filterChain.doFilter(request, response);
+      } else {
+        throw new InvalidAccessTokenException("No Access Token");
+      }
     }
     try {
       UsernamePasswordAuthenticationToken token = createToken(authorizationHeader);
       SecurityContextHolder.getContext().setAuthentication(token);
       filterChain.doFilter(request, response);
     } catch (JWTVerificationException | IllegalArgumentException e) {
-      throw new InvalidAccessTokenException("Invalid Access Token");
+      if (allowed) {
+        filterChain.doFilter(request, response);
+      } else {
+        throw new InvalidAccessTokenException("Invalid Access Token");
+      }
     }
   }
 

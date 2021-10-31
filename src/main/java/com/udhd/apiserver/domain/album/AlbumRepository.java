@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 public interface AlbumRepository extends MongoRepository<Album, ObjectId> {
 
