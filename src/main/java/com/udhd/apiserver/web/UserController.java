@@ -110,7 +110,7 @@ public class UserController {
   @ResponseStatus(HttpStatus.OK)
   public UserDto updateUser(
       @PathVariable String userId,
-      UpdateUserRequest updateUserRequest) {
+      @RequestBody UpdateUserRequest updateUserRequest) {
     SecurityUtils.checkUser(userId);
 
     return userService.updateUser(userId, updateUserRequest);
