@@ -64,7 +64,7 @@ public class UserController {
         try {
             List<Feed> feeds = feedService.getSavedFeeds(userId, count, page);
             List<FeedDto> feedDtos = feeds.stream()
-                    .map(feed -> toFeedDto(feed, true))
+                    .map(feed -> toFeedDto(feed, true, userId))
                     .collect(Collectors.toList());
             retval.setFeeds(feedDtos);
         } catch (FeedException e) {
@@ -87,7 +87,7 @@ public class UserController {
             List<Feed> feeds = feedService.getLikedFeeds(userId, count, page);
             List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
                     feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
-            List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
+            List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds, userId);
             retval.setFeeds(feedDtos);
         } catch (FeedException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

@@ -55,7 +55,7 @@ public class FeedController {
               feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()))
               : Collections.emptyList();log.info("feed", feeds);
       log.info("feed", feeds);
-      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
+      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds, userId);
       log.info("feedDto", feedDtos);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
@@ -77,7 +77,7 @@ public class FeedController {
               feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()))
               : Collections.emptyList();
       log.info("feed", feeds);
-      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
+      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds, userId);
       log.info("feedDto", feedDtos);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
@@ -98,7 +98,7 @@ public class FeedController {
       List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId);
       List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
               feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
-      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds);
+      List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds, userId);
       retval.setFeeds(feedDtos);
     } catch (FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -114,7 +114,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.registerComment(userId, feedId, registerCommentRequestDto.getContent());
-      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId));
+      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId), userId);
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -127,7 +127,7 @@ public class FeedController {
     String userId = SecurityUtils.getLoginUserId();
     try {
       feedService.deleteComment(userId, feedId, commentId);
-      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId));
+      return toFeedDto(feedService.getFeed(feedId), albumService.isSavedFeed(userId, feedId), userId);
     } catch (CommentException | FeedException e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
@@ -192,7 +192,7 @@ public class FeedController {
     return retval;
   }
 
-  public static List<FeedDto> toFeedDtoList(List<Feed> feeds, List<Album> savedFeeds) {
+  public static List<FeedDto> toFeedDtoList(List<Feed> feeds, List<Album> savedFeeds, String userId) {
     return feeds.stream()
         .map(feed -> {
           boolean saved = false;
@@ -201,12 +201,12 @@ public class FeedController {
               saved = true;
             }
           }
-          return toFeedDto(feed, saved);
+          return toFeedDto(feed, saved, userId);
         })
         .collect(Collectors.toList());
   }
 
-  public static FeedDto toFeedDto(Feed feed, boolean saved) {
+  public static FeedDto toFeedDto(Feed feed, boolean saved, String userId) {
     Photo photo = feed.getPhoto();
     PhotoDto photoDto = PhotoDto.builder()
             .id(photo.getId().toString())
@@ -233,6 +233,8 @@ public class FeedController {
             .photo(photoDto)
             .comments(commentDtos)
             .likes(likeDtos)
+            .liked(likeDtos.stream()
+                    .filter(like -> userId.equals(like.getUserId())).count() > 0)
             .saved(saved)
             .build();
   }
