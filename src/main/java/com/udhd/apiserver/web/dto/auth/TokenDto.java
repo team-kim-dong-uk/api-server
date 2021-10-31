@@ -9,23 +9,24 @@ import lombok.Getter;
 @Builder
 @Getter
 public class TokenDto {
-    /**
-     * 새로 발급받은 access token
-     */
-    private String accessToken;
-    /**
-     * 새로 발급받은 refresh token
-     */
-    private String refreshToken;
 
-    /**
-     * userId
-     */
-    private String userId;
+  /**
+   * 새로 발급받은 access token
+   */
+  private String accessToken;
+  /**
+   * 새로 발급받은 refresh token
+   */
+  private String refreshToken;
 
-    public TokenDto(Tokens tokens, String userId) {
-        this.accessToken = tokens.getAccessToken();
-        this.refreshToken = tokens.getRefreshToken();
-        this.userId = userId;
-    }
+  /**
+   * userId
+   */
+  private String userId;
+
+  public TokenDto(Tokens tokens, String userId) {
+    this.accessToken = tokens.getAccessToken();
+    this.refreshToken = tokens.getRefreshToken();
+    this.userId = userId;
+  }
 }

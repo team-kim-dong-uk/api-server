@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DHashService implements HashService {
+
   HashingAlgorithm hashingAlgorithm;
   int bitResolution;
   Precision precision;
@@ -17,6 +18,7 @@ public class DHashService implements HashService {
   public DHashService() {
     this(32, Precision.Simple);
   }
+
   public DHashService(int bitResolution, Precision precision) {
     super();
     hashingAlgorithm = new DifferenceHash(bitResolution, precision);

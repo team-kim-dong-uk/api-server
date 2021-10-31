@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 public class TaggedPhotoDto {
+
   String photoId;
   Hash hash;
 

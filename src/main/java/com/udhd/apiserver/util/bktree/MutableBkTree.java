@@ -2,11 +2,11 @@ package com.udhd.apiserver.util.bktree;
 
 import static java.lang.String.format;
 
+import com.udhd.apiserver.util.bktree.Exception.IllegalMetricException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.lang.Nullable;
-import com.udhd.apiserver.util.bktree.Exception.IllegalMetricException;
 
 /**
  * A mutable {@linkplain edu.gatech.gtri.bktree.BkTree BK-tree}.
@@ -14,10 +14,10 @@ import com.udhd.apiserver.util.bktree.Exception.IllegalMetricException;
  * <p>Mutating operations are <em>not</em> thread-safe.
  *
  * <p>Whereas the {@linkplain #add(Object) mutating methods} are iterative and
- * can thus handle very large trees, the {@link #equals(Object)},
- * {@link #hashCode()} and {@link #toString()} methods on this class and its
- * {@link edu.gatech.gtri.bktree.BkTree.Node} implementation are each recursive and as such may not
- * complete normally when called on very deep trees.
+ * can thus handle very large trees, the {@link #equals(Object)}, {@link #hashCode()} and {@link
+ * #toString()} methods on this class and its {@link edu.gatech.gtri.bktree.BkTree.Node}
+ * implementation are each recursive and as such may not complete normally when called on very deep
+ * trees.
  *
  * @param <E> type of elements in this tree
  */
@@ -28,7 +28,9 @@ public final class MutableBkTree<E> implements BkTree<E> {
   MutableNode<E> root;
 
   public MutableBkTree(Metric<? super E> metric) {
-    if (metric == null) throw new NullPointerException();
+    if (metric == null) {
+      throw new NullPointerException();
+    }
     this.metric = metric;
   }
 
@@ -38,7 +40,9 @@ public final class MutableBkTree<E> implements BkTree<E> {
    * @param element element
    */
   public void add(E element) {
-    if (element == null) throw new NullPointerException();
+    if (element == null) {
+      throw new NullPointerException();
+    }
 
     if (root == null) {
       root = new MutableNode<>(element);
@@ -73,7 +77,9 @@ public final class MutableBkTree<E> implements BkTree<E> {
    * @param elements elements
    */
   public void addAll(Iterable<? extends E> elements) {
-    if (elements == null) throw new NullPointerException();
+    if (elements == null) {
+      throw new NullPointerException();
+    }
     for (E element : elements) {
       add(element);
     }
@@ -86,7 +92,9 @@ public final class MutableBkTree<E> implements BkTree<E> {
    */
   @SafeVarargs
   public final void addAll(E... elements) {
-    if (elements == null) throw new NullPointerException();
+    if (elements == null) {
+      throw new NullPointerException();
+    }
     addAll(Arrays.asList(elements));
   }
 
@@ -96,19 +104,28 @@ public final class MutableBkTree<E> implements BkTree<E> {
   }
 
   @Override
-  public @Nullable Node<E> getRoot() {
+  public @Nullable
+  Node<E> getRoot() {
     return root;
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     MutableBkTree that = (MutableBkTree) o;
 
-    if (!metric.equals(that.metric)) return false;
-    if (root != null ? !root.equals(that.root) : that.root != null) return false;
+    if (!metric.equals(that.metric)) {
+      return false;
+    }
+    if (root != null ? !root.equals(that.root) : that.root != null) {
+      return false;
+    }
 
     return true;
   }
@@ -130,11 +147,14 @@ public final class MutableBkTree<E> implements BkTree<E> {
   }
 
   static final class MutableNode<E> implements Node<E> {
+
     final E element;
     final Map<Integer, MutableNode<E>> childrenByDistance = new HashMap<>();
 
     MutableNode(E element) {
-      if (element == null) throw new NullPointerException();
+      if (element == null) {
+        throw new NullPointerException();
+      }
       this.element = element;
     }
 
@@ -144,19 +164,28 @@ public final class MutableBkTree<E> implements BkTree<E> {
     }
 
     @Override
-    public @Nullable Node<E> getChildNode(int distance) {
+    public @Nullable
+    Node<E> getChildNode(int distance) {
       return childrenByDistance.get(distance);
     }
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
 
       MutableNode that = (MutableNode) o;
 
-      if (!childrenByDistance.equals(that.childrenByDistance)) return false;
-      if (!element.equals(that.element)) return false;
+      if (!childrenByDistance.equals(that.childrenByDistance)) {
+        return false;
+      }
+      if (!element.equals(that.element)) {
+        return false;
+      }
 
       return true;
     }

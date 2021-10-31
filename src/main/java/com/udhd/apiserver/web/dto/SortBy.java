@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum SortBy {
-    RANDOM,
-    SAVED_AT,
-    EVENT_DATE,
-    LAST_VIEWED;
+  RANDOM,
+  SAVED_AT,
+  EVENT_DATE,
+  LAST_VIEWED;
 }

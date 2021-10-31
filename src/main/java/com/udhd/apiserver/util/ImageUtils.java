@@ -7,6 +7,7 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 
 public class ImageUtils {
+
   public static BufferedImage load(String urlStr) throws IOException {
     URL url = new URL(urlStr);
 

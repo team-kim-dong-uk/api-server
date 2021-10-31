@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class FeedResponse implements GeneralResponse {
+
   @Setter
   @Getter
   List<FeedDto> feeds;

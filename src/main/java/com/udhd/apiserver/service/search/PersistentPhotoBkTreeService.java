@@ -1,6 +1,12 @@
 package com.udhd.apiserver.service.search;
 
 import com.udhd.apiserver.service.search.dto.TaggedPhotoDto;
+import com.udhd.apiserver.util.bktree.BkTreeSearcher;
+import com.udhd.apiserver.util.bktree.BkTreeSearcher.Match;
+import com.udhd.apiserver.util.bktree.Metric;
+import com.udhd.apiserver.util.bktree.MutableBkTree;
+import com.udhd.apiserver.util.bktree.SearchOption;
+import com.udhd.apiserver.util.bktree.SearchResult;
 import dev.brachtendorf.jimagehash.hash.Hash;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,23 +15,17 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import com.udhd.apiserver.util.bktree.BkTreeSearcher;
-import com.udhd.apiserver.util.bktree.BkTreeSearcher.Match;
-import com.udhd.apiserver.util.bktree.Metric;
-import com.udhd.apiserver.util.bktree.MutableBkTree;
-import com.udhd.apiserver.util.bktree.SearchOption;
-import com.udhd.apiserver.util.bktree.SearchResult;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
+
+  private static final int defaultDistance = 5;
+  private final TaggedPhotoService taggedPhotoService;
   MutableBkTree<TaggedPhotoDto> bktree;
   Metric<TaggedPhotoDto> hammingDistance;
   BkTreeSearcher<TaggedPhotoDto> searcher;
-  private static final int defaultDistance = 5;
-  private final TaggedPhotoService taggedPhotoService;
-
   @Getter
   private int size;
 
@@ -36,8 +36,9 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
   @PostConstruct
   public void reset() {
     initialize();
-    if (taggedPhotoService == null)
+    if (taggedPhotoService == null) {
       return;
+    }
     List<TaggedPhotoDto> photos = taggedPhotoService.findAll();
     bktree.addAll(photos);
   }
@@ -53,7 +54,7 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
     // TODO: when duplicated photoId, this method throws Exception. It must be tracked by log.
     taggedPhotoService.save(taggedPhoto);
     bktree.add(taggedPhoto);
-    size ++;
+    size++;
   }
 
   public void insertAll(TaggedPhotoDto[] taggedPhotos) {
@@ -71,12 +72,14 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
   }
 
   @Override
-  public List<? extends TaggedPhotoDto> search(TaggedPhotoDto taggedPhoto, int maxDistance, int limit) {
+  public List<? extends TaggedPhotoDto> search(TaggedPhotoDto taggedPhoto, int maxDistance,
+      int limit) {
     return this.search(taggedPhoto, maxDistance, limit, Integer.MIN_VALUE);
   }
 
   @Override
-  public List<? extends TaggedPhotoDto> search(TaggedPhotoDto taggedPhoto, int maxDistance, int limit,
+  public List<? extends TaggedPhotoDto> search(TaggedPhotoDto taggedPhoto, int maxDistance,
+      int limit,
       int minDistance) {
     log.info("searcher : " + searcher.toString());
     log.info("taggedPhoto : " + taggedPhoto.toString());
@@ -96,6 +99,7 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
   public List<? extends TaggedPhotoDto> search(Hash hash) {
     return this.search(hash, defaultDistance);
   }
+
   public List<? extends TaggedPhotoDto> search(Hash hash, int distance) {
     TaggedPhotoDto tmpImage = TaggedPhotoDto.builder()
         .hash(hash)

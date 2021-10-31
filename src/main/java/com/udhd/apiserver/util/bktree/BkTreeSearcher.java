@@ -3,12 +3,12 @@ package com.udhd.apiserver.util.bktree;
 import static java.lang.Math.max;
 import static java.lang.String.format;
 
+import com.udhd.apiserver.util.bktree.BkTree.Node;
+import com.udhd.apiserver.util.bktree.Exception.IllegalMetricException;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
-import com.udhd.apiserver.util.bktree.BkTree.Node;
-import com.udhd.apiserver.util.bktree.Exception.IllegalMetricException;
 
 /**
  * Searches a {@link BkTree}.
@@ -20,13 +20,14 @@ public class BkTreeSearcher<E> {
   private final BkTree<E> tree;
 
   /**
-   * Constructs a searcher that orders matches in increasing order of
-   * distance from the query.
+   * Constructs a searcher that orders matches in increasing order of distance from the query.
    *
    * @param tree tree to search
    */
   public BkTreeSearcher(BkTree<E> tree) {
-    if (tree == null) throw new NullPointerException();
+    if (tree == null) {
+      throw new NullPointerException();
+    }
     this.tree = tree;
   }
 
@@ -36,10 +37,16 @@ public class BkTreeSearcher<E> {
     int limit = option.getLimit() == null ? Integer.MAX_VALUE : option.getLimit();
     int lastDistance = minDistance;
 
-    if (maxDistance == Integer.MAX_VALUE && limit == Integer.MAX_VALUE)
-      throw new IllegalArgumentException("Either maxDistance and limit must not be the default value");
-    if (query == null) throw new NullPointerException();
-    if (maxDistance < 0) throw new IllegalArgumentException("maxDistance must be non-negative");
+    if (maxDistance == Integer.MAX_VALUE && limit == Integer.MAX_VALUE) {
+      throw new IllegalArgumentException(
+          "Either maxDistance and limit must not be the default value");
+    }
+    if (query == null) {
+      throw new NullPointerException();
+    }
+    if (maxDistance < 0) {
+      throw new IllegalArgumentException("maxDistance must be non-negative");
+    }
 
     Metric<? super E> metric = tree.getMetric();
 
@@ -61,15 +68,17 @@ public class BkTreeSearcher<E> {
 
       if (distance >= minDistance && distance <= maxDistance) {
         matches.add(new Match<>(element, distance));
-        lastDistance = Math.max(distance , lastDistance);
-        if (matches.size() >= limit)
+        lastDistance = Math.max(distance, lastDistance);
+        if (matches.size() >= limit) {
           break;
+        }
       }
 
       int minSearchDistance = max(distance - maxDistance, 0);
       int maxSearchDistance = distance + maxDistance;
 
-      for (int searchDistance = minSearchDistance; searchDistance <= maxSearchDistance; ++searchDistance) {
+      for (int searchDistance = minSearchDistance; searchDistance <= maxSearchDistance;
+          ++searchDistance) {
         Node<E> childNode = node.getChildNode(searchDistance);
         if (childNode != null) {
           queue.add(childNode);
@@ -82,7 +91,10 @@ public class BkTreeSearcher<E> {
         .lastDistance(lastDistance)
         .build();
   }
-  /** Returns the tree searched by this searcher. */
+
+  /**
+   * Returns the tree searched by this searcher.
+   */
   public BkTree<E> getTree() {
     return tree;
   }
@@ -102,32 +114,48 @@ public class BkTreeSearcher<E> {
      * @param distance distance of the matching element from the search query
      */
     public Match(E match, int distance) {
-      if (match == null) throw new NullPointerException();
-      if (distance < 0) throw new IllegalArgumentException("distance must be non-negative");
+      if (match == null) {
+        throw new NullPointerException();
+      }
+      if (distance < 0) {
+        throw new IllegalArgumentException("distance must be non-negative");
+      }
 
       this.match = match;
       this.distance = distance;
     }
 
-    /** Returns the matching element. */
+    /**
+     * Returns the matching element.
+     */
     public E getMatch() {
       return match;
     }
 
-    /** Returns the matching element's distance from the search query. */
+    /**
+     * Returns the matching element's distance from the search query.
+     */
     public int getDistance() {
       return distance;
     }
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
 
       Match that = (Match) o;
 
-      if (distance != that.distance) return false;
-      if (!match.equals(that.match)) return false;
+      if (distance != that.distance) {
+        return false;
+      }
+      if (!match.equals(that.match)) {
+        return false;
+      }
 
       return true;
     }

@@ -6,5 +6,6 @@ import lombok.RequiredArgsConstructor;
 @Data
 @RequiredArgsConstructor
 public class SuccessResponse implements GeneralResponse {
+
   String message;
 }

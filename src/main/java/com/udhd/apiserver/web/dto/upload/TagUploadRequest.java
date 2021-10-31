@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class TagUploadRequest {
+
   List<String> tags;
   Boolean propagate;
 }

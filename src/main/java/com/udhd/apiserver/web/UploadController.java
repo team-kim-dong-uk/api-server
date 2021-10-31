@@ -10,103 +10,111 @@ import com.udhd.apiserver.web.dto.upload.PresignedURLRequest;
 import com.udhd.apiserver.web.dto.upload.PresignedURLResponse;
 import com.udhd.apiserver.web.dto.upload.TagUploadRequest;
 import com.udhd.apiserver.web.dto.upload.UploadWithGoogleDriveRequest;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/upload")
 @RestController
 @Slf4j
 public class UploadController {
-    private final UploadService uploadService;
 
-    @PostMapping("/google-drive")
-    public String uploadGDrive(@RequestBody UploadWithGoogleDriveRequest uploadWithGoogleDriveRequest) {
-        String userId = SecurityUtils.getLoginUserId();
-        String pollingKey = uploadService.generatePollingKey(userId);
-        List<Upload> uploads = uploadService.uploadWithGoogleDrive(uploadWithGoogleDriveRequest, pollingKey);
-        // 비동기로 업로드 태스크 진행
-        uploadService.processUploadsFromGDrive(uploads, uploadWithGoogleDriveRequest.getGoogleDriveToken());
-        return pollingKey;
+  private final UploadService uploadService;
+
+  @PostMapping("/google-drive")
+  public String uploadGDrive(
+      @RequestBody UploadWithGoogleDriveRequest uploadWithGoogleDriveRequest) {
+    String userId = SecurityUtils.getLoginUserId();
+    String pollingKey = uploadService.generatePollingKey(userId);
+    List<Upload> uploads = uploadService
+        .uploadWithGoogleDrive(uploadWithGoogleDriveRequest, pollingKey);
+    // 비동기로 업로드 태스크 진행
+    uploadService
+        .processUploadsFromGDrive(uploads, uploadWithGoogleDriveRequest.getGoogleDriveToken());
+    return pollingKey;
+  }
+
+  @GetMapping("/progress/{pollingKey}")
+  public Long getProgress(@PathVariable String pollingKey) {
+    return uploadService.getProgress(pollingKey);
+  }
+
+  /**
+   * s3 pre-signed url들을 반환한다. 리턴값의 i번째 값은 i번째 사진이 새 사진인 경우 presigned url이고, i번째 사진이 기존에 있던 사진인 경우
+   * null 이다.
+   *
+   * @param presignedURLRequest the presigned url request
+   * @return the list
+   */
+  @RequestMapping("/presigned-url")
+  public PresignedURLResponse presignedURLs(@RequestBody PresignedURLRequest presignedURLRequest) {
+    String userId = SecurityUtils.getLoginUserId();
+    String pollingKey = uploadService.generatePollingKey(userId);
+    List<Upload> uploads = uploadService
+        .createUpload(userId, pollingKey, presignedURLRequest.getChecksums());
+    uploadService.fillPresignedUrl(uploads);
+
+    PresignedURLResponse res = PresignedURLResponse.builder()
+        .pollingKey(pollingKey)
+        .checksums(presignedURLRequest.getChecksums())
+        .urls(uploads.stream().map(Upload::getS3Url).collect(Collectors.toList()))
+        .build();
+    return res;
+  }
+
+  @RequestMapping("/presigned-url/{pollingKey}/{checksum}")
+  public Long markProgress(@PathVariable String pollingKey,
+      @PathVariable String checksum) {
+    try {
+      uploadService.confirmUpload(pollingKey, checksum);
+    } catch (Exception e) {
+      log.info("failed to mark pollingKey : " + pollingKey + " checksum : " + checksum, e);
     }
+    return getProgress(pollingKey);
+  }
 
-    @GetMapping("/progress/{pollingKey}")
-    public Long getProgress(@PathVariable String pollingKey) {
-        return uploadService.getProgress(pollingKey);
+  @PutMapping("/{feedId}/tags")
+  public GeneralResponse uploadTagsByFeedId(
+      @PathVariable String feedId,
+      @RequestBody TagUploadRequest request,
+      HttpServletResponse response
+  ) {
+    try {
+      boolean propagate = request.getPropagate() != null ? request.getPropagate() : false;
+      uploadService.setTagsByFeedId(feedId, request.getTags(), propagate);
+      SuccessResponse retval = new SuccessResponse();
+      retval.setMessage("success");
+      return retval;
+    } catch (Exception e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }
+  }
 
-    /**
-     * s3 pre-signed url들을 반환한다.
-     * 리턴값의 i번째 값은
-     *   i번째 사진이 새 사진인 경우 presigned url이고,
-     *   i번째 사진이 기존에 있던 사진인 경우 null 이다.
-     *
-     * @param presignedURLRequest the presigned url request
-     * @return the list
-     */
-    @RequestMapping("/presigned-url")
-    public PresignedURLResponse presignedURLs(@RequestBody PresignedURLRequest presignedURLRequest) {
-        String userId = SecurityUtils.getLoginUserId();
-        String pollingKey = uploadService.generatePollingKey(userId);
-        List<Upload> uploads = uploadService.createUpload(userId, pollingKey, presignedURLRequest.getChecksums());
-        uploadService.fillPresignedUrl(uploads);
-
-        PresignedURLResponse res = PresignedURLResponse.builder()
-            .pollingKey(pollingKey)
-            .checksums(presignedURLRequest.getChecksums())
-            .urls(uploads.stream().map(Upload::getS3Url).collect(Collectors.toList()))
-            .build();
-        return res;
+  @PostMapping("/{photoId}/tags")
+  public GeneralResponse uploadTagsByPhotoId(
+      @PathVariable String photoId,
+      @RequestBody TagUploadRequest request,
+      HttpServletResponse response
+  ) {
+    try {
+      uploadService.setTagsByPhotoId(photoId, request.getTags());
+      SuccessResponse retval = new SuccessResponse();
+      retval.setMessage("success");
+      return retval;
+    } catch (Exception e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }
-
-    @RequestMapping("/presigned-url/{pollingKey}/{checksum}")
-    public Long markProgress(@PathVariable String pollingKey,
-        @PathVariable String checksum) {
-      try {
-          uploadService.confirmUpload(pollingKey, checksum);
-      } catch (Exception e) {
-          log.info("failed to mark pollingKey : " + pollingKey + " checksum : " + checksum, e);
-      }
-      return getProgress(pollingKey);
-    }
-
-    @PutMapping("/{feedId}/tags")
-    public GeneralResponse uploadTagsByFeedId(
-        @PathVariable String feedId,
-        @RequestBody TagUploadRequest request,
-        HttpServletResponse response
-    ) {
-      try {
-        boolean propagate = request.getPropagate() != null ? request.getPropagate() : false;
-        uploadService.setTagsByFeedId(feedId, request.getTags(), propagate);
-        SuccessResponse retval = new SuccessResponse();
-        retval.setMessage("success");
-        return retval;
-      } catch (Exception e) {
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-      }
-    }
-
-    @PostMapping("/{photoId}/tags")
-    public GeneralResponse uploadTagsByPhotoId(
-        @PathVariable String photoId,
-        @RequestBody TagUploadRequest request,
-        HttpServletResponse response
-    ) {
-      try {
-        uploadService.setTagsByPhotoId(photoId, request.getTags());
-        SuccessResponse retval = new SuccessResponse();
-        retval.setMessage("success");
-        return retval;
-      } catch (Exception e) {
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-      }
-    }
+  }
 }

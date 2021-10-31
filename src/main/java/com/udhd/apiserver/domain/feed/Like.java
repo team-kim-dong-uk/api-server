@@ -14,6 +14,7 @@ import org.springframework.data.domain.Persistable;
 @Builder
 @AllArgsConstructor
 public class Like implements Persistable<ObjectId> {
+
   @Id
   ObjectId userId;
   String userName;

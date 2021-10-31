@@ -19,16 +19,17 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class TaggedPhotoService {
+
   final PhotoRepository photoRepository;
   final HashService hashService;
   final TaggedPhotoDtoMapper taggedPhotoDtoMapper;
 
   /**
-   * This method is a wrapper method to access into TaggedPhotoRepository.
-   * TaggedPhotoRepository에 접근하기 위한 wrappwer method
-   * @param photoId
-   * @return taggedPhoto Object. When there is no object with photoId, return null.
-   *         taggedPhoto 객체를 반환. 만약 photoId를 가진 객체가 없다면, null 반환
+   * This method is a wrapper method to access into TaggedPhotoRepository. TaggedPhotoRepository에
+   * 접근하기 위한 wrappwer method
+   *
+   * @return taggedPhoto Object. When there is no object with photoId, return null. taggedPhoto 객체를
+   * 반환. 만약 photoId를 가진 객체가 없다면, null 반환
    */
   public TaggedPhotoDto fetchByPhotoId(String photoId) {
     Optional<Photo> fetchResult = photoRepository.findById(new ObjectId(photoId));
@@ -46,11 +47,13 @@ public class TaggedPhotoService {
   public TaggedPhotoDto save(
       TaggedPhotoDto taggedPhoto) {
     String photoId = taggedPhoto.getPhotoId();
-    if (StringUtils.isEmpty(photoId) || !ObjectId.isValid(photoId))
+    if (StringUtils.isEmpty(photoId) || !ObjectId.isValid(photoId)) {
       throw new IllegalArgumentException("photo id is invalid : " + photoId);
+    }
     Optional<Photo> optionalPhoto = photoRepository.findById(new ObjectId(photoId));
-    if (optionalPhoto.isEmpty())
+    if (optionalPhoto.isEmpty()) {
       throw new IllegalArgumentException("there is no proper object :" + photoId);
+    }
 
     Photo photo = optionalPhoto.get();
     photo.setHash(hashService.convertToString(taggedPhoto.getHash()));
@@ -63,10 +66,12 @@ public class TaggedPhotoService {
       TaggedPhotoDto[] taggedPhotos) {
     return saveAll(Arrays.asList(taggedPhotos));
   }
+
   public List<TaggedPhotoDto> saveAll(Collection<TaggedPhotoDto> taggedPhotos) {
     List<Photo> savedTaggedPhotoVOs = photoRepository.saveAll(
         taggedPhotos.stream().map(taggedPhotoDtoMapper::toEntity).collect(Collectors.toList()));
-    return savedTaggedPhotoVOs.stream().map(taggedPhotoDtoMapper::toDto).collect(Collectors.toList());
+    return savedTaggedPhotoVOs.stream().map(taggedPhotoDtoMapper::toDto)
+        .collect(Collectors.toList());
   }
 
   public List<TaggedPhotoDto> findAll() {

@@ -6,5 +6,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class RegisterCommentRequestDto {
-    private String content;
+
+  private String content;
 }

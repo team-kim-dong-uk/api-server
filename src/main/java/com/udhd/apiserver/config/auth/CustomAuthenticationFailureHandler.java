@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
+
   @Override
   public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
       AuthenticationException exception) throws IOException, ServletException {

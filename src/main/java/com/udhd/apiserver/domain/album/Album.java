@@ -6,7 +6,6 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
@@ -21,27 +20,27 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "album")
 @Data
 public class Album implements Persistable<ObjectId> {
-    @Id
-    private ObjectId id;
-    private ObjectId userId;
-    private ObjectId feedId;
-    private String thumbnailLink;
-    private Date lastViewed;
-    private List<String> tags;
 
-    boolean deleted;
-    @CreatedDate
-    private LocalDateTime createdDate;
+  boolean deleted;
+  @Id
+  private ObjectId id;
+  private ObjectId userId;
+  private ObjectId feedId;
+  private String thumbnailLink;
+  private Date lastViewed;
+  private List<String> tags;
+  @CreatedDate
+  private LocalDateTime createdDate;
 
-    @LastModifiedDate
-    private LocalDateTime modifiedDate;
+  @LastModifiedDate
+  private LocalDateTime modifiedDate;
 
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
+  public void setTags(List<String> tags) {
+    this.tags = tags;
+  }
 
-    @Override
-    public boolean isNew() {
-        return createdDate == null;
-    }
+  @Override
+  public boolean isNew() {
+    return createdDate == null;
+  }
 }

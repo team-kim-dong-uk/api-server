@@ -16,6 +16,9 @@ import org.springframework.data.domain.Persistable;
 @Data
 @AllArgsConstructor
 public class Comment implements Persistable<ObjectId> {
+
+  boolean deleted; // 만약 true이라면 반드시 다른 데이터들은 null임
+  String content;
   @Id
   private ObjectId id; // subdocument 이기 때문에 직접 생성해서 넣어줘야함
   @NotNull
@@ -26,9 +29,6 @@ public class Comment implements Persistable<ObjectId> {
   private LocalDateTime createdDate; // unix timestamp
   @LastModifiedDate
   private LocalDateTime modifiedDate; // unix timestmap
-
-  boolean deleted; // 만약 true이라면 반드시 다른 데이터들은 null임
-  String content;
 
   @Override
   public boolean isNew() {

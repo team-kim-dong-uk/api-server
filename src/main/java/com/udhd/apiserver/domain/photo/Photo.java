@@ -1,6 +1,5 @@
 package com.udhd.apiserver.domain.photo;
 
-import com.udhd.apiserver.domain.feed.Comment;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -21,6 +20,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "photo")
 public class Photo {
 
+  public static String DEFAULT_SORT = "id";
+  public static String HEAD_ID = "000000000000000000000000";
   @Id
   private ObjectId id;
   private ObjectId uploaderId;
@@ -31,13 +32,8 @@ public class Photo {
   private List<String> tags;
   @Setter
   private String hash;
-
   @CreatedDate
   private LocalDateTime createdDate;
-
   @LastModifiedDate
   private LocalDateTime modifiedDate;
-
-  public static String DEFAULT_SORT = "id";
-  public static String HEAD_ID = "000000000000000000000000";
 }

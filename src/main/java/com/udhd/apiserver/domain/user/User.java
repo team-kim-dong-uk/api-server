@@ -1,16 +1,12 @@
 package com.udhd.apiserver.domain.user;
 
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.domain.Persistable;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
@@ -43,14 +39,23 @@ public class User {
     this.refreshToken = refreshToken;
   }
 
-  public void addLike(){ this.likeCount += 1; }
-  public void addSave(){ this.saveCount += 1; }
-  public void deleteLike(){
-    if(this.likeCount > 0)
-      this.likeCount -= 1;
+  public void addLike() {
+    this.likeCount += 1;
   }
-  public void deleteSave(){
-    if(this.saveCount > 0)
+
+  public void addSave() {
+    this.saveCount += 1;
+  }
+
+  public void deleteLike() {
+    if (this.likeCount > 0) {
+      this.likeCount -= 1;
+    }
+  }
+
+  public void deleteSave() {
+    if (this.saveCount > 0) {
       this.saveCount -= 1;
+    }
   }
 }

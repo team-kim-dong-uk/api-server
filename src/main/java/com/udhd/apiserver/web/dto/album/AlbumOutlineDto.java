@@ -6,16 +6,17 @@ import lombok.Getter;
 @Getter
 @Builder
 public class AlbumOutlineDto {
-    /**
-     * 저장된 앨범의 id
-     */
-    private String albumId;
-    /**
-     * 저장된 사진의 id
-     */
-    private String photoId;
-    /**
-     * 미리보기용 저화질/용량 이미지 링크
-     */
-    private String thumbnailLink;
+
+  /**
+   * 저장된 앨범의 id
+   */
+  private String albumId;
+  /**
+   * 저장된 사진의 id
+   */
+  private String photoId;
+  /**
+   * 미리보기용 저화질/용량 이미지 링크
+   */
+  private String thumbnailLink;
 }

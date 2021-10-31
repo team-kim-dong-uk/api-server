@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 
 public class JsonUtils {
-  ObjectMapper objectMapper;
+
   private static JsonUtils instance;
+  ObjectMapper objectMapper;
+
   private JsonUtils() {
     objectMapper = new ObjectMapper();
   }

@@ -6,7 +6,6 @@ import com.udhd.apiserver.domain.feed.Comment;
 import com.udhd.apiserver.domain.feed.Feed;
 import com.udhd.apiserver.domain.feed.FeedRepository;
 import com.udhd.apiserver.domain.feed.Like;
-import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.exception.album.AlbumNotFoundException;
 import com.udhd.apiserver.exception.photo.PhotoNotFoundException;
@@ -15,6 +14,10 @@ import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.UserService;
 import com.udhd.apiserver.service.search.SearchService;
 import com.udhd.apiserver.web.dto.user.UserDto;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,29 +30,24 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 @Service
 public class FeedService {
-  @Autowired
-  FeedRepository feedRepository;
-
-  @Autowired
-  UserService userService;
-
-  @Autowired
-  AlbumService albumService;
-
-  @Autowired
-  SearchService searchService;
 
   private static Integer FEED_HEAD_ID = 0;
   private static int DEFAULT_FEED_COUNT = 20;
+  /**
+   * TODO: 분리해야함 data layer
+   */
+  @Autowired
+  protected MongoTemplate mongoTemplate;
+  @Autowired
+  FeedRepository feedRepository;
+  @Autowired
+  UserService userService;
+  @Autowired
+  AlbumService albumService;
+  @Autowired
+  SearchService searchService;
 
   public List<Feed> getFeeds(String userId) throws FeedException {
     return getFeeds(userId, FEED_HEAD_ID);
@@ -71,13 +69,14 @@ public class FeedService {
     // TODO: count 개수도 변화하도록 바꿔야함
     return feedRepository.findAllByPhotoIdInOrderByOrder(similarPhotos
         .stream().map(ObjectId::new).collect(
-        Collectors.toList()), PageRequest.of(0, defaultCount));
+            Collectors.toList()), PageRequest.of(0, defaultCount));
   }
 
   public List<Feed> getSavedFeeds(String userId, int count, int page) throws FeedException {
     Pageable pageable = PageRequest.of(page, count);
     List<Album> savedAlbums = albumService.findAllByUserId(userId, pageable);
-    List<ObjectId> feedIds = savedAlbums.stream().map(album -> album.getFeedId()).collect(Collectors.toList());
+    List<ObjectId> feedIds = savedAlbums.stream().map(album -> album.getFeedId())
+        .collect(Collectors.toList());
     return feedRepository.findAllById(feedIds);
   }
 
@@ -87,12 +86,15 @@ public class FeedService {
     return ret;
   }
 
-  public void registerComment(String userId, String feedId, String content) throws CommentException {
-    if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId))
+  public void registerComment(String userId, String feedId, String content)
+      throws CommentException {
+    if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId)) {
       throw new CommentException("userId cannot be converted to ObjectId. feedId: " + userId);
+    }
 
-    if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId))
+    if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId)) {
       throw new CommentException("feedId cannot be converted to ObjectId. feedId: " + feedId);
+    }
 
     ObjectId userObjectId = new ObjectId(userId);
     ObjectId feedObjectId = new ObjectId(feedId);
@@ -112,12 +114,15 @@ public class FeedService {
     }
   }
 
-  public void deleteComment(String userId, String feedId, String commentId) throws CommentException {
-    if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId))
+  public void deleteComment(String userId, String feedId, String commentId)
+      throws CommentException {
+    if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId)) {
       throw new CommentException("userId cannot be converted to ObjectId. feedId: " + userId);
+    }
 
-    if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId))
+    if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId)) {
       throw new CommentException("feedId cannot be converted to ObjectId. feedId: " + feedId);
+    }
 
     ObjectId userObjectId = new ObjectId(userId);
     ObjectId feedObjectId = new ObjectId(feedId);
@@ -127,14 +132,19 @@ public class FeedService {
   }
 
   public void addLike(String userId, String feedId) throws FeedException, DuplicateKeyException {
-    if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId))
-      throw new FeedException("Invalid feedId : " + feedId + ". It must be non-empty and proper hexstring");
+    if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId)) {
+      throw new FeedException(
+          "Invalid feedId : " + feedId + ". It must be non-empty and proper hexstring");
+    }
 
-    if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId))
-      throw new FeedException("Invalid userId : " + userId + ". It must be non-empty and proper hexstring");
+    if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId)) {
+      throw new FeedException(
+          "Invalid userId : " + userId + ". It must be non-empty and proper hexstring");
+    }
 
-    Optional<Feed> existingLikedFeed = feedRepository.existsFeedByUserId(new ObjectId(feedId), new ObjectId(userId));
-    if (existingLikedFeed.isPresent()){
+    Optional<Feed> existingLikedFeed = feedRepository
+        .existsFeedByUserId(new ObjectId(feedId), new ObjectId(userId));
+    if (existingLikedFeed.isPresent()) {
       throw new FeedException("이미 좋아요한 사진입니다.");
     }
 
@@ -142,17 +152,21 @@ public class FeedService {
     userService.updateCount(userId, "addLike");
     pushLike(new ObjectId(feedId),
         Like.builder()
-        .userId(new ObjectId(userId))
-        .userName(user.getNickname())
-        .build());
+            .userId(new ObjectId(userId))
+            .userName(user.getNickname())
+            .build());
   }
 
   public void deleteLike(String userId, String feedId) throws FeedException {
-    if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId))
-      throw new FeedException("Invalid feedId : " + feedId + ". It must be non-empty and proper hexstring");
+    if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId)) {
+      throw new FeedException(
+          "Invalid feedId : " + feedId + ". It must be non-empty and proper hexstring");
+    }
 
-    if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId))
-      throw new FeedException("Invalid userId : " + userId + ". It must be non-empty and proper hexstring");
+    if (StringUtils.isEmpty(userId) || !ObjectId.isValid(userId)) {
+      throw new FeedException(
+          "Invalid userId : " + userId + ". It must be non-empty and proper hexstring");
+    }
 
     deleteLike(new ObjectId(feedId), new ObjectId(userId));
     userService.updateCount(userId, "deleteLike");
@@ -177,8 +191,9 @@ public class FeedService {
   }
 
   protected void pushComment(ObjectId feedId, Comment comment) {
-    if (comment.getCreatedDate() == null)
+    if (comment.getCreatedDate() == null) {
       comment.setCreatedDate(LocalDateTime.now());
+    }
     comment.setModifiedDate(LocalDateTime.now());
     push(feedId, "comments", comment);
   }
@@ -192,8 +207,9 @@ public class FeedService {
   }
 
   protected void pushLike(ObjectId feedId, Like like) {
-    if (like.getCreatedDate() == null)
+    if (like.getCreatedDate() == null) {
       like.setCreatedDate(LocalDateTime.now());
+    }
     like.setModifiedDate(LocalDateTime.now());
     push(feedId, "likes", like);
   }
@@ -203,18 +219,12 @@ public class FeedService {
   }
 
   public Feed getFeed(String feedId) throws FeedException {
-     Optional<Feed> feedOptional = feedRepository.findById(new ObjectId(feedId));
-     if (feedOptional.isEmpty())
-       throw new FeedException(FeedException.ERR_NO_FEED);
-     return feedOptional.get();
+    Optional<Feed> feedOptional = feedRepository.findById(new ObjectId(feedId));
+    if (feedOptional.isEmpty()) {
+      throw new FeedException(FeedException.ERR_NO_FEED);
+    }
+    return feedOptional.get();
   }
-
-
-  /**
-   * TODO: 분리해야함 data layer
-   */
-  @Autowired
-  protected MongoTemplate mongoTemplate;
 
   void push(ObjectId id, String property, Object value) {
     mongoTemplate.updateMulti(
@@ -222,6 +232,7 @@ public class FeedService {
         new Update().push(property, value), Feed.class
     );
   }
+
   void pull(ObjectId id, String property, Object value) {
     UpdateResult result = mongoTemplate.updateMulti(
         Query.query(Criteria.where("id").is(id)),

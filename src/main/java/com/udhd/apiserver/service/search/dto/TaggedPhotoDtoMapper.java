@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class TaggedPhotoDtoMapper implements EntityMapper<TaggedPhotoDto, Photo> {
+
   final HashService hashService;
+
   public TaggedPhotoDto toDto(Photo e) {
     return TaggedPhotoDto.builder()
         .photoId(map(e.getId()))
@@ -22,10 +24,11 @@ public class TaggedPhotoDtoMapper implements EntityMapper<TaggedPhotoDto, Photo>
   public Photo toEntity(TaggedPhotoDto d) {
     String photoId = d.getPhotoId();
     ObjectId objectId;
-    if (StringUtils.isEmpty(photoId) || ! ObjectId.isValid(photoId))
+    if (StringUtils.isEmpty(photoId) || !ObjectId.isValid(photoId)) {
       objectId = new ObjectId();
-    else
+    } else {
       objectId = new ObjectId(photoId);
+    }
 
     return Photo.builder()
         .id(objectId)
