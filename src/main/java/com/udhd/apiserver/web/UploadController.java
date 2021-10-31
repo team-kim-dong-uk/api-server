@@ -3,10 +3,15 @@ package com.udhd.apiserver.web;
 import com.udhd.apiserver.domain.upload.Upload;
 import com.udhd.apiserver.service.UploadService;
 import com.udhd.apiserver.util.SecurityUtils;
+import com.udhd.apiserver.web.dto.ErrorResponse;
+import com.udhd.apiserver.web.dto.GeneralResponse;
+import com.udhd.apiserver.web.dto.SuccessResponse;
 import com.udhd.apiserver.web.dto.upload.PresignedURLRequest;
 import com.udhd.apiserver.web.dto.upload.PresignedURLResponse;
+import com.udhd.apiserver.web.dto.upload.TagUploadRequest;
 import com.udhd.apiserver.web.dto.upload.UploadWithGoogleDriveRequest;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -68,5 +73,40 @@ public class UploadController {
           log.info("failed to mark pollingKey : " + pollingKey + " checksum : " + checksum, e);
       }
       return getProgress(pollingKey);
+    }
+
+    @PutMapping("/{feedId}/tags")
+    public GeneralResponse uploadTagsByFeedId(
+        @PathVariable String feedId,
+        @RequestBody TagUploadRequest request,
+        HttpServletResponse response
+    ) {
+      try {
+        boolean propagate = request.getPropagate() != null ? request.getPropagate() : false;
+        uploadService.setTagsByFeedId(feedId, request.getTags(), propagate);
+        SuccessResponse retval = new SuccessResponse();
+        retval.setMessage("success");
+        return retval;
+      } catch (Exception e) {
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+      }
+    }
+
+    @PostMapping("/{photoId}/tags")
+    public GeneralResponse uploadTagsByPhotoId(
+        @PathVariable String photoId,
+        @RequestBody TagUploadRequest request,
+        HttpServletResponse response
+    ) {
+      try {
+        uploadService.setTagsByPhotoId(photoId, request.getTags());
+        SuccessResponse retval = new SuccessResponse();
+        retval.setMessage("success");
+        return retval;
+      } catch (Exception e) {
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+      }
     }
 }

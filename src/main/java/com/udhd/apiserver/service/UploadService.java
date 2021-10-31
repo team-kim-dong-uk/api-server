@@ -21,6 +21,7 @@ import java.time.ZoneId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -304,5 +305,44 @@ public class UploadService {
     public boolean markCompleted(String pollingKey, String checksum) {
         Upload upload = uploadRepository.findByPollingKeyAndChecksum(pollingKey,checksum);
         return markCompleted(upload);
+    }
+
+    public void setTagsByFeedId(String feedId, List<String> tags, boolean propagate) throws IllegalArgumentException {
+        if (StringUtils.isEmpty(feedId) || !ObjectId.isValid(feedId))
+            throw new IllegalArgumentException("feedId is not valid. (feedId :" + feedId + ")");
+
+        ObjectId feedObjectId = new ObjectId(feedId);
+        Optional<Feed> optionalFeed = feedRepository.findById(feedObjectId);
+        if (optionalFeed.isEmpty())
+            throw new IllegalArgumentException("There is no proper feed. (feedId :" + feedId + ")");
+
+        Feed feed = optionalFeed.get();
+        Photo photo = feed.getPhoto();
+        if (photo == null)
+            throw new RuntimeException("Feed does not contains photo. (feedId :" + feedId + ")");
+        photo.setTags(tags);
+        feedRepository.save(feed);
+
+        if (propagate)
+            photoRepository.save(photo);
+    }
+
+    public void setTagsByPhotoId(String photoId, List<String> tags) throws IllegalArgumentException {
+        if (StringUtils.isEmpty(photoId) || !ObjectId.isValid(photoId))
+            throw new IllegalArgumentException("feedId is not valid. (photoId :" + photoId + ")");
+
+        ObjectId photoObjectId = new ObjectId(photoId);
+        List<Feed> feeds = feedRepository.findAllByPhotoId(photoObjectId);
+        if (feeds.isEmpty())
+            throw new IllegalArgumentException("There is no proper feed. (photoId :" + photoId + ")");
+
+        for (Feed feed: feeds) {
+            Photo photo = feed.getPhoto();
+            if (photo == null)
+                throw new RuntimeException(
+                    "Feed does not contains photo. (photoId :" + photoId + ")");
+            photo.setTags(tags);
+            feedRepository.save(feed);
+        }
     }
 }

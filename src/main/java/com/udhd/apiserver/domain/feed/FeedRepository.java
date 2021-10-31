@@ -26,4 +26,7 @@ public interface FeedRepository extends MongoRepository<Feed, ObjectId> {
   List<Feed> findAllById(List<ObjectId> feedIds);
   List<Feed> findAllByPhotoIdOrderByOrder(ObjectId photoId, Pageable pageable);
   List<Feed> findAllByPhotoIdInOrderByOrder(List<ObjectId> photoIds, Pageable pageable);
+
+  @Query("{ 'photo' : { $elemMatch : { '_id' : ?0 } }")
+  List<Feed> findAllByPhotoId(ObjectId photoObjectId);
 }
