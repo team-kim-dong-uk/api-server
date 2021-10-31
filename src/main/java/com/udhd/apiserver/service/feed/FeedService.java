@@ -77,7 +77,7 @@ public class FeedService {
     List<Album> savedAlbums = albumService.findAllByUserId(userId, pageable);
     List<ObjectId> feedIds = savedAlbums.stream().map(album -> album.getFeedId())
         .collect(Collectors.toList());
-    return feedRepository.findAllById(feedIds);
+    return feedRepository.findAllByIdIn(feedIds);
   }
 
   public List<Feed> getLikedFeeds(String userId, int count, int page) throws FeedException {

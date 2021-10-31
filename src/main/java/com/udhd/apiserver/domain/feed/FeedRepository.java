@@ -27,7 +27,7 @@ public interface FeedRepository extends MongoRepository<Feed, ObjectId> {
       "'likes': { $elemMatch : { '_id': ?1 }}}")
   Optional<Feed> existsFeedByUserId(ObjectId id, ObjectId userId);
 
-  List<Feed> findAllById(List<ObjectId> feedIds);
+  List<Feed> findAllByIdIn(List<ObjectId> feedIds);
 
   List<Feed> findAllByPhotoIdOrderByOrder(ObjectId photoId, Pageable pageable);
 
