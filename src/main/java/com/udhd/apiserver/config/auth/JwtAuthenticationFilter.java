@@ -44,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (!isAuthorizationHeaderValid(authorizationHeader)) {
       if (allowed) {
         filterChain.doFilter(request, response);
+        return;
       } else {
         throw new InvalidAccessTokenException("No Access Token");
       }
@@ -55,6 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     } catch (JWTVerificationException | IllegalArgumentException e) {
       if (allowed) {
         filterChain.doFilter(request, response);
+        return;
       } else {
         throw new InvalidAccessTokenException("Invalid Access Token");
       }
