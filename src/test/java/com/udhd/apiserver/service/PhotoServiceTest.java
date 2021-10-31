@@ -24,11 +24,11 @@ import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 public class PhotoServiceTest {
+    @Mock
+    private PhotoRepository photoRepository;
 
     @Autowired
     protected ObjectMapper objectMapper;
-
-    @Mock PhotoRepository photoRepository;
 
     @Mock AlbumService albumService;
 

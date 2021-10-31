@@ -5,6 +5,7 @@ import capital.scalable.restdocs.SnippetRegistry;
 import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.service.UserService;
 import com.udhd.apiserver.util.SecurityUtils;
@@ -13,6 +14,7 @@ import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
 import com.udhd.apiserver.web.dto.user.UserDto;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -46,6 +48,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 public class UserControllerTest {
+    @Mock
+    private PhotoRepository photoRepository;
+
     @Autowired
     protected WebApplicationContext context;
 

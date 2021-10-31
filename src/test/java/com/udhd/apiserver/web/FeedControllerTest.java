@@ -5,12 +5,14 @@ import capital.scalable.restdocs.SnippetRegistry;
 import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.service.feed.FeedException;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import com.udhd.apiserver.web.dto.user.UserDto;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +49,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 public class FeedControllerTest {
+    @Mock
+    private PhotoRepository photoRepository;
+
     @Autowired
     protected WebApplicationContext context;
 
@@ -124,7 +129,6 @@ public class FeedControllerTest {
         };
     }
     @Test
-    @Disabled
     @DisplayName("Feed Like")
     void likeFeed() throws Exception {
         String requestUri = "/api/v1/feeds/" + feedId + "/like";
@@ -151,7 +155,6 @@ public class FeedControllerTest {
         assertThat(afterDeleteUser.getNumLikePhotos()).isEqualTo(beforeUser.getNumLikePhotos());
     }
     @Test
-    @Disabled
     @DisplayName("좋아요한 사진 중복 추가")
     void duplicatedLike() throws Exception {
         String requestUri = "/api/v1/feeds/" + feedId + "/like";
@@ -175,7 +178,6 @@ public class FeedControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("Feed Save")
     void saveFeed() throws Exception {
         String requestUri = "/api/v1/feeds/" + feedId + "/save";

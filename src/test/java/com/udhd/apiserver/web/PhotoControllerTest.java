@@ -5,11 +5,13 @@ import capital.scalable.restdocs.SnippetRegistry;
 import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.web.dto.photo.PhotoDetailDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,6 +40,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureRestDocs
 @SpringBootTest
 public class PhotoControllerTest {
+    @Mock
+    private PhotoRepository photoRepository;
+
     @Autowired
     private WebApplicationContext context;
 

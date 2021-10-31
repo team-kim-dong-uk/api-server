@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
+public class PersistentPhotoBkTreeService {
 
   private static final int defaultDistance = 5;
   private final TaggedPhotoService taggedPhotoService;
@@ -40,7 +40,10 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
       return;
     }
     List<TaggedPhotoDto> photos = taggedPhotoService.findAll();
-    bktree.addAll(photos);
+    for (TaggedPhotoDto photo : photos) {
+      if (photo != null && photo.getHash() != null)
+        bktree.add(photo);
+    }
   }
 
   private void initialize() {
@@ -71,13 +74,11 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
     return this.search(taggedPhoto, Integer.MIN_VALUE, distance, Integer.MAX_VALUE);
   }
 
-  @Override
   public List<? extends TaggedPhotoDto> search(TaggedPhotoDto taggedPhoto, int maxDistance,
       int limit) {
     return this.search(taggedPhoto, maxDistance, limit, Integer.MIN_VALUE);
   }
 
-  @Override
   public List<? extends TaggedPhotoDto> search(TaggedPhotoDto taggedPhoto, int maxDistance,
       int limit,
       int minDistance) {
@@ -105,5 +106,19 @@ public class PersistentPhotoBkTreeService implements PhotoBkTreeService {
         .hash(hash)
         .build();
     return this.search(tmpImage, distance);
+  }
+}
+class TaggedPhotoMatric implements Metric<TaggedPhotoDto> {
+
+  @Override
+  public int distance(TaggedPhotoDto x, TaggedPhotoDto y) {
+    try {
+      Hash xHash = x.getHash();
+      Hash yHash = y.getHash();
+      return xHash.hammingDistance(yHash);
+    } catch (Exception e) {
+      // TODO: Exception handling
+      return -1;
+    }
   }
 }

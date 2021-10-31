@@ -33,6 +33,8 @@ public class DHashService implements HashService {
    So you have to di.
    */
   public Hash generateHash(String hashString) {
+    if (hashString == null)
+      return null;
     final int algorithmId = 771332648;
     final int hashLength = 35;
     return new Hash(new BigInteger(hashString, 16), hashLength, algorithmId);

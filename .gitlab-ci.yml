@@ -17,6 +17,7 @@ build:
 
   before_script:
     - mv $PROPERTIES src/main/resources/application.properties
+    - mv $TEST_PROPERTIES src/test/resources/application.properties
     - echo '########## - Define my variables'
     - export GRADLE_USER_HOME=`pwd`/.gradle
     - echo $GRADLE_USER_HOME

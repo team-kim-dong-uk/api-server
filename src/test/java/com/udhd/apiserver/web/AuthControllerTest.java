@@ -7,11 +7,13 @@ import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udhd.apiserver.config.auth.dto.TokenInfo;
 import com.udhd.apiserver.config.auth.dto.Tokens;
+import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.exception.auth.InvalidRefreshTokenException;
 import com.udhd.apiserver.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +42,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureRestDocs
 @SpringBootTest
 public class AuthControllerTest {
+    @Mock
+    private PhotoRepository photoRepository;
+
     @Autowired
     private WebApplicationContext context;
 

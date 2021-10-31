@@ -26,14 +26,14 @@ import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 public class AlbumServiceTest {
+    @Mock
+    private PhotoRepository photoRepository;
 
     @Autowired
     protected ObjectMapper objectMapper;
 
     @Mock
     AlbumRepository albumRepository;
-    @Mock
-    PhotoRepository photoRepository;
 
     @InjectMocks
     AlbumService albumService;

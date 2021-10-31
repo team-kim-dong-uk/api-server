@@ -6,6 +6,7 @@ import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udhd.apiserver.config.auth.JwtAuthenticationFilter;
+import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.util.JwtUtils;
 import com.udhd.apiserver.util.SecurityUtils;
@@ -13,6 +14,7 @@ import com.udhd.apiserver.web.dto.album.AlbumDetailDto;
 import com.udhd.apiserver.web.dto.album.AlbumOutlineDto;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -53,6 +55,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 public class AlbumControllerTest {
+    @Mock
+    private PhotoRepository photoRepository;
+
     @Autowired
     private WebApplicationContext context;
 

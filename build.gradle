@@ -35,6 +35,7 @@ dependencies {
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'dev.brachtendorf:JImageHash:1.0.0'
     implementation 'org.mapstruct:mapstruct:1.4.2.Final'
+    implementation 'junit:junit:4.13.1'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
@@ -65,18 +66,15 @@ test {
     dependsOn jsonDoclet
 }
 
-//asciidoctor {
-    //configurations 'asciidoctorExt'
-    //inputs.dir snippetsDir
-    //dependsOn test
-//}
+asciidoctor {
+    configurations 'asciidoctorExt'
+    inputs.dir snippetsDir
+    dependsOn test
+}
 
 bootJar {
     dependsOn asciidoctor
     from("${asciidoctor.outputDir}") {
         into 'BOOT-INF/classes/static/docs'
     }
-}
-test {
-  exclude '**/*'
 }

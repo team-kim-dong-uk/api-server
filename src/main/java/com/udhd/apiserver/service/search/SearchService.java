@@ -27,7 +27,7 @@ public class SearchService {
   private final TaggedPhotoService taggedPhotoService;
   private final TagRepository tagRepository;
   private final UserRepository userRepository;
-  private final PhotoBkTreeService bkTreeService;
+  private final PersistentPhotoBkTreeService bkTreeService;
   private final HashService hashService;
 
 
