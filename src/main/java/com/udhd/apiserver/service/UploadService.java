@@ -377,7 +377,7 @@ public class UploadService {
         photos.set(i, optionalPhoto.get());
     }
     return photos.stream().map(photo -> {
-      if (photo != null)
+      if (photo == null)
         return null;
       return photo.getId().toString();
     }).collect(Collectors.toList());
