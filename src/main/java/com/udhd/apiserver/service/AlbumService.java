@@ -10,6 +10,8 @@ import com.udhd.apiserver.exception.album.AlbumNotFoundException;
 import com.udhd.apiserver.exception.photo.PhotoNotFoundException;
 import com.udhd.apiserver.web.dto.album.AlbumDetailDto;
 import com.udhd.apiserver.web.dto.album.AlbumOutlineDto;
+
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -215,6 +217,8 @@ public class AlbumService {
   }
 
   public List<Album> findAllByUserIdAndFeedIdIn(String userId, List<ObjectId> searchQuery) {
+    if (userId == null || ObjectId.isValid(userId))
+      return Collections.emptyList();
     return albumRepository.findAllByUserIdAndFeedIdIn(new ObjectId(userId), searchQuery);
   }
 
