@@ -52,6 +52,7 @@ public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
   Stream<Photo> findAllByUploaderIdAndIdAfter(ObjectId uploaderId, ObjectId findAfter, Sort sort);
 
   Boolean existsPhotoByChecksum(String checksum);
+  Photo findOneByChecksum(String checksum);
 
   List<Photo> findAllByTagsIn(List<String> tags);
   List<Photo> findAllByTagsIn(List<String> tags, Pageable pageable);

@@ -64,10 +64,12 @@ public class UploadController {
     List<Upload> uploads = uploadService
         .createUpload(userId, pollingKey, presignedURLRequest.getChecksums());
     uploadService.fillPresignedUrl(uploads);
+    List<String> photoIds = uploadService.getPhotoIdsByHash(userId, presignedURLRequest.getChecksums());
 
     PresignedURLResponse res = PresignedURLResponse.builder()
         .pollingKey(pollingKey)
         .checksums(presignedURLRequest.getChecksums())
+        .photoIds(photoIds)
         .urls(uploads.stream().map(Upload::getS3Url).collect(Collectors.toList()))
         .build();
     return res;

@@ -11,4 +11,5 @@ public class PresignedURLResponse {
   public String pollingKey; /* For progress */
   public List<String> checksums; /* For Debug */
   public List<String> urls;
+  public List<String> photoIds; /* Duplicated photo */
 }

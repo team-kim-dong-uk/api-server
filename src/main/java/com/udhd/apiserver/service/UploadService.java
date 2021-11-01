@@ -353,17 +353,31 @@ public class UploadService {
     originalPhoto.setTags(tags);
     photoRepository.save(originalPhoto);
     List<Feed> feeds = feedRepository.findAllByPhotoId(photoObjectId);
-      if (feeds.isEmpty()) {
-          throw new IllegalArgumentException("There is no proper feed. (photoId :" + photoId + ")");
-      }
+    if (feeds.isEmpty()) {
+      throw new IllegalArgumentException("There is no proper feed. (photoId :" + photoId + ")");
+    }
     for (Feed feed : feeds) {
       Photo photo = feed.getPhoto();
         if (photo == null) {
-            throw new RuntimeException(
-                "Feed does not contains photo. (photoId :" + photoId + ")");
+          throw new RuntimeException(
+            "Feed does not contains photo. (photoId :" + photoId + ")");
         }
       photo.setTags(tags);
       feedRepository.save(feed);
     }
+  }
+
+  public List<String> getPhotoIdsByHash(String userId, List<String> checksums) {
+    int N = checksums.size();
+    List<Photo> photos = new ArrayList<>(Collections.nCopies(N, null));
+    // TODO: Aggregation 을 이용한 쿼리로 변경
+    for (int i = 0; i < N; i++) {
+      photos.set(i, photoRepository.findOneByChecksum(checksums.get(i)));
+    }
+    return photos.stream().map(photo -> {
+      if (photo != null)
+        return null;
+      return photo.getId().toString();
+    }).collect(Collectors.toList());
   }
 }
