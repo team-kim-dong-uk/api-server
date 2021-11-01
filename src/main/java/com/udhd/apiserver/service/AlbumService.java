@@ -217,7 +217,7 @@ public class AlbumService {
   }
 
   public List<Album> findAllByUserIdAndFeedIdIn(String userId, List<ObjectId> searchQuery) {
-    if (userId == null || ObjectId.isValid(userId))
+    if (userId == null || !ObjectId.isValid(userId))
       return Collections.emptyList();
     return albumRepository.findAllByUserIdAndFeedIdIn(new ObjectId(userId), searchQuery);
   }
