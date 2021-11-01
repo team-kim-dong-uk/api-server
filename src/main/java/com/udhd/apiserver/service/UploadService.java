@@ -136,10 +136,11 @@ public class UploadService {
     confirmUpload(upload);
   }
 
-  public void confirmUpload(String pollingKey, String checksum) {
+  public String confirmUpload(String pollingKey, String checksum) {
     Upload upload = uploadRepository.findByPollingKeyAndChecksum(pollingKey, checksum);
     // TODO: upload를 못찾을 때 에러
     confirmUpload(upload);
+    return upload.getId().toString();
   }
 
   @Async

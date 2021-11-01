@@ -6,6 +6,7 @@ import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.ErrorResponse;
 import com.udhd.apiserver.web.dto.GeneralResponse;
 import com.udhd.apiserver.web.dto.SuccessResponse;
+import com.udhd.apiserver.web.dto.upload.PresignedURLProgressResponse;
 import com.udhd.apiserver.web.dto.upload.PresignedURLRequest;
 import com.udhd.apiserver.web.dto.upload.PresignedURLResponse;
 import com.udhd.apiserver.web.dto.upload.TagUploadRequest;
@@ -73,14 +74,17 @@ public class UploadController {
   }
 
   @RequestMapping("/presigned-url/{pollingKey}/{checksum}")
-  public Long markProgress(@PathVariable String pollingKey,
+  public GeneralResponse markProgress(@PathVariable String pollingKey,
       @PathVariable String checksum) {
+    PresignedURLProgressResponse retval = new PresignedURLProgressResponse();
     try {
-      uploadService.confirmUpload(pollingKey, checksum);
+      String photoId = uploadService.confirmUpload(pollingKey, checksum);
+      retval.setPhotoId(photoId);
+      retval.setProgress(uploadService.getProgress(pollingKey));
     } catch (Exception e) {
       log.info("failed to mark pollingKey : " + pollingKey + " checksum : " + checksum, e);
     }
-    return getProgress(pollingKey);
+    return retval;
   }
 
   @PutMapping("/{feedId}/tags")
