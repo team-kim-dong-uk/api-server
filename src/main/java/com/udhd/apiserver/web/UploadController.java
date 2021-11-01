@@ -87,7 +87,7 @@ public class UploadController {
     return retval;
   }
 
-  @PutMapping("/{feedId}/tags")
+  @PutMapping("/feed/{feedId}/tags")
   public GeneralResponse uploadTagsByFeedId(
       @PathVariable String feedId,
       @RequestBody TagUploadRequest request,
@@ -105,7 +105,7 @@ public class UploadController {
     }
   }
 
-  @PostMapping("/{photoId}/tags")
+  @PutMapping("/photo/{photoId}/tags")
   public GeneralResponse uploadTagsByPhotoId(
       @PathVariable String photoId,
       @RequestBody TagUploadRequest request,
