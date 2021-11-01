@@ -97,11 +97,13 @@ public class SearchService {
       return Collections.emptyList();
     }
     Photo photo = photoOptional.get();
+    System.out.println(photo);
     List<String> tags = photo.getTags();
     if (tags == null || tags.isEmpty()) {
       return Collections.emptyList();
     }
     List<Photo> photos = photoRepository.findAllByTagsIn(photo.getTags());
+    System.out.println(photos);
     if (photos.isEmpty()) {
       return Collections.emptyList();
     }

@@ -99,19 +99,22 @@ def upload(meta, data):
 
 
     for i in range(len(preprocessed_data)):
-        polling_key, urls = get_presigned_url(meta['url'], meta['auth'],
-                                          preprocessed_data[i:i+1])
-        print(polling_key, urls)
-        if urls[0] is None:
-            continue
-        else:
-            put_image(urls[0], load_binary(preprocessed_data[i]))
-            preprocessed_data[i]['url'] = urls[0]
-            res = check_upload_progress(polling_key=polling_key,
-                                        info=preprocessed_data[i],
-                                        url=meta['url'],
-                                        auth=meta['auth'])
-            update_tags(meta['url'], meta['auth'], res["photoId"], preprocessed_data[i]['tags'])
+        try:
+            polling_key, urls = get_presigned_url(meta['url'], meta['auth'],
+                                              preprocessed_data[i:i+1])
+            print(polling_key, urls)
+            if urls[0] is None:
+                continue
+            else:
+                put_image(urls[0], load_binary(preprocessed_data[i]))
+                preprocessed_data[i]['url'] = urls[0]
+                res = check_upload_progress(polling_key=polling_key,
+                                            info=preprocessed_data[i],
+                                            url=meta['url'],
+                                            auth=meta['auth'])
+                update_tags(meta['url'], meta['auth'], res["photoId"], preprocessed_data[i]['tags'])
+        except:
+            pass
 
 def update_tags(url, auth, photoId, tags):
     headers = {
