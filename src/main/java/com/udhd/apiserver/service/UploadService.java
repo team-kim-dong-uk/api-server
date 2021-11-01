@@ -345,11 +345,17 @@ public class UploadService {
       }
 
     ObjectId photoObjectId = new ObjectId(photoId);
+    Optional<Photo> optionalPhoto = photoRepository.findById(photoObjectId);
+    if (optionalPhoto.isEmpty()) {
+      throw new IllegalArgumentException("There is no proper feed. (photoId :" + photoId + ")");
+    }
+    Photo originalPhoto = optionalPhoto.get();
+    originalPhoto.setTags(tags);
+    photoRepository.save(originalPhoto);
     List<Feed> feeds = feedRepository.findAllByPhotoId(photoObjectId);
       if (feeds.isEmpty()) {
           throw new IllegalArgumentException("There is no proper feed. (photoId :" + photoId + ")");
       }
-
     for (Feed feed : feeds) {
       Photo photo = feed.getPhoto();
         if (photo == null) {
