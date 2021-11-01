@@ -33,6 +33,6 @@ public interface FeedRepository extends MongoRepository<Feed, ObjectId> {
 
   List<Feed> findAllByPhotoIdInOrderByOrder(List<ObjectId> photoIds, Pageable pageable);
 
-  @Query("{ 'photo' : { $elemMatch : { '_id' : ?0 } } }")
+  @Query("{ 'photo._id' : ?0 }")
   List<Feed> findAllByPhotoId(ObjectId photoObjectId);
 }
