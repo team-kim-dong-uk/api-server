@@ -36,7 +36,7 @@ public class CustomAuthenticationSuccessHandler extends
             .queryParam("nickname", loginInfoDto.getNickname())
             .queryParam("isNewUser", loginInfoDto.isNewUser())
             .queryParam("email", loginInfoDto.getEmail())
-            .build().toUriString()
+            .build().encode().toUriString()
     );
   }
 }
