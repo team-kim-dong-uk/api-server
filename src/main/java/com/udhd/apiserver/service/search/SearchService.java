@@ -1,5 +1,7 @@
 package com.udhd.apiserver.service.search;
 
+import com.udhd.apiserver.domain.photo.Photo;
+import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.domain.tag.Tag;
 import com.udhd.apiserver.domain.tag.TagRepository;
 import com.udhd.apiserver.domain.user.User;
@@ -11,10 +13,14 @@ import dev.brachtendorf.jimagehash.hash.Hash;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -27,6 +33,7 @@ public class SearchService {
   private final TaggedPhotoService taggedPhotoService;
   private final TagRepository tagRepository;
   private final UserRepository userRepository;
+  private final PhotoRepository photoRepository;
   private final PersistentPhotoBkTreeService bkTreeService;
   private final HashService hashService;
 
@@ -77,5 +84,27 @@ public class SearchService {
     } catch (IOException e) {
       log.info("error", e);
     }
+  }
+
+  public List<String> searchPhotoByTags(String photoId) {
+    if (StringUtils.isEmpty(photoId) || !ObjectId.isValid(photoId)) {
+      return Collections.emptyList();
+    }
+
+    ObjectId photoObjectId = new ObjectId(photoId);
+    Optional<Photo> photoOptional = photoRepository.findById(photoObjectId);
+    if (photoOptional.isEmpty()) {
+      return Collections.emptyList();
+    }
+    Photo photo = photoOptional.get();
+    List<String> tags = photo.getTags();
+    if (tags == null || tags.isEmpty()) {
+      return Collections.emptyList();
+    }
+    List<Photo> photos = photoRepository.findAllByTagsIn(photo.getTags());
+    if (photos.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return photos.stream().map(p -> p.getId().toString()).collect(Collectors.toList());
   }
 }

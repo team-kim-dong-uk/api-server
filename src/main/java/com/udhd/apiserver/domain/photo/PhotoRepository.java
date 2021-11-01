@@ -54,6 +54,7 @@ public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
   Boolean existsPhotoByChecksum(String checksum);
 
   List<Photo> findAllByTagsIn(List<String> tags);
+  List<Photo> findAllByTagsIn(List<String> tags, Pageable pageable);
 
   @Aggregation(value = "{ $sample: { size: ?0 } } ")
   List<Photo> findRandomPhotos(int count);

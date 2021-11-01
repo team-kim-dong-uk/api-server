@@ -20,8 +20,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "album")
 @Data
 public class Album implements Persistable<ObjectId> {
-
-  boolean deleted;
   @Id
   private ObjectId id;
   private ObjectId userId;

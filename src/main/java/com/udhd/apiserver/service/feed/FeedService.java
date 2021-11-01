@@ -67,6 +67,9 @@ public class FeedService {
       throws FeedException {
     List<String> similarPhotos = searchService.searchSimilarPhoto(photoId, distance, count);
     // TODO: count 개수도 변화하도록 바꿔야함
+    if (similarPhotos.size() < count) {
+      similarPhotos.addAll(searchService.searchPhotoByTags(photoId));
+    }
     return feedRepository.findAllByPhotoIdInOrderByOrder(similarPhotos
         .stream().map(ObjectId::new).collect(Collectors.toList()), PageRequest.of(0, count));
   }
