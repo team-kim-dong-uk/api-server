@@ -58,7 +58,7 @@ docker build:
   tags:
     - api
   only:
-    - develop
+    - master
 
 
 
@@ -74,4 +74,4 @@ deploy:
   tags:
     - api
   only:
-    - develop
+    - master
