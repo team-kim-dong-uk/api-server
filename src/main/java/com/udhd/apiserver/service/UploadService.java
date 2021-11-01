@@ -372,7 +372,9 @@ public class UploadService {
     List<Photo> photos = new ArrayList<>(Collections.nCopies(N, null));
     // TODO: Aggregation 을 이용한 쿼리로 변경
     for (int i = 0; i < N; i++) {
-      photos.set(i, photoRepository.findOneByChecksum(checksums.get(i)));
+      Optional<Photo> optionalPhoto = photoRepository.findByChecksum(checksums.get(i));
+      if (optionalPhoto.isPresent())
+        photos.set(i, optionalPhoto.get());
     }
     return photos.stream().map(photo -> {
       if (photo != null)
