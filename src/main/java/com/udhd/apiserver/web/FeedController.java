@@ -200,7 +200,7 @@ public class FeedController {
   @ResponseBody
   GeneralResponse getRelatedFeeds(
       @RequestParam(defaultValue = "") String photoId,
-      @RequestParam(defaultValue = "20") Integer distance,
+      @RequestParam(defaultValue = "5") Integer distance,
       @RequestParam(defaultValue = "21") Integer count,
       HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();

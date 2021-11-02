@@ -72,6 +72,7 @@ public class FeedService {
     List<String> similarPhotos = null;
     try {
       similarPhotos = searchService.searchSimilarPhoto(photoId, distance, count);
+      System.out.println(similarPhotos);
     } catch (Exception e) {
       log.error(e.toString());
     }
