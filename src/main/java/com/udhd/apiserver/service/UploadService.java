@@ -245,7 +245,8 @@ public class UploadService {
   public void createThumbnailsAndScaledImages() {
     List<Photo> photos = photoRepository.findAll();
     String s3UrlPrefix = "https://" + bucket + ".s3." + bucketRegion + ".amazonaws.com/";
-    for (Photo photo : photos) {
+    for (int i=0; i < photos.size();  i++) {
+	Photo photo = photos.get(i);
       try {
         BufferedImage originalImage = ImageUtils.load(photo.getOriginalLink());
         // create and upload thumbnail image
@@ -257,18 +258,21 @@ public class UploadService {
         }
         // create and upload scaled image
         if (photo.getScaledLink() == null) {
-          BufferedImage scaledImage = ImageUtils.createThumbnail(originalImage);
-          String thumbnailKey = photo.getChecksum() + "-scaled";
-          uploadBufferedImage(scaledImage, thumbnailKey);
-          photo.setThumbnailLink(s3UrlPrefix + thumbnailKey);
+          BufferedImage scaledImage = ImageUtils.createScaledImage(originalImage);
+          String scaledKey = photo.getChecksum() + "-scaled";
+          uploadBufferedImage(scaledImage, scaledKey);
+          photo.setScaledLink(s3UrlPrefix + scaledKey);
         }
+	photoRepository.save(photo);
       } catch(Exception e) {
         System.out.println(photo.getId());
         e.printStackTrace();
       }
-      System.out.println("uploaded: " + photo.getId());
-      return;
+      if (i % 1000 == 0) {
+	      System.out.println(i);
+      }
     }
+    System.out.println("done!!!!!");
   }
 
   private void uploadBufferedImage(BufferedImage image, String objectKey) throws IOException {
