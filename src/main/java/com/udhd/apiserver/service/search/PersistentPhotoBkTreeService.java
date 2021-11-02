@@ -9,6 +9,7 @@ import com.udhd.apiserver.util.bktree.SearchOption;
 import com.udhd.apiserver.util.bktree.SearchResult;
 import dev.brachtendorf.jimagehash.hash.Hash;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
@@ -83,6 +84,8 @@ public class PersistentPhotoBkTreeService {
       int limit,
       int minDistance) {
     log.info("searcher : " + searcher.toString());
+    if (taggedPhoto == null || taggedPhoto.getPhotoId() == null ||  taggedPhoto.getHash() == null)
+      return Collections.emptyList();
     log.info("taggedPhoto : " + taggedPhoto.toString());
     SearchOption searchOption = SearchOption.builder()
         .minDistance(minDistance)

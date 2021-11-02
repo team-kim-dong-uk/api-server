@@ -14,10 +14,13 @@ import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.UserService;
 import com.udhd.apiserver.service.search.SearchService;
 import com.udhd.apiserver.web.dto.user.UserDto;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class FeedService {
 
   private static final Long FEED_HEAD_ID = 0L;
@@ -59,13 +63,20 @@ public class FeedService {
 
   public List<Feed> getFeeds(String userId, Long lastOrder, int feedCount) throws FeedException {
     // Unused userId
-    Pageable pageable = PageRequest.of(0, feedCount);
-    return feedRepository.findAllByOrderGreaterThanEqual(lastOrder, pageable);
+    long millis = Instant.now().toEpochMilli();
+    return feedRepository.findAllByCreatedTimestampAfterOrderByOrder(millis);
   }
 
   public List<Feed> getRelatedFeeds(String userId, String photoId, int distance, int count)
       throws FeedException {
-    List<String> similarPhotos = searchService.searchSimilarPhoto(photoId, distance, count);
+    List<String> similarPhotos = null;
+    try {
+      similarPhotos = searchService.searchSimilarPhoto(photoId, distance, count);
+    } catch (Exception e) {
+      log.error(e.toString());
+    }
+    if (similarPhotos == null)
+      similarPhotos = Collections.emptyList();
     // TODO: count 개수도 변화하도록 바꿔야함
     if (similarPhotos.size() < count) {
       similarPhotos.addAll(searchService.searchPhotoByTags(photoId));

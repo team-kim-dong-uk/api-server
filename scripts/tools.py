@@ -6,6 +6,7 @@ import copy  # to deepcopy
 import time  # to get current milliseconds
 import jwt
 from PIL import Image
+from tqdm import tqdm
 
 
 def main():
@@ -98,22 +99,30 @@ def upload(meta, data):
         preprocessed_data.append(preprocessed_info)
 
 
-    for i in range(len(preprocessed_data)):
+    batch_size = 100
+    for i in tqdm(range(int(len(preprocessed_data) / batch_size))):
         try:
-            polling_key, urls = get_presigned_url(meta['url'], meta['auth'],
-                                              preprocessed_data[i:i+1])
-            print(polling_key, urls)
-            if urls[0] is None:
-                continue
-            else:
-                put_image(urls[0], load_binary(preprocessed_data[i]))
-                preprocessed_data[i]['url'] = urls[0]
-                res = check_upload_progress(polling_key=polling_key,
-                                            info=preprocessed_data[i],
-                                            url=meta['url'],
-                                            auth=meta['auth'])
-                update_tags(meta['url'], meta['auth'], res["photoId"], preprocessed_data[i]['tags'])
-        except:
+            polling_key, urls, photo_ids = get_presigned_url(meta['url'], meta['auth'],
+                                              preprocessed_data[i * batch_size:(i+1) * batch_size])
+            for j in tqdm(range(batch_size)):
+                try:
+                    if urls[j] is None:
+                        update_tags(meta['url'], meta['auth'], photo_ids[j], preprocessed_data[batch_size * i + j]['tags'])
+                        #print('tag upload' + photo_ids[j] + ' tags: ' + preprocessed_data[batch_size * i + j]['tags'])
+                    else:
+                        put_image(urls[j], load_binary(preprocessed_data[batch_size * i + j]))
+                        preprocessed_data[batch_size * i + j]['url'] = urls[j]
+                        res = check_upload_progress(polling_key=polling_key,
+                                                    info=preprocessed_data[batch_size * i + j],
+                                                    url=meta['url'],
+                                                    auth=meta['auth'])
+                        update_tags(meta['url'], meta['auth'], res["photoId"], preprocessed_data[batch_size * i + j]['tags'])
+                        #print('tag upload' + res["photoId"] + ' tags: ' + preprocessed_data[batch_size * i + j]['tags'])
+                except Exception as e:
+                    print(e)
+
+        except Exception as e:
+            print(e)
             pass
 
 def update_tags(url, auth, photoId, tags):
@@ -122,11 +131,9 @@ def update_tags(url, auth, photoId, tags):
         'Content-Type': 'application/json'
     }
     tag_url = url + '/api/v1/upload/photo/' + photoId + '/tags'
-    print(tags)
     req = request.Request(tag_url, method="PUT",
                           data=bytes(json.dumps({'propagate': True, 'tags': tags}), encoding='utf-8'),
                           headers=headers)
-    print(tag_url)
     res = request.urlopen(req)
 
 # TODO : Unsafety. Does not check it works properly.
@@ -136,7 +143,6 @@ def put_image(presigned_url, binary):
     }
     req = request.Request(presigned_url, method="PUT", data=binary, headers=headers)
     res = request.urlopen(req)
-    print(res)
 
 
 # TODO
@@ -154,12 +160,12 @@ def get_presigned_url(url, auth, info):
 
     with request.urlopen(req) as res:
         raw_data = res.read()
-        print(raw_data.decode('utf-8'))
         data = json.loads(raw_data.decode('utf-8'))
         urls = data["urls"]
         polling_key = data["pollingKey"]
+        photoIds = data["photoIds"]
 
-    return polling_key, urls
+    return polling_key, urls, photoIds
 
 
 def load_binary(info):
@@ -179,11 +185,9 @@ def load_binary(info):
 def check_upload_progress(polling_key, info, url, auth):
     target_url = url + '/api/v1/upload/presigned-url/' + polling_key + '/' + info['hash']
     headers = {'Authorization': auth}
-    print(target_url)
     req = request.Request(target_url, headers=headers)
     with request.urlopen(req) as res:
         raw_data = res.read()
-        print(raw_data.decode('utf-8'))
         data = json.loads(raw_data.decode('utf-8'))
         return data
 

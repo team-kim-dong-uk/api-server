@@ -211,7 +211,7 @@ public class FeedController {
           feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
       List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds, userId);
       retval.setFeeds(feedDtos);
-    } catch (FeedException e) {
+    } catch (Exception e) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }

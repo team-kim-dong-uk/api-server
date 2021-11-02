@@ -34,6 +34,7 @@ public class Feed implements Persistable<ObjectId> {
   @LastModifiedDate
   private LocalDateTime modifiedDate;
 
+  private Long createdTimestamp;
   private Long order;
 
   @Override

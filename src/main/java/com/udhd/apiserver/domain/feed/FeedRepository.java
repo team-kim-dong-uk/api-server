@@ -17,6 +17,7 @@ public interface FeedRepository extends MongoRepository<Feed, ObjectId> {
   List<Feed> findAllByOrder(Long order, Pageable pageable);
 
   List<Feed> findAllByOrderGreaterThanEqual(Long order, Pageable pageable);
+  List<Feed> findAllByCreatedTimestampAfterOrderByOrder(Long createdTimestamp);
 
   List<Feed> findAllByCreatedDateBetween(LocalDateTime s, LocalDateTime e, Pageable pageable);
 
