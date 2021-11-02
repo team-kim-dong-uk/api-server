@@ -118,29 +118,39 @@ public class FeedController {
 
   public static FeedDto toFeedDto(Feed feed, boolean saved, String userId) {
     Photo photo = feed.getPhoto();
+    Long createDate = null;
+    if (photo.getCreatedDate() != null)
+      createDate = photo.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    Long modifiedDate = null;
+    if (photo.getModifiedDate() != null)
+      modifiedDate = photo.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     PhotoDto photoDto = PhotoDto.builder()
         .id(photo.getId().toString())
         .uploaderId(photo.getUploaderId().toString())
         .checksum(photo.getChecksum())
         .originalLink(photo.getOriginalLink())
         .thumbnailLink(photo.getThumbnailLink())
-        .createdDate(
-            photo.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-        .modifiedDate(
-            photo.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        .createdDate(createDate)
+        .modifiedDate(modifiedDate)
         .tags(photo.getTags())
         .build();
-    List<CommentDto> commentDtos = feed.getComments().stream().map(comment -> CommentDto.builder()
+    List<CommentDto> commentDtos = feed.getComments().stream().map(comment -> {
+        Long icreateDate = null;
+        Long imodifiedDate = null;
+        if (comment.getCreatedDate() != null)
+          icreateDate = comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        if (comment.getModifiedDate() != null)
+          imodifiedDate = comment.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+      return CommentDto.builder()
         .id(comment.getId().toString())
         .userId(comment.getUserId().toString())
         .userName(comment.getUserName())
         .content(comment.getContent())
         .deleted(comment.isDeleted())
-        .createdDate(
-            comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-        .modifiedDate(
-            comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-        .build()).collect(Collectors.toList());
+        .createdDate(icreateDate)
+        .modifiedDate(imodifiedDate)
+        .build();
+    }).collect(Collectors.toList());
     List<LikeDto> likeDtos = feed.getLikes().stream().map(
         like -> LikeDto.builder().id(like.getId().toString()).userId(like.getUserId().toString())
             .userName(like.getUserName()).build()).collect(Collectors.toList());
