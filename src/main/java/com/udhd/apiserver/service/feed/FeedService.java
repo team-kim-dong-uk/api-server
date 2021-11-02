@@ -86,12 +86,20 @@ public class FeedService {
     List<Feed> retval = new ArrayList<>(Collections.emptyList());
     Optional<Feed> optionalFeed = feedRepository.findByPhotoId(new ObjectId(photoId));
     optionalFeed.ifPresent(retval::add);
-    retval.addAll(feedRepository.findAllByPhotoIdInOrderByOrder(similarPhotos
+    feedRepository.findAllByPhotoIdInOrderByOrder(similarPhotos
         .stream().map(p -> {
           if (StringUtils.isEmpty(p) || !ObjectId.isValid(p))
             return null;
           return new ObjectId(p);
-        }).collect(Collectors.toList()), PageRequest.of(0, count)));
+        }).collect(Collectors.toList()), PageRequest.of(0, count))
+        .forEach(feed -> {
+          try {
+            if (!feed.getPhoto().getId().toString().equals(photoId))
+              retval.add(feed);
+          } catch (Exception e) {
+            log.error(e.toString());
+          }
+        });
     return retval;
   }
 
