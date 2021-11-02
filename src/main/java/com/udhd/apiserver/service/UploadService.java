@@ -433,4 +433,16 @@ public class UploadService {
       return photo.getId().toString();
     }).collect(Collectors.toList());
   }
+
+  public void synchronizeFeed() {
+    List<Photo> photos = photoRepository.findAll();
+    photos.forEach(photo -> {
+      Optional<Feed> optionalFeed = feedRepository.findByPhotoId(photo.getId());
+      if (optionalFeed.isPresent()) {
+        Feed feed = optionalFeed.get();
+        feed.setPhoto(photo);
+        feedRepository.save(feed);
+      }
+    });
+  }
 }
