@@ -33,7 +33,7 @@ public class CustomAuthenticationSuccessHandler extends
             .queryParam("userId", loginInfoDto.getUserId())
             .queryParam("accessToken", loginInfoDto.getAccessToken())
             .queryParam("refreshToken", loginInfoDto.getRefreshToken())
-            .queryParam("nickname", loginInfoDto.getNickname())
+            .queryParam("nickname", loginInfoDto.getNickname() == null ? "" : loginInfoDto.getNickname())
             .queryParam("isNewUser", loginInfoDto.isNewUser())
             .queryParam("email", loginInfoDto.getEmail())
             .build().encode().toUriString()
