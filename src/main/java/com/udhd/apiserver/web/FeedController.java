@@ -19,6 +19,7 @@ import com.udhd.apiserver.web.dto.feed.LikeDto;
 import com.udhd.apiserver.web.dto.feed.PhotoDto;
 import com.udhd.apiserver.web.dto.feed.RegisterCommentRequestDto;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -200,7 +201,7 @@ public class FeedController {
   @ResponseBody
   GeneralResponse getRelatedFeeds(
       @RequestParam(defaultValue = "") String photoId,
-      @RequestParam(defaultValue = "20") Integer distance,
+      @RequestParam(defaultValue = "5") Integer distance,
       @RequestParam(defaultValue = "21") Integer count,
       HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();

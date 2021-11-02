@@ -16,6 +16,7 @@ import com.udhd.apiserver.service.search.SearchService;
 import com.udhd.apiserver.web.dto.user.UserDto;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -72,6 +73,7 @@ public class FeedService {
     List<String> similarPhotos = null;
     try {
       similarPhotos = searchService.searchSimilarPhoto(photoId, distance, count);
+      System.out.println(similarPhotos);
     } catch (Exception e) {
       log.error(e.toString());
     }
@@ -79,10 +81,26 @@ public class FeedService {
       similarPhotos = Collections.emptyList();
     // TODO: count 개수도 변화하도록 바꿔야함
     if (similarPhotos.size() < count) {
-      similarPhotos.addAll(searchService.searchPhotoByTags(photoId));
+      similarPhotos.addAll(searchService.searchPhotoByTags(photoId, count));
     }
-    return feedRepository.findAllByPhotoIdInOrderByOrder(similarPhotos
-        .stream().map(ObjectId::new).collect(Collectors.toList()), PageRequest.of(0, count));
+    List<Feed> retval = new ArrayList<>(Collections.emptyList());
+    Optional<Feed> optionalFeed = feedRepository.findByPhotoId(new ObjectId(photoId));
+    optionalFeed.ifPresent(retval::add);
+    feedRepository.findAllByPhotoIdInOrderByOrder(similarPhotos
+        .stream().map(p -> {
+          if (StringUtils.isEmpty(p) || !ObjectId.isValid(p))
+            return null;
+          return new ObjectId(p);
+        }).collect(Collectors.toList()), PageRequest.of(0, count))
+        .forEach(feed -> {
+          try {
+            if (!feed.getPhoto().getId().toString().equals(photoId))
+              retval.add(feed);
+          } catch (Exception e) {
+            log.error(e.toString());
+          }
+        });
+    return retval;
   }
 
   public List<Feed> getSavedFeeds(String userId, int count, int page) throws FeedException {

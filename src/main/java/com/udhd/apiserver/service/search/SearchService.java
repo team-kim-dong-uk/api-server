@@ -86,7 +86,7 @@ public class SearchService {
     }
   }
 
-  public List<String> searchPhotoByTags(String photoId) {
+  public List<String> searchPhotoByTags(String photoId, int count) {
     if (StringUtils.isEmpty(photoId) || !ObjectId.isValid(photoId)) {
       return Collections.emptyList();
     }
@@ -102,7 +102,7 @@ public class SearchService {
     if (tags == null || tags.isEmpty()) {
       return Collections.emptyList();
     }
-    List<Photo> photos = photoRepository.findAllByTagsIn(photo.getTags());
+    List<Photo> photos = photoRepository.findAllByTagsIn(photo.getTags(), PageRequest.of(0, count));
     System.out.println(photos);
     if (photos.isEmpty()) {
       return Collections.emptyList();
