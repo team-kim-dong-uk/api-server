@@ -26,6 +26,7 @@ public class Photo {
   private ObjectId id;
   private ObjectId uploaderId;
   private String thumbnailLink;
+  private String scaledLink;
   private String originalLink;
   private String checksum;
   @Setter
