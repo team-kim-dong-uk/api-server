@@ -1,5 +1,6 @@
 package com.udhd.apiserver.service;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
@@ -15,10 +16,12 @@ import com.udhd.apiserver.domain.upload.Upload;
 import com.udhd.apiserver.domain.upload.UploadRepository;
 import com.udhd.apiserver.service.search.PhotoDto;
 import com.udhd.apiserver.service.search.SearchService;
+import com.udhd.apiserver.util.ImageUtils;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.upload.UploadWithGoogleDriveRequest;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -45,6 +48,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import javax.imageio.ImageIO;
 
 @RequiredArgsConstructor
 @Service
@@ -235,6 +240,48 @@ public class UploadService {
     Long total = uploadRepository.countByPollingKey(pollingKey);
     Long done = uploadRepository.countByPollingKeyAndStatus(pollingKey, Upload.STATUS_COMPLETED);
     return total == 0 ? 0 : 100 * done / total;
+  }
+
+  public void createThumbnailsAndScaledImages() {
+    List<Photo> photos = photoRepository.findAll();
+    String s3UrlPrefix = "https://" + bucket + ".s3." + bucketRegion + ".amazonaws.com/";
+    for (Photo photo : photos) {
+      try {
+        BufferedImage originalImage = ImageUtils.load(photo.getOriginalLink());
+        // create and upload thumbnail image
+        if (photo.getThumbnailLink() == null || photo.getThumbnailLink().equals(photo.getOriginalLink())) {
+          BufferedImage thumbnailImage = ImageUtils.createThumbnail(originalImage);
+          String thumbnailKey = photo.getChecksum() + "-thumb";
+          uploadBufferedImage(thumbnailImage, thumbnailKey);
+          photo.setThumbnailLink(s3UrlPrefix + thumbnailKey);
+        }
+        // create and upload scaled image
+        if (photo.getScaledLink() == null) {
+          BufferedImage scaledImage = ImageUtils.createThumbnail(originalImage);
+          String thumbnailKey = photo.getChecksum() + "-scaled";
+          uploadBufferedImage(scaledImage, thumbnailKey);
+          photo.setThumbnailLink(s3UrlPrefix + thumbnailKey);
+        }
+      } catch(Exception e) {
+        System.out.println(photo.getId());
+        e.printStackTrace();
+      }
+      System.out.println("uploaded: " + photo.getId());
+      return;
+    }
+  }
+
+  private void uploadBufferedImage(BufferedImage image, String objectKey) throws IOException {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    ImageIO.write(image, "jpeg", os);
+    byte[] buffer = os.toByteArray();
+    InputStream imageInputStream = new ByteArrayInputStream(buffer);
+    ObjectMetadata metadata = new ObjectMetadata();
+    metadata.setContentType("image/jpeg");
+    PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, objectKey,
+            imageInputStream, metadata)
+            .withCannedAcl(CannedAccessControlList.PublicRead);
+    amazonS3Client.putObject(putObjectRequest);
   }
 
   private String calculateChecksum(byte[] data) {

@@ -75,6 +75,11 @@ public class UploadController {
     return res;
   }
 
+  @RequestMapping("/resize")
+  public void resize() {
+    uploadService.createThumbnailsAndScaledImages();
+  }
+
   @RequestMapping("/presigned-url/{pollingKey}/{checksum}")
   public GeneralResponse markProgress(@PathVariable String pollingKey,
       @PathVariable String checksum) {
