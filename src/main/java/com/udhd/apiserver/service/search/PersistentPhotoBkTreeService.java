@@ -94,8 +94,12 @@ public class PersistentPhotoBkTreeService {
         .build();
     SearchResult<? extends TaggedPhotoDto> result = searcher.search(taggedPhoto, searchOption);
     List<TaggedPhotoDto> retval = new ArrayList<>();
+    // TODO: 두번돌지말고 한번에 처리하도록 해야함.
+    retval.add(taggedPhoto);
     for (Match<? extends TaggedPhotoDto> element : result.getMatches()) {
-      retval.add(element.getMatch());
+      if (!taggedPhoto.getPhotoId().equals(element.getMatch().getPhotoId())) {
+        retval.add(element.getMatch());
+      }
     }
     return retval;
   }
