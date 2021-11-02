@@ -121,7 +121,7 @@ class TaggedPhotoMatric implements Metric<TaggedPhotoDto> {
       return xHash.hammingDistance(yHash);
     } catch (Exception e) {
       // TODO: Exception handling
-      return -1;
+      return Integer.MIN_VALUE;
     }
   }
 }
