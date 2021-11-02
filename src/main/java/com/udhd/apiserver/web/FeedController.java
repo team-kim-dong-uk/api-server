@@ -200,13 +200,13 @@ public class FeedController {
   @ResponseBody
   GeneralResponse getRelatedFeeds(
       @RequestParam(defaultValue = "") String photoId,
-      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(defaultValue = "20") Integer distance,
       @RequestParam(defaultValue = "21") Integer count,
       HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();
     String userId = SecurityUtils.getLoginUserId();
     try {
-      List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId, page, count);
+      List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId, distance, count);
       List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,
           feeds.stream().map(feed -> feed.getId()).collect(Collectors.toList()));
       List<FeedDto> feedDtos = toFeedDtoList(feeds, savedFeeds, userId);

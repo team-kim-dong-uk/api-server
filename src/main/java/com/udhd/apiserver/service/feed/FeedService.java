@@ -63,9 +63,8 @@ public class FeedService {
     return feedRepository.findAllByOrderGreaterThanEqual(lastOrder, pageable);
   }
 
-  public List<Feed> getRelatedFeeds(String userId, String photoId, int page, int count)
+  public List<Feed> getRelatedFeeds(String userId, String photoId, int distance, int count)
       throws FeedException {
-    int distance = 30;
     List<String> similarPhotos = searchService.searchSimilarPhoto(photoId, distance, count);
     // TODO: count 개수도 변화하도록 바꿔야함
     if (similarPhotos.size() < count) {
