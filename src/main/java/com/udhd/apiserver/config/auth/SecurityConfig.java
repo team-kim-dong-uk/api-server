@@ -33,6 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 , "/favicon.ico"
                 , "/api/v1/feeds/list"
                     ,"/api/v1/feeds/related"
+		    ,"/api/v1/upload/resize"
             })
             , LogoutFilter.class)
         .csrf().disable()

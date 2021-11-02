@@ -66,4 +66,28 @@ public class ImageUtils {
     g.dispose();
     return resizedImage;
   }
+
+  public static BufferedImage createScaledImage(BufferedImage srcImage) {
+    float scaledWitdhSize = 400;
+    int srcHeight = srcImage.getHeight();
+    int srcWidth = srcImage.getWidth();
+    float scalingFactor;
+      scalingFactor = scaledWitdhSize / srcWidth;
+    // Infer the scaling factor to avoid stretching the image
+    // unnaturally
+    int width = (int) (scalingFactor * srcWidth);
+    int height = (int) (scalingFactor * srcHeight);
+    BufferedImage resizedImage = new BufferedImage(width, height,
+            BufferedImage.TYPE_INT_RGB);
+    Graphics2D g = resizedImage.createGraphics();
+    // Fill with white before applying semi-transparent (alpha) images
+    g.setPaint(Color.white);
+    g.fillRect(0, 0, width, height);
+    // Simple bilinear resize
+    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+            RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    g.drawImage(srcImage, 0, 0, width, height, null);
+    g.dispose();
+    return resizedImage;
+  }
 }
