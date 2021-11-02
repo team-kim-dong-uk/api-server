@@ -83,7 +83,12 @@ public class FeedService {
       similarPhotos.addAll(searchService.searchPhotoByTags(photoId));
     }
     return feedRepository.findAllByPhotoIdInOrderByOrder(similarPhotos
-        .stream().map(ObjectId::new).collect(Collectors.toList()), PageRequest.of(0, count));
+        .stream().map(p -> {
+          if (StringUtils.isEmpty(p) || !ObjectId.isValid(p)) {
+            return null;
+          }
+          return new ObjectId(p);
+        }).collect(Collectors.toList()), PageRequest.of(0, count));
   }
 
   public List<Feed> getSavedFeeds(String userId, int count, int page) throws FeedException {
