@@ -138,9 +138,9 @@ public class FeedController {
         Long icreateDate = null;
         Long imodifiedDate = null;
         if (comment.getCreatedDate() != null)
-          icreateDate = comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+          icreateDate = comment.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         if (comment.getModifiedDate() != null)
-          imodifiedDate = comment.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+          imodifiedDate = comment.getModifiedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
       return CommentDto.builder()
         .id(comment.getId().toString())
         .userId(comment.getUserId().toString())
