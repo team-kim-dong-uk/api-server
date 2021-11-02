@@ -12,6 +12,7 @@ public class PhotoDto {
   String uploaderId;
   String thumbnailLink;
   String originalLink;
+  String scaledLink;
   String checksum;
   List<String> tags;
   Long createdDate;

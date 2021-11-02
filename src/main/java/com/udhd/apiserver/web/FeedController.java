@@ -71,6 +71,7 @@ public class FeedController {
         .uploaderId(photo.getUploaderId().toString())
         .checksum(photo.getChecksum())
         .originalLink(photo.getOriginalLink())
+        .scaledLink(photo.getScaledLink())
         .thumbnailLink(photo.getThumbnailLink())
         .createdDate(
             photo.getCreatedDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
@@ -129,6 +130,7 @@ public class FeedController {
         .uploaderId(photo.getUploaderId().toString())
         .checksum(photo.getChecksum())
         .originalLink(photo.getOriginalLink())
+        .scaledLink(photo.getScaledLink())
         .thumbnailLink(photo.getThumbnailLink())
         .createdDate(createDate)
         .modifiedDate(modifiedDate)
