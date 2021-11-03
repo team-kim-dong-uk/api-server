@@ -39,6 +39,7 @@ import java.util.List;
 import static capital.scalable.restdocs.misc.AuthorizationSnippet.documentAuthorization;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -216,6 +217,36 @@ public class UserControllerTest {
         // then
         actions
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteUser() throws Exception {
+        String userId = "123";
+
+        var requestUri =  "/api/v1/users/" + userId;
+        ResultActions actions = mockMvc
+                .perform(delete(requestUri).with(userToken()));
+
+        actions
+                .andExpect(status().isNoContent());
+
+    }
+
+    @Test
+    void deleteUser_404() throws Exception {
+        String userId = "123444";
+        String errorMessage = "error in findById";
+
+        doThrow(new IllegalArgumentException(errorMessage)).when(userService).deleteUser(userId);
+
+        var requestUri =  "/api/v1/users/" + userId;
+        ResultActions actions = mockMvc
+                .perform(delete(requestUri).with(userToken()));
+
+        actions
+                .andExpect(status().isNotFound())
+        ;
+
     }
 
 }
