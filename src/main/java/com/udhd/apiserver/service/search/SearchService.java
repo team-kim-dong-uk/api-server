@@ -69,7 +69,9 @@ public class SearchService {
     }
     return bkTreeService.search(taggedPhoto, distance, count)
         .stream()
-        .map(TaggedPhotoDto::getPhotoId).collect(Collectors.toList());
+        .map(TaggedPhotoDto::getPhotoId)
+        .limit(count)
+        .collect(Collectors.toList());
   }
 
   public void registerPhoto(PhotoDto photoDto) {
