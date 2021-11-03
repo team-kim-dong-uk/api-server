@@ -6,6 +6,7 @@ import static com.udhd.apiserver.web.FeedController.toFeedDtoList;
 import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.feed.Feed;
 import com.udhd.apiserver.exception.auth.DuplicateNicknameException;
+import com.udhd.apiserver.exception.user.UserNotFoundException;
 import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.service.UserService;
@@ -14,6 +15,7 @@ import com.udhd.apiserver.service.feed.FeedService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.ErrorResponse;
 import com.udhd.apiserver.web.dto.GeneralResponse;
+import com.udhd.apiserver.web.dto.SuccessResponse;
 import com.udhd.apiserver.web.dto.feed.FeedDto;
 import com.udhd.apiserver.web.dto.feed.FeedDtoMapper;
 import com.udhd.apiserver.web.dto.feed.FeedResponse;
@@ -25,15 +27,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
@@ -44,6 +38,8 @@ public class UserController {
     private final FeedService feedService;
     private final AlbumService albumService;
     private final FeedDtoMapper feedDtoMapper;
+
+    final String SUCCESS_MESSAGE = "success";
 
   @GetMapping("/{userId}/save")
   @ResponseStatus(HttpStatus.OK)
@@ -152,4 +148,27 @@ public class UserController {
 
     return photoService.findPhotosUploadedBy(userId, findAfter, fetchSize);
   }
+
+    /**
+     * 회원 탈퇴
+     *
+     * @param userId the user id
+     * @return the userId
+     * @response 204 or 404
+     */
+    @DeleteMapping("/{userId}")
+    public GeneralResponse deleteUser(@PathVariable String userId,
+                                      HttpServletResponse response) {
+        SecurityUtils.checkUser(userId);
+        SuccessResponse retval = new SuccessResponse();
+        try {
+            userService.deleteUser(userId);
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            retval.setMessage(SUCCESS_MESSAGE);
+        } catch (UserNotFoundException | IllegalArgumentException e) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return new ErrorResponse(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        }
+        return retval;
+    }
 }
