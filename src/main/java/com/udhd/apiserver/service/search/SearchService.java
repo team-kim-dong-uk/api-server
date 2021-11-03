@@ -104,7 +104,7 @@ public class SearchService {
     if (tags == null || tags.isEmpty()) {
       return Collections.emptyList();
     }
-    List<Photo> photos = photoRepository.findAllByTagsIn(photo.getTags(), PageRequest.of(0, count));
+    List<Photo> photos = photoRepository.findAllByTagsInRandom(photo.getTags(), count);
     System.out.println(photos);
     if (photos.isEmpty()) {
       return Collections.emptyList();
