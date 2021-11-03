@@ -83,6 +83,9 @@ public class FeedService {
     if (similarPhotos.size() < count) {
       similarPhotos.addAll(searchService.searchPhotoByTags(photoId, count));
     }
+    Collections.shuffle(similarPhotos);
+    similarPhotos = similarPhotos.stream().limit(count).collect(Collectors.toList());
+
     List<Feed> retval = new ArrayList<>(Collections.emptyList());
     Optional<Feed> optionalFeed = feedRepository.findByPhotoId(new ObjectId(photoId));
     optionalFeed.ifPresent(retval::add);
