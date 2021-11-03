@@ -91,6 +91,12 @@ public class UserService {
     return userOptional.get();
   }
 
+  public void deleteUser(String userId) throws IllegalArgumentException {
+    User user = findById(userId); // throws IllegalArgumentException
+    userRepository.delete(user);
+  }
+
+
   public User updateCount(String userId, String type) {
     User user = findById(userId);
     switch (type) {
