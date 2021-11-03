@@ -55,7 +55,7 @@ public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
 
   List<Photo> findAllByTagsIn(List<String> tags);
 
-  @Aggregation(value = "[{ $match: { tags: {$in: ?0} } }, {$sample: {$size: ?1} } ]")
+  @Aggregation(value = {"{ $match: { tags: {$in: ?0} } }", "{$sample: {$size: ?1} }"})
   List<Photo> findAllByTagsInRandom(List<String> tags, int count);
 
   @Aggregation(value = "{ $sample: { size: ?0 } } ")
