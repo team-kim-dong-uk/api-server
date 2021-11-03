@@ -10,6 +10,7 @@ import com.udhd.apiserver.util.bktree.SearchResult;
 import dev.brachtendorf.jimagehash.hash.Hash;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
@@ -72,7 +73,7 @@ public class PersistentPhotoBkTreeService {
   }
 
   public List<? extends TaggedPhotoDto> search(TaggedPhotoDto taggedPhoto, int distance) {
-    return this.search(taggedPhoto, Integer.MIN_VALUE, distance, Integer.MAX_VALUE);
+    return this.search(taggedPhoto, distance, Integer.MAX_VALUE, 0);
   }
 
   public List<? extends TaggedPhotoDto> search(TaggedPhotoDto taggedPhoto, int maxDistance,
@@ -94,7 +95,18 @@ public class PersistentPhotoBkTreeService {
         .build();
     SearchResult<? extends TaggedPhotoDto> result = searcher.search(taggedPhoto, searchOption);
     List<TaggedPhotoDto> retval = new ArrayList<>();
-    for (Match<? extends TaggedPhotoDto> element : result.getMatches()) {
+    List<Match<? extends TaggedPhotoDto>> matches = new ArrayList<>(result.getMatches());
+    matches.sort((o1, o2) -> {
+      int d1 = o1.getDistance();
+      int d2 = o2.getDistance();
+      if (d1 < d2)
+        return -1;
+      else if (d1 > d2)
+        return 1;
+      return 0;
+    });
+
+    for (Match<? extends TaggedPhotoDto> element : matches) {
       retval.add(element.getMatch());
     }
     return retval;

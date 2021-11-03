@@ -69,9 +69,6 @@ public class BkTreeSearcher<E> {
       if (distance >= minDistance && distance <= maxDistance) {
         matches.add(new Match<>(element, distance));
         lastDistance = Math.max(distance, lastDistance);
-        if (matches.size() >= limit) {
-          break;
-        }
       }
 
       int minSearchDistance = max(distance - maxDistance, 0);
