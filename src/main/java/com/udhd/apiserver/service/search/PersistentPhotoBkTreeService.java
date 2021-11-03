@@ -96,6 +96,7 @@ public class PersistentPhotoBkTreeService {
     SearchResult<? extends TaggedPhotoDto> result = searcher.search(taggedPhoto, searchOption);
     List<TaggedPhotoDto> retval = new ArrayList<>();
     List<Match<? extends TaggedPhotoDto>> matches = new ArrayList<>(result.getMatches());
+    Collections.shuffle(matches);
     matches.sort((o1, o2) -> {
       int d1 = o1.getDistance();
       int d2 = o2.getDistance();
