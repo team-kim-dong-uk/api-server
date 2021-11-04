@@ -36,7 +36,7 @@ public class PhotoService {
     this.photoRepository = photoRepository;
   }
 
-  private static PhotoOutlineDto toPhotoOutlineDto(Photo photo) {
+  public static PhotoOutlineDto toPhotoOutlineDto(Photo photo) {
     return PhotoOutlineDto.builder()
         .photoId(photo.getId().toString())
         .thumbnailLink(photo.getThumbnailLink())

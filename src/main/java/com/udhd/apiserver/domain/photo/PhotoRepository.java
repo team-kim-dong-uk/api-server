@@ -60,4 +60,7 @@ public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
 
   @Aggregation(value = "{ $sample: { size: ?0 } } ")
   List<Photo> findRandomPhotos(int count);
+
+  @Query(value= "{ tags: { $all : ?0 } }")
+  List<Photo> findAllByAllTags(List<String> tags, Pageable pageable);
 }

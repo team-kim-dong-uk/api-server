@@ -6,8 +6,10 @@ import com.udhd.apiserver.domain.tag.Tag;
 import com.udhd.apiserver.domain.tag.TagRepository;
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.domain.user.UserRepository;
+import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.service.search.dto.TaggedPhotoDto;
 import com.udhd.apiserver.util.ImageUtils;
+import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import com.udhd.apiserver.web.dto.search.SearchCandidateDto;
 import dev.brachtendorf.jimagehash.hash.Hash;
 import java.io.IOException;
@@ -110,5 +112,11 @@ public class SearchService {
       return Collections.emptyList();
     }
     return photos.stream().map(p -> p.getId().toString()).collect(Collectors.toList());
+  }
+
+  public List<PhotoOutlineDto> searchPhotoByAllTags(List<String> tags, Integer page) {
+    final int defaultPageSize = 21;
+    return photoRepository.findAllByAllTags(tags, PageRequest.of(page, defaultPageSize))
+        .stream().map(PhotoService::toPhotoOutlineDto).collect(Collectors.toList());
   }
 }

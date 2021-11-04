@@ -1,11 +1,14 @@
 package com.udhd.apiserver.web;
 
 import com.udhd.apiserver.service.PhotoService;
+import com.udhd.apiserver.service.search.SearchService;
+import com.udhd.apiserver.web.dto.ErrorResponse;
 import com.udhd.apiserver.web.dto.photo.PhotoDetailDto;
 import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import com.udhd.apiserver.web.dto.photo.TagListDto;
 import java.util.Arrays;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PhotoController {
 
   private final PhotoService photoService;
+  private final SearchService searchService;
 
   /**
    * 대량 업로드?????? TODO
@@ -36,6 +40,20 @@ public class PhotoController {
   public List<PhotoOutlineDto> randomPhotos(
       @RequestParam(defaultValue = "24") int count) {
     return photoService.getRandomPhotos(count);
+  }
+
+  @GetMapping("/tags")
+  public Object getPhotoByTags(
+      @RequestParam(defaultValue = "") List<String> tags,
+      @RequestParam(defaultValue = "0") Integer page,
+      HttpServletResponse response
+  ) {
+    try {
+      return searchService.searchPhotoByAllTags(tags, page);
+    } catch (Exception e) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      return new ErrorResponse(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+    }
   }
 
   /**
