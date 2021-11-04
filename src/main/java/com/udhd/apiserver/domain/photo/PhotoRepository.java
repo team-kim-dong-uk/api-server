@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
 
@@ -61,6 +63,6 @@ public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
   @Aggregation(value = "{ $sample: { size: ?0 } } ")
   List<Photo> findRandomPhotos(int count);
 
-  @Query(value= "{ tags: { $all : ?0 } }")
+  @Query("{ tags: { $all : ?0 } }")
   List<Photo> findAllByAllTags(List<String> tags, Pageable pageable);
 }
