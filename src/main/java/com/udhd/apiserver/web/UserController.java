@@ -164,7 +164,6 @@ public class UserController {
         try {
             userService.deleteUser(userId);
             response.setStatus(HttpServletResponse.SC_NO_CONTENT);
-            retval.setMessage(SUCCESS_MESSAGE);
         } catch (UserNotFoundException | IllegalArgumentException e) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return new ErrorResponse(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
