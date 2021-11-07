@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -218,6 +219,8 @@ public class FeedController {
       HttpServletResponse response) {
     FeedResponse retval = new FeedResponse();
     String userId = SecurityUtils.getLoginUserId();
+    if (StringUtils.isEmpty(userId))
+      userId = "";
     try {
       List<Feed> feeds = feedService.getRelatedFeeds(userId, photoId, distance, count);
       List<Album> savedFeeds = albumService.findAllByUserIdAndFeedIdIn(userId,

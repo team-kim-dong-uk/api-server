@@ -81,7 +81,7 @@ public class FeedService {
       similarPhotos = Collections.emptyList();
     // TODO: count 개수도 변화하도록 바꿔야함
     if (similarPhotos.size() < count) {
-      similarPhotos.addAll(searchService.searchPhotoByTags(photoId, count));
+      similarPhotos.addAll(searchService.searchPhotoByTags(userId, photoId, count));
     }
     Collections.shuffle(similarPhotos);
     similarPhotos = similarPhotos.stream().limit(count).collect(Collectors.toList());
