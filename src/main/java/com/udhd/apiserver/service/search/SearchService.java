@@ -122,17 +122,7 @@ public class SearchService {
     if (photos.isEmpty()) {
       return Collections.emptyList();
     }
-    List<String> remainPhotoIds = remainNotOwned(userId, photos.stream().map(Photo::getId).map(ObjectId::toString).collect(
-        Collectors.toList()));
-    List<String> retval = new ArrayList<>();
-    photos.forEach(p -> {
-      for (String remainPhotoId : remainPhotoIds) {
-        if (remainPhotoId.equals(p.getId().toString())) {
-          retval.add(remainPhotoId);
-        }
-      }
-    });
-    return retval;
+    return photos.stream().map(Photo::getId).map(ObjectId::toString).collect(Collectors.toList());
   }
 
   public List<TaggedPhotoDto> searchSimilarPhotos(List<TaggedPhotoDto> photoDtos) {

@@ -6,6 +6,7 @@ import com.udhd.apiserver.domain.feed.Comment;
 import com.udhd.apiserver.domain.feed.Feed;
 import com.udhd.apiserver.domain.feed.FeedRepository;
 import com.udhd.apiserver.domain.feed.Like;
+import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.exception.album.AlbumNotFoundException;
 import com.udhd.apiserver.exception.photo.PhotoNotFoundException;
@@ -85,6 +86,7 @@ public class FeedService {
     }
     Collections.shuffle(similarPhotos);
     similarPhotos = similarPhotos.stream().limit(count).collect(Collectors.toList());
+    similarPhotos = searchService.remainNotOwned(userId, similarPhotos);
 
     List<Feed> retval = new ArrayList<>(Collections.emptyList());
     Optional<Feed> optionalFeed = feedRepository.findByPhotoId(new ObjectId(photoId));
