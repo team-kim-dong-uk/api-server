@@ -201,10 +201,6 @@ public class AlbumService {
         .build();
   }
 
-  public List<Album> findAllByUserIdAndPhotoIdIn(String userId, List<ObjectId> searchQuery) {
-    return albumRepository.findAllByUserIdAndFeedIdIn(new ObjectId(userId), searchQuery);
-  }
-
   public List<Album> findAllByUserIdAndFeedIdIn(String userId, List<ObjectId> searchQuery) {
     if (userId == null || !ObjectId.isValid(userId))
       return Collections.emptyList();

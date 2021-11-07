@@ -78,4 +78,15 @@ public class TaggedPhotoService {
     return photoRepository.findAll().stream().map(taggedPhotoDtoMapper::toDto)
         .collect(Collectors.toList());
   }
+
+  public List<TaggedPhotoDto> findByPhotoIds(List<String> photoIds) {
+    List<ObjectId> photoObjectIds = photoIds.stream().map(ObjectId::new).collect(Collectors.toList());
+    List<Photo> photos = photoRepository.findAllById(photoObjectIds);
+    return photos.stream().map(photo -> {
+        return TaggedPhotoDto.builder()
+        .photoId(photo.toString())
+        .hash(hashService.generateHash(photo.getHash()))
+        .build();
+    }).collect(Collectors.toList());
+  }
 }

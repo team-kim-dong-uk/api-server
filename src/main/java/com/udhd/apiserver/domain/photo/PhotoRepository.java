@@ -21,6 +21,7 @@ public interface PhotoRepository extends MongoRepository<Photo, ObjectId> {
 
   List<Photo> findAll();
 
+  List<Photo> findAllById(List<ObjectId> objectIds);
   List<Photo> findAllByIdAfter(ObjectId findAfter);
 
   List<Photo> findAllByIdAfter(ObjectId findAfter, Pageable pageable);

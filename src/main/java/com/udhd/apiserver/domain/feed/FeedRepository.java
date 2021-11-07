@@ -36,6 +36,7 @@ public interface FeedRepository extends MongoRepository<Feed, ObjectId> {
 
   @Query("{ 'photo._id' : ?0 }")
   List<Feed> findAllByPhotoId(ObjectId photoObjectId);
+  List<Feed> findAllByPhotoIdIn(List<ObjectId> photoIds);
 
   Optional<Feed> findByPhotoId(ObjectId photoId);
 }
