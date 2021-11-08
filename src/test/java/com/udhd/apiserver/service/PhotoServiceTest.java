@@ -1,6 +1,5 @@
 package com.udhd.apiserver.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.photo.Photo;
 import com.udhd.apiserver.domain.photo.PhotoRepository;
@@ -8,10 +7,10 @@ import com.udhd.apiserver.exception.album.AlbumNotFoundException;
 import com.udhd.apiserver.web.dto.photo.PhotoDetailDto;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -22,17 +21,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 
-@SpringBootTest
+
+@ExtendWith(MockitoExtension.class)
 public class PhotoServiceTest {
     @Mock
     private PhotoRepository photoRepository;
+    @Mock
+    AlbumService albumService;
 
-    @Autowired
-    protected ObjectMapper objectMapper;
+    @InjectMocks
+    PhotoService photoService;
 
-    @Mock AlbumService albumService;
-
-    protected MockMvc mockMvc;
 
     private final PhotoDetailDto mockPhotoDetailDto
             = PhotoDetailDto.builder()
@@ -46,8 +45,8 @@ public class PhotoServiceTest {
 
 
     @Test
-    void detailPhotoByUserId() throws Exception {
-        PhotoService photoService = new PhotoService(albumService, photoRepository);
+    void detailPhotoByUserId() {
+        //PhotoService photoService = new PhotoService(albumService, photoRepository);
         // given
         String photoId = "6110066423a94f0000000000";
         String photoId_A = "6110066423a94f0000000001";
@@ -74,8 +73,6 @@ public class PhotoServiceTest {
                 .build();
 
         given(albumService.getAlbumDetail(userId, photoId)).willReturn(albums.get(0));
-        given(albumService.getAlbumDetail(userId, photoId_A)).willReturn(albums.get(1));
-
 
         given(photoRepository.findById(new ObjectId(photoId))).willReturn(Optional.ofNullable(photo));
         PhotoDetailDto photoDetailDto = photoService.getPhotoDetail(userId, photoId);

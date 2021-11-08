@@ -12,6 +12,7 @@ import com.udhd.apiserver.exception.auth.InvalidRefreshTokenException;
 import com.udhd.apiserver.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,61 +39,11 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(RestDocumentationExtension.class)
-@AutoConfigureRestDocs
-@SpringBootTest
-public class AuthControllerTest {
-    @Mock
-    private PhotoRepository photoRepository;
 
-    @Autowired
-    private WebApplicationContext context;
-
-    @Autowired
-    protected ObjectMapper objectMapper;
+public class AuthControllerTest extends ControllerTest{
 
     @MockBean
     private AuthService authService;
-
-    protected MockMvc mockMvc;
-
-    @BeforeEach
-    public void setUp(RestDocumentationContextProvider restDocumentation) throws Exception {
-        this.mockMvc = MockMvcBuilders
-                .webAppContextSetup(context)
-                .alwaysDo(JacksonResultHandlers.prepareJackson(objectMapper))
-                .alwaysDo(MockMvcRestDocumentation.document("{class-name}/{method-name}",
-                        Preprocessors.preprocessRequest(),
-                        Preprocessors.preprocessResponse(
-                                ResponseModifyingPreprocessors.replaceBinaryContent(),
-                                ResponseModifyingPreprocessors.limitJsonArrayLength(objectMapper),
-                                Preprocessors.prettyPrint())))
-                .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation)
-                        .uris()
-                        .withScheme("https")
-                        .withHost("udhd.djbaek.com")
-                        .and().snippets()
-                        .withDefaults(CliDocumentation.curlRequest(),
-                                HttpDocumentation.httpRequest(),
-                                HttpDocumentation.httpResponse(),
-                                AutoDocumentation.requestFields(),
-                                AutoDocumentation.responseFields(),
-                                AutoDocumentation.pathParameters(),
-                                AutoDocumentation.requestParameters(),
-                                AutoDocumentation.description(),
-                                AutoDocumentation.methodAndPath(),
-                                AutoDocumentation.sectionBuilder()
-                                        .snippetNames(
-                                                SnippetRegistry.AUTO_PATH_PARAMETERS,
-                                                SnippetRegistry.AUTO_REQUEST_PARAMETERS,
-                                                SnippetRegistry.AUTO_REQUEST_FIELDS,
-                                                SnippetRegistry.HTTP_REQUEST,
-                                                SnippetRegistry.AUTO_RESPONSE_FIELDS,
-                                                SnippetRegistry.HTTP_RESPONSE)
-                                        .skipEmpty(true)
-                                        .build()))
-                .build();
-    }
 
     @Test
     void reissueRefreshToken() throws Exception {
@@ -101,7 +52,7 @@ public class AuthControllerTest {
         String refreshTokenRequest = "{\"refreshToken\" : \""+refreshToken+"\"}";
         Tokens generatedTokens = Tokens.builder().accessToken("<access-token>").refreshToken("<refresh-token>").build();
         TokenInfo validTokenInfo = TokenInfo.builder()
-                                                .userId("012345678901234567890123")
+                                                .userId(userId)
                                                 .build();
 
         given(authService.validateRefreshToken(refreshToken)).willReturn(validTokenInfo);
