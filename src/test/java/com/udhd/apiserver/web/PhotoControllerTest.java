@@ -36,11 +36,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@ExtendWith(RestDocumentationExtension.class)
+@AutoConfigureRestDocs
+@SpringBootTest
+public class PhotoControllerTest {
+    @Mock
+    private PhotoRepository photoRepository;
 
-public class PhotoControllerTest extends ControllerTest{
+    @Autowired
+    private WebApplicationContext context;
+
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     @MockBean
     private PhotoService photoService;
+
+    protected MockMvc mockMvc;
 
     private final PhotoDetailDto mockPhotoDetailDto
             = PhotoDetailDto.builder()
@@ -51,6 +63,45 @@ public class PhotoControllerTest extends ControllerTest{
             .uploadedAt(new Date())
             .tags(Arrays.asList("오마이걸", "멤버1", "1집", "210701"))
             .build();
+
+
+    @BeforeEach
+    public void setUp(RestDocumentationContextProvider restDocumentation) throws Exception {
+        this.mockMvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .alwaysDo(JacksonResultHandlers.prepareJackson(objectMapper))
+                .alwaysDo(MockMvcRestDocumentation.document("{class-name}/{method-name}",
+                        Preprocessors.preprocessRequest(),
+                        Preprocessors.preprocessResponse(
+                                ResponseModifyingPreprocessors.replaceBinaryContent(),
+                                ResponseModifyingPreprocessors.limitJsonArrayLength(objectMapper),
+                                Preprocessors.prettyPrint())))
+                .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation)
+                        .uris()
+                        .withScheme("https")
+                        .withHost("udhd.djbaek.com")
+                        .and().snippets()
+                        .withDefaults(CliDocumentation.curlRequest(),
+                                HttpDocumentation.httpRequest(),
+                                HttpDocumentation.httpResponse(),
+                                AutoDocumentation.requestFields(),
+                                AutoDocumentation.responseFields(),
+                                AutoDocumentation.pathParameters(),
+                                AutoDocumentation.requestParameters(),
+                                AutoDocumentation.description(),
+                                AutoDocumentation.methodAndPath(),
+                                AutoDocumentation.sectionBuilder()
+                                        .snippetNames(
+                                                SnippetRegistry.AUTO_PATH_PARAMETERS,
+                                                SnippetRegistry.AUTO_REQUEST_PARAMETERS,
+                                                SnippetRegistry.AUTO_REQUEST_FIELDS,
+                                                SnippetRegistry.HTTP_REQUEST,
+                                                SnippetRegistry.AUTO_RESPONSE_FIELDS,
+                                                SnippetRegistry.HTTP_RESPONSE)
+                                        .skipEmpty(true)
+                                        .build()))
+                .build();
+    }
 
     @Test
     void uploadPhotos() throws Exception {

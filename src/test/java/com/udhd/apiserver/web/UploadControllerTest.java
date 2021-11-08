@@ -57,11 +57,84 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@ExtendWith(RestDocumentationExtension.class)
+@AutoConfigureRestDocs
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SpringBootTest
+public class UploadControllerTest {
+    @Mock
+    private PhotoRepository photoRepository;
 
-public class UploadControllerTest extends ControllerTest{
+    @Autowired
+    private WebApplicationContext context;
+
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     @MockBean
     private UploadService uploadService;
+
+    protected MockMvc mockMvc;
+
+    private MockedStatic<SecurityUtils> mockedSecurityUtils;
+
+    @BeforeAll
+    public void mockStaticSetup() {
+        mockedSecurityUtils = mockStatic(SecurityUtils.class);
+        given(SecurityUtils.getLoginUserId()).willReturn("123");
+    }
+
+    @AfterAll
+    public void demockStaticSetup() {
+        mockedSecurityUtils.close();
+    }
+
+    @BeforeEach
+    public void setUp(RestDocumentationContextProvider restDocumentation) throws Exception {
+        this.mockMvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .alwaysDo(JacksonResultHandlers.prepareJackson(objectMapper))
+                .alwaysDo(MockMvcRestDocumentation.document("{class-name}/{method-name}",
+                        Preprocessors.preprocessRequest(),
+                        Preprocessors.preprocessResponse(
+                                ResponseModifyingPreprocessors.replaceBinaryContent(),
+                                ResponseModifyingPreprocessors.limitJsonArrayLength(objectMapper),
+                                Preprocessors.prettyPrint())))
+                .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation)
+                        .uris()
+                        .withScheme("https")
+                        .withHost("udhd.djbaek.com")
+                        .and().snippets()
+                        .withDefaults(CliDocumentation.curlRequest(),
+                                HttpDocumentation.httpRequest(),
+                                HttpDocumentation.httpResponse(),
+                                AutoDocumentation.requestFields(),
+                                AutoDocumentation.responseFields(),
+                                AutoDocumentation.pathParameters(),
+                                AutoDocumentation.requestParameters(),
+                                AutoDocumentation.description(),
+                                AutoDocumentation.methodAndPath(),
+                                AutoDocumentation.authorization("User access token required."),
+                                AutoDocumentation.sectionBuilder()
+                                        .snippetNames(
+                                                SnippetRegistry.AUTO_AUTHORIZATION,
+                                                SnippetRegistry.AUTO_PATH_PARAMETERS,
+                                                SnippetRegistry.AUTO_REQUEST_PARAMETERS,
+                                                SnippetRegistry.AUTO_REQUEST_FIELDS,
+                                                SnippetRegistry.HTTP_REQUEST,
+                                                SnippetRegistry.AUTO_RESPONSE_FIELDS,
+                                                SnippetRegistry.HTTP_RESPONSE)
+                                        .skipEmpty(true)
+                                        .build()))
+                .build();
+    }
+
+    protected RequestPostProcessor userToken() {
+        return (request) -> {
+            request.addHeader("Authorization", "Bearer <access-token>");
+            return documentAuthorization(request, "User access token required.");
+        };
+    }
 
     @Test
     void presignedUrls() throws Exception {
