@@ -1,10 +1,7 @@
 package com.udhd.apiserver.service;
 
 import com.udhd.apiserver.domain.album.AlbumRepository;
-import com.udhd.apiserver.domain.feed.FeedRepository;
-import com.udhd.apiserver.domain.photo.PhotoRepository;
 import org.bson.types.ObjectId;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,22 +18,13 @@ public class AlbumServiceTest {
 
     @Mock
     AlbumRepository albumRepository;
-    @Mock
-    PhotoRepository photoRepository;
-    @Mock
-    FeedRepository feedRepository;
 
     @InjectMocks
     AlbumService albumService;
 
-    @BeforeEach
-    void setUp() {
-        this.albumService = new AlbumService(albumRepository, photoRepository, feedRepository);
-    }
-
     @Test
     @DisplayName("중복된 사진 앨범 추가")
-    void saveAlbum_Duplicate() throws Exception {
+    void saveAlbum_Duplicate() {
         String userId = "60e2fea74c17cf5152fb5b78";
         String photoId = "60e2fea74c17cf5152fb5b78";
 
