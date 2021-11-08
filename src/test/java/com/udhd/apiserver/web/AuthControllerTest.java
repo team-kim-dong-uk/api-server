@@ -52,7 +52,7 @@ public class AuthControllerTest extends ControllerTest{
         String refreshTokenRequest = "{\"refreshToken\" : \""+refreshToken+"\"}";
         Tokens generatedTokens = Tokens.builder().accessToken("<access-token>").refreshToken("<refresh-token>").build();
         TokenInfo validTokenInfo = TokenInfo.builder()
-                                                .userId("012345678901234567890123")
+                                                .userId(userId)
                                                 .build();
 
         given(authService.validateRefreshToken(refreshToken)).willReturn(validTokenInfo);
