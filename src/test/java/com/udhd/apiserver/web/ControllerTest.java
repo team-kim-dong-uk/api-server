@@ -11,6 +11,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.restdocs.RestDocumentationContextProvider;
@@ -39,6 +40,11 @@ abstract public class ControllerTest {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @Value("${userId}")
+    protected String userId;
+    @Value("${feedId}")
+    protected String feedId;
+
     @Autowired
     private WebApplicationContext context;
 
@@ -47,7 +53,7 @@ abstract public class ControllerTest {
     @BeforeAll
     public void mockStaticSetup() {
         mockedSecurityUtils = mockStatic(SecurityUtils.class);
-        given(SecurityUtils.getLoginUserId()).willReturn("123");
+        given(SecurityUtils.getLoginUserId()).willReturn(userId);
     }
 
     @AfterAll
