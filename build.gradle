@@ -48,6 +48,7 @@ dependencies {
     implementation 'capital.scalable:spring-auto-restdocs-core:2.0.11'
     jsondoclet "capital.scalable:spring-auto-restdocs-json-doclet-jdk9:2.0.11"
     testImplementation 'org.mockito:mockito-inline:3.11.1'
+    compileOnly 'org.apache.commons:commons-text:1.8' // for message converter
 }
 
 task jsonDoclet(type: Javadoc, dependsOn: compileJava) {
