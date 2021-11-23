@@ -1,31 +1,11 @@
-package com.udhd.apiserver.web;
+package com.udhd.apiserver.integration;
 
-import capital.scalable.restdocs.AutoDocumentation;
-import capital.scalable.restdocs.SnippetRegistry;
-import capital.scalable.restdocs.jackson.JacksonResultHandlers;
-import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.udhd.apiserver.domain.photo.PhotoRepository;
+import com.udhd.apiserver.integration.IntegrationTest;
 import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.web.dto.photo.PhotoDetailDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.restdocs.RestDocumentationContextProvider;
-import org.springframework.restdocs.RestDocumentationExtension;
-import org.springframework.restdocs.cli.CliDocumentation;
-import org.springframework.restdocs.http.HttpDocumentation;
-import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
-import org.springframework.restdocs.operation.preprocess.Preprocessors;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -37,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-public class PhotoControllerTest extends ControllerTest{
+public class PhotoIntegrationTest extends IntegrationTest {
 
     @MockBean
     private PhotoService photoService;

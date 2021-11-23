@@ -1,4 +1,4 @@
-package com.udhd.apiserver.web;
+package com.udhd.apiserver.integration;
 
 import capital.scalable.restdocs.AutoDocumentation;
 import capital.scalable.restdocs.SnippetRegistry;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mockStatic;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 @Disabled
-abstract public class ControllerTest {
+abstract public class IntegrationTest {
 
     protected MockMvc mockMvc;
     @Autowired
