@@ -189,7 +189,7 @@ public class UserControllerSliceTest {
                 .group(group)
                 .build();
         // given
-        given(userService.updateUser(userId, request))
+        given(userService.updateUser(matches(userId), any()))
                 .willReturn(UserDto.builder()
                         .nickname(afterNickname)
                         .group(group)
@@ -207,8 +207,9 @@ public class UserControllerSliceTest {
         actions
                 .andDo(print())
                 .andExpect(status().isOk())
-                //.andExpect(status().isForbidden())
-        ;
+                .andExpect(jsonPath("nickname", is(afterNickname)))
+                .andExpect(jsonPath("group", is(group)))
+                ;
     }
 
     @Test
