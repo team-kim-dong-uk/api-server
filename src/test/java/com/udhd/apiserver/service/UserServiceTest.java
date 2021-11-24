@@ -3,6 +3,7 @@ package com.udhd.apiserver.service;
 import com.udhd.apiserver.domain.user.User;
 import com.udhd.apiserver.domain.user.UserRepository;
 import com.udhd.apiserver.exception.auth.DuplicateNicknameException;
+import com.udhd.apiserver.exception.auth.InvalidAccessTokenException;
 import com.udhd.apiserver.exception.user.UserNotFoundException;
 import com.udhd.apiserver.web.dto.user.UserDto;
 import org.bson.types.ObjectId;
@@ -85,6 +86,17 @@ public class UserServiceTest {
                 .thenReturn(true);
 
         assertThrows(DuplicateNicknameException.class,
+                () -> userService.setNickname(userId, nicknameForChange));
+    }
+    @Test
+    @DisplayName("닉네임 변경 - Invalid")
+    void setNickname_invalid(){
+        String nicknameForChange = "fromis";
+
+        when(userRepository.findById(userObjectId))
+                .thenThrow(new InvalidAccessTokenException("Invalid access token"));
+
+        assertThrows(InvalidAccessTokenException.class,
                 () -> userService.setNickname(userId, nicknameForChange));
     }
 
