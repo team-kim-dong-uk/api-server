@@ -1,23 +1,11 @@
-package com.udhd.apiserver.web;
+package com.udhd.apiserver.integration;
 
-import capital.scalable.restdocs.AutoDocumentation;
-import capital.scalable.restdocs.SnippetRegistry;
-import capital.scalable.restdocs.jackson.JacksonResultHandlers;
-import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udhd.apiserver.config.auth.dto.TokenInfo;
 import com.udhd.apiserver.config.auth.dto.Tokens;
-import com.udhd.apiserver.domain.photo.PhotoRepository;
 import com.udhd.apiserver.exception.auth.InvalidRefreshTokenException;
+import com.udhd.apiserver.integration.IntegrationTest;
 import com.udhd.apiserver.service.AuthService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,22 +13,13 @@ import static org.mockito.BDDMockito.given;
 
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.RestDocumentationContextProvider;
-import org.springframework.restdocs.RestDocumentationExtension;
-import org.springframework.restdocs.cli.CliDocumentation;
-import org.springframework.restdocs.http.HttpDocumentation;
-import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
-import org.springframework.restdocs.operation.preprocess.Preprocessors;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
-public class AuthControllerTest extends ControllerTest{
+public class AuthIntegrationTest extends IntegrationTest {
 
     @MockBean
     private AuthService authService;
@@ -67,8 +46,8 @@ public class AuthControllerTest extends ControllerTest{
         // then
         actions
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken", is("<access-token>")))
-                .andExpect(jsonPath("$.refreshToken", is("<refresh-token>")));
+                .andExpect(jsonPath("$.accessToken", is("&lt;access-token&gt;")))
+                .andExpect(jsonPath("$.refreshToken", is("&lt;refresh-token&gt;")));
     }
 
     @Test
