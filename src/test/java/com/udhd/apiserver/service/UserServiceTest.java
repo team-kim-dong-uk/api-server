@@ -5,6 +5,7 @@ import com.udhd.apiserver.domain.user.UserRepository;
 import com.udhd.apiserver.exception.auth.DuplicateNicknameException;
 import com.udhd.apiserver.exception.auth.InvalidAccessTokenException;
 import com.udhd.apiserver.exception.user.UserNotFoundException;
+import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
 import com.udhd.apiserver.web.dto.user.UserDto;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.DisplayName;
@@ -98,6 +99,33 @@ public class UserServiceTest {
 
         assertThrows(InvalidAccessTokenException.class,
                 () -> userService.setNickname(userId, nicknameForChange));
+    }
+
+    @Test
+    @DisplayName("유저 정보 업데이트")
+    void updateUser(){
+        String nicknameForChange = "fromis";
+        UpdateUserRequest request = UpdateUserRequest.builder()
+                .nickname(nicknameForChange)
+                .build();
+
+        when(userRepository.findById(userObjectId))
+                .thenReturn(Optional.of(user));
+
+        UserDto result = userService.updateUser(userId, request);
+        assertThat(result.getNickname()).isEqualTo(nicknameForChange);
+    }
+    @Test
+    @DisplayName("존재하지 않는 유저 정보 업데이트")
+    void updateUser_404(){
+        String nicknameForChange = "fromis";
+        UpdateUserRequest request = UpdateUserRequest.builder()
+                .nickname(nicknameForChange)
+                .build();
+        when(userRepository.findById(userObjectId))
+                .thenThrow(new UserNotFoundException(userObjectId));
+
+        assertThrows(UserNotFoundException.class, () -> userService.updateUser(userId, request));
     }
 
     @Test
