@@ -5,6 +5,7 @@ import com.udhd.apiserver.config.auth.WebConfig;
 import com.udhd.apiserver.domain.album.Album;
 import com.udhd.apiserver.domain.feed.Feed;
 import com.udhd.apiserver.domain.photo.Photo;
+import com.udhd.apiserver.exception.user.UserNotFoundException;
 import com.udhd.apiserver.service.AlbumService;
 import com.udhd.apiserver.service.PhotoService;
 import com.udhd.apiserver.service.UserService;
@@ -15,12 +16,8 @@ import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
 import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
 import com.udhd.apiserver.web.dto.user.UserDto;
 import org.bson.types.ObjectId;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,6 +26,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -41,6 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -64,11 +63,11 @@ public class UserControllerSliceTest {
     @Autowired
     protected MockMvc mockMvc;
 
+    private static String userId = "6110066323a94f7c27f9cf4c";
     private static MockedStatic<SecurityUtils> mockedSecurityUtils;
 
-    private String userId = "123";
     private UserDto userDto = UserDto.builder()
-            .userId("123").nickname("닉네임")
+            .userId("6110066323a94f7c27f9cf4c").nickname("닉네임")
             .email("testuser@gmail.com")
             .numUploadedPhotos(100).numAlbumPhotos(4000)
             .build();
@@ -86,12 +85,15 @@ public class UserControllerSliceTest {
     private Album album = Album.builder()
             .build();
 
-    @BeforeClass
-    public static void beforeClass() {
-        mockedSecurityUtils = mockStatic(SecurityUtils.class);
+
+    @BeforeAll
+    static void beforeClass() {
+        // static method mocking
+        mockedSecurityUtils = Mockito.mockStatic(SecurityUtils.class);
+        mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(userId);
     }
-    @AfterClass
-    public static void afterClass() { mockedSecurityUtils.close(); }
+    @AfterAll
+    static void afterClass() { mockedSecurityUtils.close(); }
 
 
     @Test
@@ -149,10 +151,6 @@ public class UserControllerSliceTest {
                 ;
     }
 
-
-    /*
-    * 문제 : 필터에서 걸리는데 어떻게 처리해줘야할지 모르겠음.
-    * */
     @Test
     @WithMockUser
     @DisplayName("닉네임을 설정하는 테스트")
@@ -163,13 +161,17 @@ public class UserControllerSliceTest {
                 .willReturn(UserDto.builder()
                         .nickname(afterNickname)
                         .build());
+
         // when
         String requestUri = "/api/v1/users/" + userId + "/nickname";
         ResultActions actions = mockMvc
-                .perform(put(requestUri).content("{nickname: "+afterNickname+"}"));
+                .perform(put(requestUri).contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"nickname\": \""+afterNickname+"\"}")
+                            .with(csrf().asHeader())
+                );
         // then
         actions
-                .andExpect(status().isForbidden())
+                  .andExpect(status().isOk())
                 /*.andExpect(status().isOk())
                 .andExpect(jsonPath("userId", is(userId)))
                 .andExpect(jsonPath("nickname", is(afterNickname)))*/
@@ -190,15 +192,22 @@ public class UserControllerSliceTest {
         given(userService.updateUser(userId, request))
                 .willReturn(UserDto.builder()
                         .nickname(afterNickname)
+                        .group(group)
                         .build());
+
         // when
         String requestUri = "/api/v1/users/" + userId;
         ResultActions actions = mockMvc
-                .perform(patch(requestUri).content(request.toString()));
+                .perform(patch(requestUri).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nickname\": \""+afterNickname+"\"," +
+                                "  \"group\": \""+group+"\"  }")
+                        .with(csrf().asHeader())
+                );
         // then
         actions
                 .andDo(print())
-                .andExpect(status().isForbidden())
+                .andExpect(status().isOk())
+                //.andExpect(status().isForbidden())
         ;
     }
 
@@ -210,9 +219,6 @@ public class UserControllerSliceTest {
         given(photoService.findPhotosUploadedBy(userId, null, 21))
                 .willReturn(List.of(PhotoOutlineDto.builder()
                         .build()));
-        // static method mocking
-        MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class);
-        utilities.when(SecurityUtils::getLoginUserId).thenReturn(userId);
 
         // when
         String requestUri = "/api/v1/users/" + userId + "/uploaded";
@@ -229,20 +235,33 @@ public class UserControllerSliceTest {
     @WithMockUser
     @DisplayName("회원 탈퇴하기")
     void deleteUser() throws Exception {
-        // given
-
-        // static method mocking
-        MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class);
-        utilities.when(SecurityUtils::getLoginUserId).thenReturn(userId);
+        // when
+        String requestUri = "/api/v1/users/" + userId;
+        ResultActions actions = mockMvc
+                .perform(delete(requestUri)
+                        .with(csrf()));
+        // then
+        actions
+                .andDo(print())
+                .andExpect(status().isNoContent())
+        ;
+    }
+    @Test
+    @WithMockUser
+    @DisplayName("존재하지 않는 회원 탈퇴하기")
+    void deleteUser_404() throws Exception {
+        doThrow(new UserNotFoundException(new ObjectId(userId)))
+                .when(userService).deleteUser(userId);
 
         // when
         String requestUri = "/api/v1/users/" + userId;
         ResultActions actions = mockMvc
-                .perform(delete(requestUri));
+                .perform(delete(requestUri)
+                        .with(csrf()));
         // then
         actions
                 .andDo(print())
-                .andExpect(status().isForbidden())
+                .andExpect(status().isNotFound())
         ;
     }
 }
