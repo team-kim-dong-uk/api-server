@@ -11,6 +11,8 @@ import com.udhd.apiserver.service.UserService;
 import com.udhd.apiserver.service.feed.FeedService;
 import com.udhd.apiserver.util.SecurityUtils;
 import com.udhd.apiserver.web.dto.feed.FeedDtoMapper;
+import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
+import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
 import com.udhd.apiserver.web.dto.user.UserDto;
 import org.bson.types.ObjectId;
 import org.junit.AfterClass;
@@ -38,7 +40,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -174,5 +176,73 @@ public class UserControllerSliceTest {
         ;
     }
 
+    @Test
+    @WithMockUser
+    @DisplayName("유저 정보를 업데이트하는 테스트")
+    void updateUser() throws Exception {
+        String afterNickname = "afterSet";
+        String group = "fromis";
+        UpdateUserRequest request = UpdateUserRequest.builder()
+                .nickname(afterNickname)
+                .group(group)
+                .build();
+        // given
+        given(userService.updateUser(userId, request))
+                .willReturn(UserDto.builder()
+                        .nickname(afterNickname)
+                        .build());
+        // when
+        String requestUri = "/api/v1/users/" + userId;
+        ResultActions actions = mockMvc
+                .perform(patch(requestUri).content(request.toString()));
+        // then
+        actions
+                .andDo(print())
+                .andExpect(status().isForbidden())
+        ;
+    }
 
+    @Test
+    @WithMockUser
+    @DisplayName("업로드한 사진 목록 가져오기")
+    void getUploadedByUser() throws Exception {
+        // given
+        given(photoService.findPhotosUploadedBy(userId, null, 21))
+                .willReturn(List.of(PhotoOutlineDto.builder()
+                        .build()));
+        // static method mocking
+        MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class);
+        utilities.when(SecurityUtils::getLoginUserId).thenReturn(userId);
+
+        // when
+        String requestUri = "/api/v1/users/" + userId + "/uploaded";
+        ResultActions actions = mockMvc
+                .perform(get(requestUri));
+        // then
+        actions
+                .andDo(print())
+                .andExpect(status().isOk())
+                ;
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("회원 탈퇴하기")
+    void deleteUser() throws Exception {
+        // given
+
+        // static method mocking
+        MockedStatic<SecurityUtils> utilities = Mockito.mockStatic(SecurityUtils.class);
+        utilities.when(SecurityUtils::getLoginUserId).thenReturn(userId);
+
+        // when
+        String requestUri = "/api/v1/users/" + userId;
+        ResultActions actions = mockMvc
+                .perform(delete(requestUri));
+        // then
+        actions
+                .andDo(print())
+                .andExpect(status().isForbidden())
+        ;
+    }
 }
