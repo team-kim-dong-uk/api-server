@@ -129,6 +129,30 @@ public class UserServiceTest {
     }
 
     @Test
+    @DisplayName("유저 가져오기")
+    void findUserById(){
+        when(userRepository.findById(userObjectId))
+                .thenReturn(Optional.of(user));
+
+        User user = userService.findById(userId);
+
+        assertThat(user.getId()).isEqualTo(userObjectId);
+    }
+    @Test
+    @DisplayName("존재하지 않는 유저 가져오기")
+    void findUserById_404(){
+        when(userRepository.findById(userObjectId))
+                .thenThrow(new IllegalArgumentException(userId));
+
+        assertThrows(IllegalArgumentException.class, () -> userService.findById(userId));
+    }
+    @Test
+    @DisplayName("유저 가져오기 - 잘못된 id 형식")
+    void findUserById_id_error(){
+        assertThrows(IllegalArgumentException.class, () -> userService.findById("123"));
+    }
+
+    @Test
     @DisplayName("존재하지 않는 유저 삭제")
     void deleteUser_404() {
         String userId = "60e2fea74c17cf5152fb5b78";
