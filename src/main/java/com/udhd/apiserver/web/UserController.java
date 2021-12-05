@@ -86,7 +86,7 @@ public class UserController {
     }
 
 
-    @PutMapping("/{userId}/nickname")
+    @PatchMapping("/{userId}/nickname")
     public UserDto setNickname(
             @PathVariable String userId,
             @RequestBody UpdateUserRequest updateUserRequest) throws DuplicateNicknameException {
@@ -108,7 +108,7 @@ public class UserController {
   }
 
 
-  @PutMapping("/{userId}/group")
+  @PatchMapping("/{userId}/group")
   public UserDto setGroup(
       @PathVariable String userId,
       @RequestBody UpdateUserRequest updateUserRequest) throws DuplicateNicknameException {
