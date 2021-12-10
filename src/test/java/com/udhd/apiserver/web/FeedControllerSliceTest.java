@@ -138,4 +138,25 @@ public class FeedControllerSliceTest {
                 .andExpect(jsonPath("feeds[0].saved").value(true))
         ;
     }
+    @Test
+    @WithMockUser
+    @DisplayName("유사한 사진 가져오기")
+    void getRelatedFeeds() throws Exception {
+        // given
+        /*선택 기준이 되는 사진은 리턴 값에 없어야 함*/
+        given(feedService.getRelatedFeeds(userId, photoId, 5, 21))
+                .willReturn(new ArrayList<Feed>());
+        given(albumService.findAllByUserIdAndFeedIdIn(any(), any()))
+                .willReturn(List.of(album));
+        // when
+        String requestUri = "/api/v1/feeds/related";
+        ResultActions actions = mockMvc
+                .perform(get(requestUri));
+        // then
+        actions
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("feeds").exists())
+        ;
+    }
 }
