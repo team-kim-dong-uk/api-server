@@ -134,6 +134,8 @@ public class FeedControllerSliceTest {
         actions
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("feeds").exists())
+                .andExpect(jsonPath("feeds[0].saved").value(true))
         ;
     }
 }
