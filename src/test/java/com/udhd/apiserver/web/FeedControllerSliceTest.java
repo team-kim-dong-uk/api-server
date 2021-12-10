@@ -37,6 +37,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,7 +67,9 @@ public class FeedControllerSliceTest {
 
     private static String userId = "6110066323a94f7c27f9cf4c";
     private static String feedId = "6110066323a94f7c27f9cf4d";
-    private static String photoId = "6110066323a94f7c27f9cf4e";
+    private static String feedId_a = "6110066323a94f7c27f9cf4e";
+    private static String photoId = "6110066323a94f7c27f9cf4f";
+    private static String photoId_a = "6110066323a94f7c27f9cf41";
     private static MockedStatic<SecurityUtils> mockedSecurityUtils;
 
 
@@ -80,12 +83,29 @@ public class FeedControllerSliceTest {
             .tags(List.of("오마이걸"))
             .hash(Integer.toString(photoId.hashCode()))
             .build();
+    private Photo photo_a = Photo.builder()
+            .id(new ObjectId(photoId_a))
+            .uploaderId(new ObjectId(userId))
+            .thumbnailLink("thumbnail_a.com")
+            .scaledLink("scaled_a.com")
+            .originalLink("origin_a.com")
+            .checksum("456456456456")
+            .tags(List.of("오마이걸"))
+            .hash(Integer.toString(photoId_a.hashCode()))
+            .build();
     private Feed feed = Feed.builder()
                             .id(new ObjectId(feedId))
                             .photo(photo)
                             .comments(new ArrayList<>())
                             .likes(new ArrayList<>())
                         .build();
+    private Feed feed_a = Feed.builder()
+            .id(new ObjectId(feedId_a))
+            .photo(photo_a)
+            .comments(new ArrayList<>())
+            .likes(new ArrayList<>())
+            .build();
+    private List<Feed> feeds = List.of(feed, feed_a);
     private Album album = Album.builder()
             .feedId(new ObjectId(feedId))
             .build();
@@ -138,25 +158,33 @@ public class FeedControllerSliceTest {
                 .andExpect(jsonPath("feeds[0].saved").value(true))
         ;
     }
+    /*
+    * 선택의 기준인 photo, photoId는 결과에 없고
+    * photo_a, photoId_a 만 존재해야 함
+    * */
     @Test
     @WithMockUser
     @DisplayName("유사한 사진 가져오기")
     void getRelatedFeeds() throws Exception {
-        // given
-        /*선택 기준이 되는 사진은 리턴 값에 없어야 함*/
+        /*선택 기준이 되는 사진인 photo , photoId은 리턴 값에 없어야 함*/
         given(feedService.getRelatedFeeds(userId, photoId, 5, 21))
-                .willReturn(new ArrayList<Feed>());
+                .willReturn(feeds.stream().filter(feed ->
+                                !feed.getPhoto().getId().equals(new ObjectId(photoId))
+                            ).collect(Collectors.toList()));
+
         given(albumService.findAllByUserIdAndFeedIdIn(any(), any()))
                 .willReturn(List.of(album));
         // when
         String requestUri = "/api/v1/feeds/related";
         ResultActions actions = mockMvc
-                .perform(get(requestUri));
+                .perform(get(requestUri)
+                        .param("photoId", photoId));
         // then
         actions
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("feeds").exists())
+                .andExpect(jsonPath("feeds[0].photo.id").value(photoId_a))
         ;
     }
 }
