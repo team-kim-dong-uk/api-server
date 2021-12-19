@@ -3,18 +3,12 @@ package com.udhd.apiserver.web;
 import com.udhd.apiserver.config.auth.SecurityConfig;
 import com.udhd.apiserver.config.auth.WebConfig;
 import com.udhd.apiserver.domain.album.Album;
+import com.udhd.apiserver.domain.feed.Comment;
 import com.udhd.apiserver.domain.feed.Feed;
 import com.udhd.apiserver.domain.photo.Photo;
-import com.udhd.apiserver.exception.user.UserNotFoundException;
 import com.udhd.apiserver.service.AlbumService;
-import com.udhd.apiserver.service.PhotoService;
-import com.udhd.apiserver.service.UserService;
 import com.udhd.apiserver.service.feed.FeedService;
 import com.udhd.apiserver.util.SecurityUtils;
-import com.udhd.apiserver.web.dto.feed.FeedDtoMapper;
-import com.udhd.apiserver.web.dto.photo.PhotoOutlineDto;
-import com.udhd.apiserver.web.dto.user.UpdateUserRequest;
-import com.udhd.apiserver.web.dto.user.UserDto;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -25,12 +19,13 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.servlet.HttpEncodingAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -39,12 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.matches;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -57,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {SecurityConfig.class, WebConfig.class})
         })
 @ExtendWith(MockitoExtension.class)
+@Import(HttpEncodingAutoConfiguration.class)
 public class FeedControllerSliceTest {
 
     @MockBean private FeedService feedService;
@@ -70,6 +63,7 @@ public class FeedControllerSliceTest {
     private static String feedId_a = "6110066323a94f7c27f9cf4e";
     private static String photoId = "6110066323a94f7c27f9cf4f";
     private static String photoId_a = "6110066323a94f7c27f9cf41";
+    private static String commentId = "6110066323a94f7c27f9cf42";
     private static MockedStatic<SecurityUtils> mockedSecurityUtils;
 
 
@@ -93,7 +87,7 @@ public class FeedControllerSliceTest {
             .tags(List.of("오마이걸"))
             .hash(Integer.toString(photoId_a.hashCode()))
             .build();
-    private Feed feed = Feed.builder()
+    private final Feed feed = Feed.builder()
                             .id(new ObjectId(feedId))
                             .photo(photo)
                             .comments(new ArrayList<>())
@@ -187,4 +181,36 @@ public class FeedControllerSliceTest {
                 .andExpect(jsonPath("feeds[0].photo.id").value(photoId_a))
         ;
     }
+
+    @Test
+    @WithMockUser
+    @DisplayName("코멘트 추가")
+    void registerComment() throws Exception {
+        // given
+        String content = "새로운 댓글이다!";
+        Feed commentFeed = feed;
+        Comment comment = Comment.builder()
+                .id(new ObjectId(commentId))
+                .userId(new ObjectId(userId))
+                .content(content)
+                .deleted(false)
+                .build();
+        commentFeed.setComments(List.of(comment));
+        given(feedService.getFeed(feedId)).willReturn(commentFeed);
+        given(albumService.isSavedFeed(userId, feedId)).willReturn(true);
+        // when
+        String requestUri = "/api/v1/feeds/" + feedId + "/comment";
+        ResultActions actions = mockMvc
+                .perform(put(requestUri).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"content\" : \"" + content +"\"}")
+                        .with(csrf().asHeader()));
+        // then
+        actions
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("comments[0].content").value(content))
+        ;
+
+    }
+
 }
