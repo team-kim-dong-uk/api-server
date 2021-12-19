@@ -20,9 +20,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +56,7 @@ public class FeedServiceTest {
     private static String feedId_a = "6110066323a94f7c27f9cf4e";
     private static String photoId = "6110066323a94f7c27f9cf4f";
     private static String photoId_a = "6110066323a94f7c27f9cf41";
-    private static String commentId = "6110066323a94f7c27f9cf42";
+    private static String photoId_b = "6110066323a94f7c27f9cf42";
 
     User user = User.builder()
             .id(new ObjectId(userId))
@@ -107,6 +109,31 @@ public class FeedServiceTest {
         given(feedRepository.findAllByCreatedTimestampAfterOrderByOrder(any()))
                 .willReturn(feeds);
         assertThat(feedService.getFeeds(userId)).isEqualTo(feeds);
+    }
+
+    @Test
+    @DisplayName("Related Feed 가져오기")
+    void getRelatedFeeds() throws FeedException {
+        String queryPhotoId = photoId;
+        int distance = 5;
+        int count = 10;
+
+        List<String> similarPhotos = new ArrayList<String>(Arrays.asList(photoId_a));
+
+        given(searchService.searchSimilarPhoto(queryPhotoId, distance, count))
+                .willReturn(similarPhotos);
+        given(searchService.searchPhotoByTags(userId, queryPhotoId, count))
+                .willReturn(List.of(photoId_b));
+        given(searchService.remainNotOwned(any(), any()))
+                .willReturn(List.of(photoId_a));
+        given(feedRepository.findAllByPhotoIdInOrderByOrder(
+                List.of(new ObjectId(photoId_a)),PageRequest.of(0, count))
+                ).willReturn(List.of(feed_a));
+        given(feedRepository.findByPhotoId(new ObjectId(queryPhotoId)))
+                .willReturn(Optional.of(feed));
+
+        assertThat(feedService.getRelatedFeeds(userId, queryPhotoId, distance, count))
+                .isEqualTo(List.of(feed, feed_a));
     }
 }
 
